@@ -20,20 +20,12 @@ env:
 
 jobs:
   test:
-    name: Julia ${{ matrix.version }} - ${{ matrix.os }} - ${{ matrix.arch }}
+    name: Julia min - Ubuntu - x64
     runs-on: ${{ matrix.os }}
     timeout-minutes: 60
     permissions: # needed to allow julia-actions/cache to proactively delete old caches that it has created
       actions: write
       contents: read
-    strategy:
-      matrix:
-        version:
-          - 'min'
-        os:
-          - ubuntu-latest
-        arch:
-          - x64
     steps:
       - uses: actions/checkout@v4
         with:
@@ -41,8 +33,7 @@ jobs:
       - uses: julia-actions/setup-julia@v2
         with:
           show-versioninfo: true
-          version: ${{ matrix.version }}
-          arch: ${{ matrix.arch }}
+          version: 'min'
       - uses: julia-actions/julia-downgrade-compat@v1
         with:
           skip: Pkg,TOML
