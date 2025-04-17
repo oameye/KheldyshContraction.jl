@@ -28,10 +28,7 @@ end
     using Aqua
 
     Aqua.test_ambiguities([KeldyshContraction], broken=true)
-    Aqua.test_all(
-        KeldyshContraction;
-        ambiguities=false,
-    )
+    Aqua.test_all(KeldyshContraction; ambiguities=false)
 end
 
 @testset "propagator" begin
