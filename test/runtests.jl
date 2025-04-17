@@ -10,6 +10,7 @@ using KeldyshContraction, Test
     all_concrete(KeldyshContraction.QAdd)
     all_concrete(KeldyshContraction.Destroy)
     all_concrete(KeldyshContraction.Create)
+    all_concrete(KeldyshContraction.Propagator)
 end
 
 @testset "Code linting" begin
@@ -21,6 +22,16 @@ end
     using ExplicitImports
     @test check_no_stale_explicit_imports(KeldyshContraction) == nothing
     @test check_all_explicit_imports_via_owners(KeldyshContraction) == nothing
+end
+
+@testset "best practices" begin
+    using Aqua
+
+    Aqua.test_ambiguities([KeldyshContraction], broken=true)
+    Aqua.test_all(
+        KeldyshContraction;
+        ambiguities=false,
+    )
 end
 
 @testset "propagator" begin
