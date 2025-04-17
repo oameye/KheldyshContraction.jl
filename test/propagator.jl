@@ -2,9 +2,7 @@ using KeldyshContraction, Test
 using KeldyshContraction: In, Out, Classical, Quantum, Plus, Minus
 using KeldyshContraction: propagator, position, contour
 
-
 @qfields ϕᶜ::Destroy(Classical) ϕᴾ::Destroy(Quantum)
-
 
 @testset "propagator checks" begin
     @test_throws AssertionError propagator(ϕᶜ, ϕᶜ) # annilihation creation

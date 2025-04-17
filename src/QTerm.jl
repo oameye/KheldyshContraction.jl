@@ -86,7 +86,6 @@ end
 
 Base.adjoint(q::QAdd) = QAdd(map(adjoint, arguments(q)))
 
-
 ########################
 #       acts_on
 ########################

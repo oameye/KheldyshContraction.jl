@@ -15,7 +15,6 @@ expr = ϕᶜ(Out) * ϕᶜ'(In) * L_int
 @test is_conserved(expr)
 @test is_physical(expr)
 
-
 @testset "wick contractions" begin
     wick_contractions = wick_contraction(expr.arguments[1].args_nc)
     @test length(wick_contractions) == 4
@@ -24,7 +23,7 @@ expr = ϕᶜ(Out) * ϕᶜ'(In) * L_int
     regularized_wick = regularise(propagators)
     @test length(regularized_wick) == 2
     @test length(unique(regularized_wick)) == 1
-    @test isequal(wick_contraction(expr.arguments[1]),*(regularized_wick[1]...))
+    @test isequal(wick_contraction(expr.arguments[1]), *(regularized_wick[1]...))
 
     a = wick_contraction(expr)
 end

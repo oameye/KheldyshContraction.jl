@@ -58,7 +58,7 @@ regular(v::Vector{Average}) = all(regular.(v))
 regularise(vp::Vector{Vector{Average}}) = filter(regular, vp)
 
 function set_reg_to_zero!(p::Average)
-    p.arguments .= set_reg_to_zero.(arguments(p) )
+    p.arguments .= set_reg_to_zero.(arguments(p))
     p
 end
 function set_reg_to_zero!(vp::Union{Vector{Average},Vector{Vector{Average}}})
@@ -67,7 +67,6 @@ function set_reg_to_zero!(vp::Union{Vector{Average},Vector{Vector{Average}}})
     end
     return vp
 end
-
 
 #################################
 #       Contraction

@@ -47,13 +47,17 @@ end
 
 # Type promotion -- average(::QField)::Number
 function SymbolicUtils.promote_symtype(
-    ::SymbolicUtils.BasicSymbolic{SymbolicUtils.FnType{Tuple{QSym, QSym}, Propagator{T}}}, ::Type{<:QSym}, ::Type{<:QSym}
+    ::SymbolicUtils.BasicSymbolic{SymbolicUtils.FnType{Tuple{QSym,QSym},Propagator{T}}},
+    ::Type{<:QSym},
+    ::Type{<:QSym},
 ) where {T}
     return Propagator{T}
 end
 
 # needs a specific symtype overload, otherwise we build the wrong expressions with maketerm
-SymbolicUtils.symtype(::SymbolicUtils.BasicSymbolic{Propagator{T}}) where {T} = Propagator{T}
+function SymbolicUtils.symtype(::SymbolicUtils.BasicSymbolic{Propagator{T}}) where {T}
+    Propagator{T}
+end
 
 """
     propagator(x::QSym, y::QSym)

@@ -59,8 +59,9 @@ for f in [:Destroy, :Create]
     @eval position(ϕ::$(f)) = ϕ.position
     @eval isbulk(ϕ::$(f)) = iszero(Int(position(ϕ)))
 
-    @eval set_reg_to_zero(ϕ::$(f)) =
-        $(f)(name(ϕ), contour(ϕ), Zero, position(ϕ); ϕ.metadata)
+    @eval set_reg_to_zero(ϕ::$(f)) = $(f)(
+        name(ϕ), contour(ϕ), Zero, position(ϕ); ϕ.metadata
+    )
 end
 
 function Base.adjoint(op::Destroy)

@@ -54,7 +54,6 @@ Base.zero(::T) where {T<:QField} = zero(T)
 Base.zero(::Type{<:QField}) = 0
 Base.iszero(::QField) = false
 
-
 ########################
 #   Field properties
 ########################
