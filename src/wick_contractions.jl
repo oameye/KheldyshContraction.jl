@@ -40,6 +40,10 @@ function is_physical_propagator(a::Vector{QField})
     return len && in_out && physical
 end
 
+######################
+#     regularise
+######################
+
 function regular(p::Average)
     _isbulk = isbulk(p)
     _reg = regularisations(p)

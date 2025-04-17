@@ -1,3 +1,5 @@
+# *,+,/,- math of the QField and QSym types
+
 function Base.:*(a::QSym, b::QSym)
     args = [a, b]
     sort!(args; by=acts_on)

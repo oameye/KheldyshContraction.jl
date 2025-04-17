@@ -50,8 +50,7 @@ end
 
 const T_LATEX = Union{
     <:QField,
-    # <:AbstractMeanfieldEquations,
-    #  <:SymbolicUtils.Symbolic{<:CNumber},
+    #  <:SymbolicUtils.Symbolic{<:Number},
 }
 
 Base.show(io::IO, ::MIME"text/latex", x::T_LATEX) = write(io, latexify(x))

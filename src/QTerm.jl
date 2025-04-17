@@ -116,3 +116,4 @@ function acts_on(q::QAdd)
     return pos
 end
 acts_on(x) = Int[]
+# ^ used for sorting the arguments of a QMul and QAdd

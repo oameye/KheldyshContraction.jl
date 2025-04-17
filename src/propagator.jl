@@ -33,8 +33,8 @@ end
 """
     Propagator <: Number
 
-Symbolic number representing the average over an operator.
-See also: [`average`](@ref)
+Symbolic number representing the Propagator of two fields.
+See also: [`propagator`](@ref)
 """
 struct Propagator{T} <: Number end
 
@@ -55,14 +55,15 @@ function SymbolicUtils.promote_symtype(
 end
 
 # needs a specific symtype overload, otherwise we build the wrong expressions with maketerm
+# and `SymbolicUtils.expand` and `SymbolicUtils.simplify` will not work
 function SymbolicUtils.symtype(::SymbolicUtils.BasicSymbolic{Propagator{T}}) where {T}
     Propagator{T}
 end
 
 """
-    propagator(x::QSym, y::QSym)
+    propagator(ψ::QSym, ϕ::QSym)
 
-Compute the average of an operator.
+Compute the Keldysh two-point green's functions over two field `ψ` and `ϕ`.
 """
 function propagator(x::QSym, y::QSym)
     propagator_checks(x, y)
@@ -94,9 +95,6 @@ function positions(p::Average)
     return position.(fields(p))
 end
 propagator_type(p::SymbolicUtils.BasicSymbolic{Propagator{T}}) where {T} = T
-# function propagator_type(p::SymbolicUtils.BasicSymbolic{Propagator})
-#     return typeof(p).parameters[1].parameters[1]
-# end
 
 acts_on(p::Average) = acts_on(fields(p)...)
 acts_on(x::QSym, y::QSym) = sum(acts_on.((x, y)))

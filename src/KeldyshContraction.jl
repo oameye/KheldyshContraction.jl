@@ -11,10 +11,9 @@ using LaTeXStrings
 const NO_METADATA = SymbolicUtils.NO_METADATA
 
 # Fields
-include("abstract_types.jl")
+include("keldysh_algebra.jl")
 include("QTerm.jl")
 include("field_math.jl")
-include("keldysh.jl")
 include("hashing.jl")
 
 # Propagators

@@ -15,17 +15,6 @@ function _postwalk_func(x)
     end
 end
 
-# function _latexify(lhs_, rhs_, t)
-#     # Convert eqs to Exprs
-#     rhs = _to_expression.(rhs_)
-#     rhs = [MacroTools.postwalk(_postwalk_func, eq) for eq in rhs]
-#     lhs = _to_expression.(lhs_)
-#     lhs = [MacroTools.postwalk(_postwalk_func, eq) for eq in lhs]
-
-#     return lhs, rhs
-# end
-# _latexify(lhs, rhs) = _latexify([lhs], [rhs])
-
 @latexrecipe function f(op::QField)
     # Options
     cdot --> false
