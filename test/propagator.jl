@@ -1,6 +1,6 @@
-using LossyTransport, Test
-using LossyTransport: In, Out, Classical, Quantum, Plus, Minus
-using LossyTransport: propagator, position, contour
+using KeldyshContraction, Test
+using KeldyshContraction: In, Out, Classical, Quantum, Plus, Minus
+using KeldyshContraction: propagator, position, contour
 
 
 @qfields ϕᶜ::Destroy(Classical) ϕᴾ::Destroy(Quantum)
@@ -19,16 +19,16 @@ end
 
 @testset "properties" begin
     p = propagator(ϕᴾ, ϕᶜ'(In))
-    @test LossyTransport.acts_on(p) == 1
-    @test LossyTransport.contours(p) == [Quantum, Classical]
-    @test !LossyTransport.isbulk(p)
-    @test LossyTransport.regularisations(p) == fill(LossyTransport.Zero, 2)
-    @test LossyTransport.propagator_type(p) == LossyTransport.Advanced
+    @test KeldyshContraction.acts_on(p) == 1
+    @test KeldyshContraction.contours(p) == [Quantum, Classical]
+    @test !KeldyshContraction.isbulk(p)
+    @test KeldyshContraction.regularisations(p) == fill(KeldyshContraction.Zero, 2)
+    @test KeldyshContraction.propagator_type(p) == KeldyshContraction.Advanced
 end
 
 # @testset "undo_average" begin
 #     p = propagator(ϕᶜ, ϕᶜ'(In))
-#     @test isequal(LossyTransport.undo_average(p), ϕᶜ*ϕᶜ'(In))
+#     @test isequal(KeldyshContraction.undo_average(p), ϕᶜ*ϕᶜ'(In))
 # end
 
 @testset "math" begin
@@ -40,7 +40,7 @@ end
 
 @testset "regularisation" begin
     p = propagator(ϕᶜ(Minus), ϕᶜ'(In))
-    @test LossyTransport.regular(p) == true
-    LossyTransport.set_reg_to_zero!(p)
-    @test LossyTransport.regularisations(p) == fill(LossyTransport.Zero, 2)
+    @test KeldyshContraction.regular(p) == true
+    KeldyshContraction.set_reg_to_zero!(p)
+    @test KeldyshContraction.regularisations(p) == fill(KeldyshContraction.Zero, 2)
 end

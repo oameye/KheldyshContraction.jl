@@ -1,26 +1,26 @@
-using LossyTransport, Test
+using KeldyshContraction, Test
 
 @testset "Concretely typed" begin
-    using LossyTransport
+    using KeldyshContraction
     using CheckConcreteStructs
 
-    # all_concrete(LossyTransport.ProductSpace)
-    # all_concrete(LossyTransport.BosonicField)
-    all_concrete(LossyTransport.QMul)
-    all_concrete(LossyTransport.QAdd)
-    all_concrete(LossyTransport.Destroy)
-    all_concrete(LossyTransport.Create)
+    # all_concrete(KeldyshContraction.ProductSpace)
+    # all_concrete(KeldyshContraction.BosonicField)
+    all_concrete(KeldyshContraction.QMul)
+    all_concrete(KeldyshContraction.QAdd)
+    all_concrete(KeldyshContraction.Destroy)
+    all_concrete(KeldyshContraction.Create)
 end
 
 @testset "Code linting" begin
     using JET
-    JET.test_package(LossyTransport; target_defined_modules=true)
+    JET.test_package(KeldyshContraction; target_defined_modules=true)
 end
 
 @testset "ExplicitImports" begin
     using ExplicitImports
-    @test check_no_stale_explicit_imports(LossyTransport) == nothing
-    @test check_all_explicit_imports_via_owners(LossyTransport) == nothing
+    @test check_no_stale_explicit_imports(KeldyshContraction) == nothing
+    @test check_all_explicit_imports_via_owners(KeldyshContraction) == nothing
 end
 
 @testset "propagator" begin

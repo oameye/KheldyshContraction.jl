@@ -1,4 +1,4 @@
-module LossyTransport
+module KeldyshContraction
 
 using TermInterface: TermInterface, metadata
 using SymbolicUtils: SymbolicUtils, arguments, operation

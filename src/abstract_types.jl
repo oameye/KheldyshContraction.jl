@@ -72,7 +72,7 @@ function subtraction(x::Vector{Regularisation})
     subtraction(Tuple(x))
 end
 
-@enum KheldyshContour begin
+@enum KeldyshContour begin
     Quantum = 0
     Classical = 1
 end

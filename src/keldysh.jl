@@ -9,7 +9,7 @@ struct Destroy{contour,regularisation,M} <: QSym
     metadata::M  # M should stay parametric such that symbolics can work with it
     function Destroy(
         name::Symbol,
-        contour::KheldyshContour,
+        contour::KeldyshContour,
         reg::Regularisation=Zero,
         pos::Position=Bulk;
         metadata::M=NO_METADATA,
@@ -29,7 +29,7 @@ struct Create{contour,regularisation,M} <: QSym
     metadata::M # M should stay parametric such that symbolics can work with it
     function Create(
         name::Symbol,
-        contour::KheldyshContour,
+        contour::KeldyshContour,
         reg::Regularisation=Zero,
         pos::Position=Bulk;
         metadata::M=NO_METADATA,
@@ -95,7 +95,7 @@ Convenience macro for the construction of fields.
 Examples
 ========
 ```
-julia> using LossyTransport: Classical, Quantum
+julia> using KeldyshContraction: Classical, Quantum
 
 julia> @qnumbers ψ::Destroy(Classical)
 (ψ,)
