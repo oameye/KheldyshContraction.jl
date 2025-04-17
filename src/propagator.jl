@@ -1,0 +1,131 @@
+@enum PropagatorType begin
+    Keldysh
+    Advanced
+    Retarded
+end
+
+function propagator_type(out::QSym, in::QSym)::PropagatorType
+    contours = Int.(contour.((out, in)))
+    diff_contour = first(-(contours...))
+    if iszero(diff_contour)
+        return Keldysh
+    elseif isone(diff_contour)
+        return Retarded
+    else
+        return Advanced
+    end
+end
+
+function propagator_checks(out::QField, in::QField)::Nothing
+    @assert isa(in, Create) "The `in` field must be a Create operator"
+    @assert isa(out, Destroy) "The `out` field must be a Destroy operator"
+    v = [out, in]
+
+    positions = Int.(position.(v))
+    @assert first(positions) <= 0 "The outgoing field can't be the In<:Position` coordinate"
+    @assert last(positions) >= 0 "The incoming field can't be the Out<:Position` coordinate"
+    @assert abs(-(positions...)) < 2 "Can't make a propagator with `In<:Position` and `Out<:Position` coordinate"
+    contours = Int.(contour.(v))
+    @assert !is_qq_contraction(v) "The quantum-quantum progator is zero"
+    return nothing
+end
+
+"""
+    Propagator <: Number
+
+Symbolic number representing the average over an operator.
+See also: [`average`](@ref)
+"""
+struct Propagator{T} <: Number end
+
+const Average = SymbolicUtils.BasicSymbolic{<:Propagator}
+
+function sym_average(T::PropagatorType) # Symbolic function for averages
+    Tf = SymbolicUtils.FnType{Tuple{QSym,QSym},Propagator{T}}
+    SymbolicUtils.Sym{Tf}(:avg)
+end
+
+# Type promotion -- average(::QField)::Number
+function SymbolicUtils.promote_symtype(
+    ::SymbolicUtils.BasicSymbolic{SymbolicUtils.FnType{Tuple{QSym, QSym}, Propagator{T}}}, ::Type{<:QSym}, ::Type{<:QSym}
+) where {T}
+    return Propagator{T}
+end
+
+# needs a specific symtype overload, otherwise we build the wrong expressions with maketerm
+SymbolicUtils.symtype(::SymbolicUtils.BasicSymbolic{Propagator{T}}) where {T} = Propagator{T}
+
+"""
+    propagator(x::QSym, y::QSym)
+
+Compute the average of an operator.
+"""
+function propagator(x::QSym, y::QSym)
+    propagator_checks(x, y)
+    T = propagator_type(x, y)
+    return SymbolicUtils.Term{Propagator{T}}(sym_average(T), [x, y])
+end
+
+# ensure that BasicSymbolic{<:Propagator} are only single averages
+function Base.:*(a::Average, b::Average)
+    if isequal(a, b)
+        return SymbolicUtils.Mul(Number, 1, Dict(a => 2))
+    end
+    return SymbolicUtils.Mul(Number, 1, Dict(a => 1, b => 1))
+end
+function Base.:+(a::Average, b::Average)
+    if isequal(a, b)
+        return SymbolicUtils.Add(Number, 0, Dict(a => 2))
+    end
+    return SymbolicUtils.Add(Number, 0, Dict(a => 1, b => 1))
+end
+
+fields(p::Average) = SymbolicUtils.arguments(p)
+function regularisations(p::Average)
+    return regularisation.(fields(p))
+end
+contours(p::Average) = contour.(fields(p))
+isbulk(p::Average) = all(isbulk.(fields(p)))
+function positions(p::Average)
+    return position.(fields(p))
+end
+propagator_type(p::SymbolicUtils.BasicSymbolic{Propagator{T}}) where {T} = T
+# function propagator_type(p::SymbolicUtils.BasicSymbolic{Propagator})
+#     return typeof(p).parameters[1].parameters[1]
+# end
+
+acts_on(p::Average) = acts_on(fields(p)...)
+acts_on(x::QSym, y::QSym) = sum(acts_on.((x, y)))
+
+# function acts_on(s::SymbolicUtils.Symbolic)
+#     if SymbolicUtils.iscall(s)
+#         f = SymbolicUtils.operation(s)
+#         if f === sym_average
+#             return acts_on(SymbolicUtils.arguments(s)...)
+#         else
+#             aon = []
+#             for arg in SymbolicUtils.arguments(s)
+#                 append!(aon, acts_on(arg))
+#             end
+#             unique!(aon)
+#             sort!(aon)
+#             return aon
+#         end
+#     else
+#         return Int[]
+#     end
+# end
+
+# function undo_average(t) # TODO slow because return type  uncertain?
+#     if SymbolicUtils.iscall(t)
+#         f = SymbolicUtils.operation(t)
+#         if isequal(f, sym_average)
+#             return QMul(1, SymbolicUtils.arguments(t))
+#         else
+#             args = map(undo_average, SymbolicUtils.arguments(t))
+#             return f(args...)
+#         end
+#     else
+#         return t
+#     end
+# end
