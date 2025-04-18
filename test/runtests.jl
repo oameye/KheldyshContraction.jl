@@ -11,9 +11,11 @@ using KeldyshContraction, Test
     all_concrete(KeldyshContraction.Propagator)
 end
 
-@testset "Code linting" begin
-    using JET
-    JET.test_package(KeldyshContraction; target_defined_modules=true)
+if VERSION < v"1.12.0-beta"
+    @testset "Code linting" begin
+        using JET
+        JET.test_package(KeldyshContraction; target_defined_modules=true)
+    end
 end
 
 @testset "ExplicitImports" begin
@@ -25,8 +27,16 @@ end
 @testset "best practices" begin
     using Aqua
 
-    Aqua.test_ambiguities([KeldyshContraction], broken=false)
+    Aqua.test_ambiguities([KeldyshContraction]; broken=false)
     Aqua.test_all(KeldyshContraction; ambiguities=false)
+end
+
+@testset "show methods" begin
+    include("show_methods.jl")
+end
+
+@testset "QField" begin
+    include("QField.jl")
 end
 
 @testset "propagator" begin
