@@ -1,0 +1,3 @@
+[type.ipynb]
+extend-glob = ["*.ipynb"]
+check-file = false

@@ -37,7 +37,7 @@ SymbolicUtils.arguments(a::QMul) = vcat(a.arg_c, a.args_nc)
 function SymbolicUtils.maketerm(::Type{<:QMul}, ::typeof(*), args, metadata)
     args_c = filter(x -> !(x isa QField), args)
     args_nc = filter(x -> x isa QField, args)
-    arg_c = *(args_c...)
+    arg_c = isempty(args_c) ? 1 : *(args_c...)
     isempty(args_nc) && return arg_c
     return QMul(arg_c, args_nc; metadata)
 end
@@ -46,7 +46,7 @@ SymbolicUtils.metadata(a::QMul) = a.metadata
 
 function Base.adjoint(q::QMul)
     args_nc = map(adjoint, q.args_nc)
-    reverse!(args_nc)
+    reverse!(args_nc) # TODO fields switch under adjoint right?
     sort!(args_nc; by=acts_on)
     return QMul(conj(q.arg_c), args_nc; q.metadata)
 end
@@ -111,7 +111,7 @@ function acts_on(q::QAdd)
     for arg in arguments(q)
         append!(pos, acts_on(arg))
     end
-    unique!(pos) # TODO should this unque be here?
+    unique!(pos) # TODO should this unique be here?
     sort!(pos)
     return pos
 end

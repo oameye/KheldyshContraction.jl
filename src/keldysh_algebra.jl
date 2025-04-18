@@ -37,8 +37,9 @@ TermInterface.metadata(x::QSym) = x.metadata
 
 # Symbolic type promotion
 for f in SymbolicUtils.basic_diadic # [+, -, *, /, //, \, ^]
-    @eval SymbolicUtils.promote_symtype(::$(typeof(f)), Ts::Type{<:QField}...) =
-        promote_type(Ts...)
+    @eval SymbolicUtils.promote_symtype(::$(typeof(f)), Ts::Type{<:QField}...) = promote_type(
+        Ts...
+    )
     @eval SymbolicUtils.promote_symtype(::$(typeof(f)), T::Type{<:QField}, Ts...) = T
     @eval SymbolicUtils.promote_symtype(
         ::$(typeof(f)), T::Type{<:QField}, S::Type{<:Number}
@@ -97,7 +98,7 @@ end
 """
     Destroy <: QSym
 
-Bosonic field representing the quantum field annilihation operator.
+Bosonic field representing the quantum field annihilation operator.
 """
 struct Destroy{contour,regularisation,M} <: QSym
     name::Symbol
@@ -155,8 +156,9 @@ for f in [:Destroy, :Create]
     @eval position(ϕ::$(f)) = ϕ.position
     @eval isbulk(ϕ::$(f)) = iszero(Int(position(ϕ)))
 
-    @eval set_reg_to_zero(ϕ::$(f)) =
-        $(f)(name(ϕ), contour(ϕ), Zero, position(ϕ); ϕ.metadata)
+    @eval set_reg_to_zero(ϕ::$(f)) = $(f)(
+        name(ϕ), contour(ϕ), Zero, position(ϕ); ϕ.metadata
+    )
 end
 
 function Base.adjoint(op::Destroy)
