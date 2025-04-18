@@ -46,7 +46,7 @@ SymbolicUtils.metadata(a::QMul) = a.metadata
 
 function Base.adjoint(q::QMul)
     args_nc = map(adjoint, q.args_nc)
-    reverse!(args_nc)
+    reverse!(args_nc) # TODO fields switch under adjoint right?
     sort!(args_nc; by=acts_on)
     return QMul(conj(q.arg_c), args_nc; q.metadata)
 end
