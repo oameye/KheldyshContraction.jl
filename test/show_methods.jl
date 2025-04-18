@@ -1,16 +1,21 @@
 using KeldyshContraction, Test
-using KeldyshContraction: Classical, Quantum, Plus, Minus, In, Out
-import KeldyshContraction as KC
+using KeldyshContraction: Classical, Quantum, Plus, Minus, In, Out, propagator
 
 @qfields ϕ::Destroy(Classical) ψ::Destroy(Quantum)
 
+input = [
+    ϕ,
+    ϕ',
+    ϕ(Plus)',
+    ϕ(Minus)',
+    propagator(ϕ, ϕ'(In)),
+    propagator(ϕ(Out), ϕ'),
+    propagator(ϕ(Out), ψ'),
+    propagator(ψ(Out), ϕ'),
+]
 
-@test sprint(show, ϕ) == "ϕ"
-@test sprint(show, ϕ') == "̄ϕ"
-@test sprint(show, ϕ(Plus)') == "̄ϕ⁺"
-@test sprint(show, ϕ(Minus)') == "̄ϕ⁻"
-
-@test sprint(show,propagator(ϕ, ϕ'(In))) == "Gᴷ(y,x₂)"
-@test sprint(show,propagator(ϕ(Out), ϕ')) == "Gᴷ(x₁,y)"
-@test sprint(show,propagator(ϕ(Out), ψ')) == "Gᴿ(x₁,y)"
-@test sprint(show,propagator(ψ(Out), ϕ')) == "Gᴬ(x₁,y)"
+output = ["ϕ", "̄ϕ", "̄ϕ⁺", "̄ϕ⁻", "Gᴷ(y,x₂)", "Gᴷ(x₁,y)", "Gᴿ(x₁,y)", "Gᴬ(x₁,y)"]
+for (i, o) in zip(input, output)
+    @test sprint(show, i) == o
+    @test repr(i) == o
+end
