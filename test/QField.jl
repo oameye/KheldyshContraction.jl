@@ -63,8 +63,8 @@ end
     @test acts_on(ϕ) == 0
     @test acts_on(ψ(In)) == 1
     @test acts_on(ψ(Out)) == -1
-    @test acts_on(ϕ + ψ) == 0
-    @test acts_on(ϕ*ψ) == 0
+    @test acts_on(ϕ + ψ) == [0]
+    @test acts_on(ϕ*ψ) == [0]
 
     @test acts_on(ϕ + ψ(In)) == [0, 1]
     @test acts_on(ϕ*ψ(In)) == [0, 1]
