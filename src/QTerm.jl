@@ -111,7 +111,7 @@ function acts_on(q::QAdd)
     for arg in arguments(q)
         append!(pos, acts_on(arg))
     end
-    unique!(pos) # TODO should this unque be here?
+    unique!(pos) # TODO should this unique be here?
     sort!(pos)
     return pos
 end

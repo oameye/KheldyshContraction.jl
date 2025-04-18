@@ -4,7 +4,6 @@ import KeldyshContraction as KC
 
 @qfields ϕ::Destroy(Classical) ψ::Destroy(Quantum)
 
-
 @testset "SymbolicUtils interface" begin
     using TermInterface, SymbolicUtils
 
@@ -14,11 +13,10 @@ import KeldyshContraction as KC
 
     @testset "SymbolicUtils promotion" begin
         # Test the promotion of Keldysh fields
-        ϕ + 1 |> typeof
-        @test SymbolicUtils.promote_symtype(+,ϕ, 1) isa KC.QField broken=true
-        @test SymbolicUtils.promote_symtype(*,ϕ, 1) isa KC.QField broken=true
+        typeof(ϕ + 1)
+        @test SymbolicUtils.promote_symtype(+, ϕ, 1) isa KC.QField broken=true
+        @test SymbolicUtils.promote_symtype(*, ϕ, 1) isa KC.QField broken=true
     end
-
 end
 
 @testset "ones and zeros" begin
@@ -37,14 +35,14 @@ end
 
     @test isequal(ψ + ϕ, ϕ + ψ) broken=true
     @test isequal(ψ*ϕ, ϕ*ψ) broken=true
-    @test isequal(1 + ϕ,ϕ + 1)
+    @test isequal(1 + ϕ, ϕ + 1)
 end
 @testset "simplification" begin
     @test isequal(ϕ + ϕ, 2*ϕ) broken=true
     @test isequal(ϕ + ϕ + ϕ, 3*ϕ) broken=true
 
-    @test isequal(( ϕ + ϕ)*( ϕ + ϕ), 4*ϕ^2) broken=true
-    @test isequal(( ϕ + ϕ)*( ϕ + ϕ), ϕ^2+ϕ^2+ϕ^2+ϕ^2)
+    @test isequal((ϕ + ϕ)*(ϕ + ϕ), 4*ϕ^2) broken=true
+    @test isequal((ϕ + ϕ)*(ϕ + ϕ), ϕ^2+ϕ^2+ϕ^2+ϕ^2)
 end
 
 @testset "adjoint" begin
@@ -53,10 +51,10 @@ end
     ψ′ = Create(KC.name(ψ), Quantum, KC.regularisation(ψ), KC.position(ψ); ψ.metadata)
 
     # Test the adjoint of Keldysh fields
-    @test isequal(ϕ' ,ϕ′)
+    @test isequal(ϕ', ϕ′)
     @test adjoint(ψ) == ψ′
     @test isequal(adjoint(ϕ*ψ), ψ′*ϕ′) # fields switch under adjoint
-    @test isequal(adjoint(ϕ + ψ), ϕ′+ ψ′)
+    @test isequal(adjoint(ϕ + ψ), ϕ′ + ψ′)
 end
 
 @testset "acts_on" begin
@@ -68,8 +66,8 @@ end
     @test acts_on(ϕ + ψ) == 0
     @test acts_on(ϕ*ψ) == 0
 
-    @test acts_on(ϕ + ψ(In)) == [0,1]
-    @test acts_on(ϕ*ψ(In))  == [0,1]
+    @test acts_on(ϕ + ψ(In)) == [0, 1]
+    @test acts_on(ϕ*ψ(In)) == [0, 1]
 end
 
 @testset "more math" begin
@@ -79,9 +77,9 @@ end
 
     @test isequal((ϕ^2), ϕ*ϕ)
 
-    @test isequal(-(ϕ,1),ϕ-1)
-    @test isequal(-(1,ϕ),1-ϕ)
+    @test isequal(-(ϕ, 1), ϕ-1)
+    @test isequal(-(1, ϕ), 1-ϕ)
 
-    @test isequal(ϕ + 0,ϕ )
-    @test isequal(0 + ϕ,ϕ )
+    @test isequal(ϕ + 0, ϕ)
+    @test isequal(0 + ϕ, ϕ)
 end
