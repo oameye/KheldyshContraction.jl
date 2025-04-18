@@ -1,3 +1,13 @@
+"""
+    PropagatorType `Keldysh`, `Advanced`, `Retarded`
+
+The type of propagator taken of two fields with the x-y Contour where `x` is the Contour of the [`Destroy`](@ref) field and `y` the contour of the [`Create`](@ref) field.
+- `Keldysh` propagator of a Classical-Classical contour
+- `Advanced` propagator of a Quantum-Classical contour
+- `Retarded` propagator of a Classical-Quantum contour
+
+The Quantum-Quantum propagator should always be zero.
+"""
 @enum PropagatorType begin
     Keldysh
     Advanced
@@ -33,7 +43,8 @@ end
 """
     Propagator <: Number
 
-Symbolic number representing the Propagator of two fields.
+Symbolic number representing the Propagator of two fields ϕ and ψ. By convention a propagator is shown as G(ϕ, ψ) with ψ the incoming [`Create`](@ref) field and ϕ the outgoing [`Destroy`](@ref) field.
+
 See also: [`propagator`](@ref)
 """
 struct Propagator{T} <: Number end
@@ -63,7 +74,7 @@ end
 """
     propagator(ψ::QSym, ϕ::QSym)
 
-Compute the Keldysh two-point green's functions over two field `ψ` and `ϕ`.
+Create the Keldysh two-point green's functions over two field `ψ` and `ϕ`. Here `ψ` is the incoming [`Create`](@ref) field and `ψ` the outgoing [`Destroy`](@ref) field. The created propagator will be of type `SymbolicUtils.BasicSymbolic{Propagator{T}}` where `T` is the type [`PropagatorType`](@ref).
 """
 function propagator(x::QSym, y::QSym)
     propagator_checks(x, y)

@@ -20,7 +20,7 @@ expr = ϕᶜ(Out) * ϕᶜ'(In) * L_int
     @test length(wick_contractions) == 4
 
     propagators = make_propagators(wick_contractions)
-    regularized_wick = regularise(propagators)
+    regularized_wick = KeldyshContraction.regularise(propagators)
     @test length(regularized_wick) == 2
     @test length(unique(regularized_wick)) == 1
     @test isequal(wick_contraction(expr.arguments[1]), *(regularized_wick[1]...))
