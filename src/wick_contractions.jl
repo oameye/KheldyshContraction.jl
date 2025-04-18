@@ -92,7 +92,7 @@ The function handles two types of inputs:
 - `QAdd`: Distributes the contraction over sums
 - `QMul`: Contracts products of fields into propagators
 
-The function returns a new espression of propagators of type `SymbolicUtils.Symbol`.
+The function returns a new expression of propagators of type `SymbolicUtils.Symbol`.
 
 ```
 """
