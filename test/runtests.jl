@@ -11,7 +11,7 @@ using KeldyshContraction, Test
     all_concrete(KeldyshContraction.Propagator)
 end
 
-if  VERSION < v"1.12.0-beta"
+if VERSION < v"1.12.0-beta"
     @testset "Code linting" begin
         using JET
         JET.test_package(KeldyshContraction; target_defined_modules=true)
