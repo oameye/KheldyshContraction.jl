@@ -29,6 +29,10 @@ end
     Aqua.test_all(KeldyshContraction; ambiguities=false)
 end
 
+@testset "show methods" begin
+    include("show_methods.jl")
+end
+
 @testset "QField" begin
     include("QField.jl")
 end
