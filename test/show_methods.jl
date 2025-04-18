@@ -19,3 +19,10 @@ for (i, o) in zip(input, output)
     @test sprint(show, i) == o
     @test repr(i) == o
 end
+
+output_latex = ["\$\\phi\$", "\$\\bar{ϕ}\$", "\$\\bar{ϕ}^+\$", "\$\\bar{ϕ}^{-}\$"]
+
+for (i, o) in zip(input[1:4], output_latex)
+    @test sprint(show, MIME"text/latex"(), i) == o
+    @test repr(MIME"text/latex"(), i) == o
+end
