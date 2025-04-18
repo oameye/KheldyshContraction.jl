@@ -37,7 +37,7 @@ SymbolicUtils.arguments(a::QMul) = vcat(a.arg_c, a.args_nc)
 function SymbolicUtils.maketerm(::Type{<:QMul}, ::typeof(*), args, metadata)
     args_c = filter(x -> !(x isa QField), args)
     args_nc = filter(x -> x isa QField, args)
-    arg_c = *(args_c...)
+    arg_c = isempty(args_c) ? 1 : *(args_c...)
     isempty(args_nc) && return arg_c
     return QMul(arg_c, args_nc; metadata)
 end
