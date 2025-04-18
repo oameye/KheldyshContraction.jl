@@ -36,12 +36,21 @@ SymbolicUtils.iscall(::Type{T}) where {T<:QTerm} = true
 TermInterface.metadata(x::QSym) = x.metadata
 
 # Symbolic type promotion
-SymbolicUtils.promote_symtype(f, Ts::Type{<:QField}...) = promote_type(Ts...)
-SymbolicUtils.promote_symtype(f, T::Type{<:QField}, Ts...) = T
-SymbolicUtils.promote_symtype(f, T::Type{<:QField}, S::Type{<:Number}) = T
-SymbolicUtils.promote_symtype(f, T::Type{<:Number}, S::Type{<:QField}) = S
-function SymbolicUtils.promote_symtype(f, T::Type{<:QField}, S::Type{<:QField})
-    promote_type(T, S)
+for f in SymbolicUtils.basic_diadic # [+, -, *, /, //, \, ^]
+    @eval SymbolicUtils.promote_symtype(::$(typeof(f)), Ts::Type{<:QField}...) =
+        promote_type(Ts...)
+    @eval SymbolicUtils.promote_symtype(::$(typeof(f)), T::Type{<:QField}, Ts...) = T
+    @eval SymbolicUtils.promote_symtype(
+        ::$(typeof(f)), T::Type{<:QField}, S::Type{<:Number}
+    ) = T
+    @eval SymbolicUtils.promote_symtype(
+        ::$(typeof(f)), T::Type{<:Number}, S::Type{<:QField}
+    ) = S
+    @eval function SymbolicUtils.promote_symtype(
+        ::$(typeof(f)), T::Type{<:QField}, S::Type{<:QField}
+    )
+        return promote_type(T, S)
+    end
 end
 
 SymbolicUtils.symtype(x::T) where {T<:QField} = T
@@ -67,7 +76,7 @@ end
 subtraction(x::NTuple{2,Regularisation}) = -(Int.(x)...)
 function subtraction(x::Vector{Regularisation})
     @assert length(x) == 2
-    subtraction(Tuple(x))
+    return subtraction(Tuple(x))
 end
 
 @enum KeldyshContour begin
@@ -146,9 +155,8 @@ for f in [:Destroy, :Create]
     @eval position(ϕ::$(f)) = ϕ.position
     @eval isbulk(ϕ::$(f)) = iszero(Int(position(ϕ)))
 
-    @eval set_reg_to_zero(ϕ::$(f)) = $(f)(
-        name(ϕ), contour(ϕ), Zero, position(ϕ); ϕ.metadata
-    )
+    @eval set_reg_to_zero(ϕ::$(f)) =
+        $(f)(name(ϕ), contour(ϕ), Zero, position(ϕ); ϕ.metadata)
 end
 
 function Base.adjoint(op::Destroy)

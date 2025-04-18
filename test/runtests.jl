@@ -4,8 +4,6 @@ using KeldyshContraction, Test
     using KeldyshContraction
     using CheckConcreteStructs
 
-    # all_concrete(KeldyshContraction.ProductSpace)
-    # all_concrete(KeldyshContraction.BosonicField)
     all_concrete(KeldyshContraction.QMul)
     all_concrete(KeldyshContraction.QAdd)
     all_concrete(KeldyshContraction.Destroy)
@@ -27,7 +25,7 @@ end
 @testset "best practices" begin
     using Aqua
 
-    Aqua.test_ambiguities([KeldyshContraction], broken=true)
+    Aqua.test_ambiguities([KeldyshContraction], broken=false)
     Aqua.test_all(KeldyshContraction; ambiguities=false)
 end
 

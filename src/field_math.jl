@@ -78,8 +78,8 @@ end
 ## Addition
 
 Base.:-(a::QField) = -1 * a
-Base.:-(a, b::QField) = a + (-b)
-Base.:-(a::QField, b) = a + (-b)
+Base.:-(a::SNuN, b::QField) = a + (-b)
+Base.:-(a::QField, b::SNuN) = a + (-b)
 Base.:-(a::QField, b::QField) = a + (-b)
 
 function Base.:+(a::QField, b::SNuN)
@@ -111,7 +111,7 @@ function Base.:+(a::QAdd, b::QAdd)
     return QAdd(args)
 end
 
-function Base.:*(a::QAdd, b)
+function Base.:*(a::QAdd, b::SNuN)
     args = QSymbol[a_ * b for a_ in arguments(a)]
     flatten_adds!(args)
     isempty(args) && return 0
