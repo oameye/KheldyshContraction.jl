@@ -29,6 +29,10 @@ end
     Aqua.test_all(KeldyshContraction; ambiguities=false)
 end
 
+@testset "QField" begin
+    include("QField.jl")
+end
+
 @testset "propagator" begin
     include("propagator.jl")
 end
