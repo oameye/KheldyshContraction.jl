@@ -75,7 +75,30 @@ end
 #################################
 #       Contraction
 #################################
+"""
+    wick_contraction(expr::Union{QAdd,QMul})
 
+Compute all possible Wick contractions of quantum fields in the expression `expr`.
+
+Wick contractions decompose products of quantum field operators into sums of products
+of propagators (two-point correlation functions). The rules of the contraction are:
+  - Conservation (equal numbers of creation/annihilation operators)
+  - Physicality (proper time ordering)
+  - No quantum-quantum contractions
+  - If the fields have a [`KeldyshContraction.Regularisation`](@ref) applied, the contractions are
+    regularised. The [`KeldyshContraction.Regularisation`](@ref) property is set to zero after the reguralisation.
+
+The function handles two types of inputs:
+- `QAdd`: Distributes the contraction over sums
+- `QMul`: Contracts products of fields into propagators
+
+The function returns a new espression of propagators of type `SymbolicUtils.Symbol`.
+
+```
+"""
+function wick_contraction(a::QAdd)
+    return SymbolicUtils.expand(sum(wick_contraction.(SymbolicUtils.arguments(a))))
+end
 function wick_contraction(a::QMul)
     @assert is_conserved(a)
     @assert is_physical(a)
@@ -85,9 +108,6 @@ function wick_contraction(a::QMul)
     regular_propagators = regularise(propagators)
     set_reg_to_zero!(regular_propagators)
     return a.arg_c * make_term(regular_propagators)
-end
-function wick_contraction(a::QAdd)
-    return SymbolicUtils.expand(sum(wick_contraction.(SymbolicUtils.arguments(a))))
 end
 
 function wick_contraction(args_nc::Vector{QField})::Vector{Vector{Vector{QField}}}

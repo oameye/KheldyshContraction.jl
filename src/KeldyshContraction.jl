@@ -24,6 +24,6 @@ include("wick_contractions.jl")
 include("latexify_recipes.jl")
 include("printing.jl")
 
-export @qfields, Destroy, Create, wick_contraction, regularise
+export @qfields, Destroy, Create, wick_contraction, Quantum, Classical
 
 end

@@ -4,8 +4,79 @@ CollapsedDocStrings = true
 
 # API
 
-```@autodocs
-Modules = [KeldyshContraction]
-Private = false
-Order   = [:function, :type]
+```@contents
+Pages = ["API.md"]
+Depth = 2:3
+```
+
+## Field Types
+
+### Individual Fields
+
+```@example API
+using Term, KeldyshContraction # hide
+Term.typestree(KeldyshContraction.QSym) # hide
+```
+
+```@docs
+KeldyshContraction.QField
+KeldyshContraction.QSym
+KeldyshContraction.Create
+KeldyshContraction.Destroy
+```
+
+#### Field Properties
+
+The field properties are determined by the Enum objects:
+
+```@docs
+KeldyshContraction.KeldyshContour
+KeldyshContraction.Regularisation
+KeldyshContraction.Position
+```
+
+#### Field Constructors
+
+It is expected to create the fields using the `Create` and `Destroy` constructors, together with the `@qfields` macro.
+
+```@docs
+KeldyshContraction.@qfields
+```
+
+The created fields are callable to change a property of the individual fields:
+
+```@example API
+using KeldyshContraction
+using KeldyshContraction: In, Classical, position
+
+@qfields ϕ::Destroy(Classical) 
+
+position(ϕ(In))
+```
+
+### Field Algebra
+
+```@example API
+using Term, KeldyshContraction # hide
+Term.typestree(KeldyshContraction.QTerm) # hide
+```
+
+```@docs
+KeldyshContraction.QTerm
+KeldyshContraction.QMul
+KeldyshContraction.QAdd
+```
+
+## Propagator
+
+```@docs
+KeldyshContraction.Propagator
+KeldyshContraction.PropagatorType
+KeldyshContraction.propagator
+```
+
+## Wick Contraction
+  
+```@docs
+wick_contraction
 ```
