@@ -1,7 +1,13 @@
 using KeldyshContraction, Test
 using KeldyshContraction: In, Out, Classical, Quantum, Plus, Minus
 using KeldyshContraction:
-    is_physical, is_conserved, make_propagators, propagator, construct_self_energy
+    is_physical,
+    is_conserved,
+    make_propagators,
+    propagator,
+    construct_self_energy,
+    InteractionLagrangian,
+    SelfEnergy
 
 @qfields ϕᶜ::Destroy(Classical) ϕᴾ::Destroy(Quantum)
 
@@ -49,4 +55,8 @@ end
     expr = ϕᶜ(Out) * ϕᶜ'(In) * L_int
     a = wick_contraction(expr)
     construct_self_energy(a)
+
+    L = InteractionLagrangian(L_int)
+    GF = wick_contraction(L)
+    Σ = SelfEnergy(GF)
 end

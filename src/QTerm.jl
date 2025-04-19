@@ -60,6 +60,9 @@ function Base.isequal(a::QMul, b::QMul)
     return true
 end
 
+isbulk(q::QMul) = all(isbulk.(q.args_nc))
+allfields(q::QMul) = q.args_nc
+
 ########################
 #       Addition
 ########################
@@ -85,6 +88,8 @@ function Base.isequal(a::QAdd, b::QAdd)
 end
 
 Base.adjoint(q::QAdd) = QAdd(map(adjoint, arguments(q)))
+isbulk(q::QAdd) = all(isbulk.(arguments(q)))
+allfields(q::QAdd) = reduce(vcat, allfields.(SymbolicUtils.arguments(q)))
 
 ########################
 #       acts_on
@@ -117,3 +122,25 @@ function acts_on(q::QAdd)
 end
 acts_on(x) = Int[]
 # ^ used for sorting the arguments of a QMul and QAdd
+
+###########################
+#  Interaction Lagrangian
+###########################
+
+struct InteractionLagrangian{T}
+    lagrangian::T
+    qfield::Destroy{Quantum,Zero,Nothing}
+    cfield::Destroy{Classical,Zero,Nothing}
+    function InteractionLagrangian(expr::QTerm)
+        @assert isbulk(expr) "An interaction Lagrangian only accepts bulk terms"
+        @assert is_conserved(expr) "An interaction Lagrangian only accepts conserved terms"
+        @assert is_physical(expr) "An interaction Lagrangian only accepts physical terms"
+        fields = filter(is_annihilation, unique(set_reg_to_zero.(allfields(expr))))
+        @assert length(fields) <= 2 "An interaction Lagrangian only accepts up to two different fields"
+        contours = Int.(contour.(fields))
+        @assert unique(contours) == contours "An interaction Lagrangian only accepts fields with opposite contours"
+        q_idx = findfirst(iszero, contours)
+        c_idx = findfirst(isone, contours)
+        return new{typeof(expr)}(expr, fields[q_idx], fields[c_idx])
+    end
+end

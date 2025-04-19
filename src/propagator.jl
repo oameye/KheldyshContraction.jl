@@ -113,35 +113,15 @@ propagator_type(p::SymbolicUtils.BasicSymbolic{Propagator{T}}) where {T} = T
 acts_on(p::Average) = acts_on(fields(p)...)
 acts_on(x::QSym, y::QSym) = sum(acts_on.((x, y)))
 
-# function acts_on(s::SymbolicUtils.Symbolic)
-#     if SymbolicUtils.iscall(s)
-#         f = SymbolicUtils.operation(s)
-#         if f === sym_average
-#             return acts_on(SymbolicUtils.arguments(s)...)
-#         else
-#             aon = []
-#             for arg in SymbolicUtils.arguments(s)
-#                 append!(aon, acts_on(arg))
-#             end
-#             unique!(aon)
-#             sort!(aon)
-#             return aon
-#         end
-#     else
-#         return Int[]
-#     end
-# end
+##########################################
+#       dressed green's function
+##########################################
 
-# function undo_average(t) # TODO slow because return type  uncertain?
-#     if SymbolicUtils.iscall(t)
-#         f = SymbolicUtils.operation(t)
-#         if isequal(f, sym_average)
-#             return QMul(1, SymbolicUtils.arguments(t))
-#         else
-#             args = map(undo_average, SymbolicUtils.arguments(t))
-#             return f(args...)
-#         end
-#     else
-#         return t
-#     end
-# end
+struct DressedPropagator{Tk,Tr,Ta}
+    keldysh::Tk
+    retarded::Tr
+    advanced::Ta
+    function DressedPropagator(expr_cc::SNuN, expr_cq::SNuN, expr_qc::SNuN)
+        new{typeof(expr_cc),typeof(expr_cq),typeof(expr_qc)}(expr_cc, expr_cq, expr_qc)
+    end
+end

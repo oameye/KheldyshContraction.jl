@@ -21,9 +21,12 @@ end
 
 function construct_self_energy(expr::SymbolicUtils.Symbolic)
     self_energy = Dict{PropagatorType,SNuN}((Advanced => 0, Retarded => 0, Keldysh => 0))
-
+    return construct_self_energy!(self_energy, expr)
+end
+function construct_self_energy!(
+    self_energy::Dict{PropagatorType,SNuN}, expr::SymbolicUtils.Symbolic
+)
     terms = SymbolicUtils.arguments(expr)
-
     for term in terms
         args = SymbolicUtils.arguments(term)
         idxs_c = findall(x -> !(x isa Average), args)
@@ -40,4 +43,23 @@ function construct_self_energy(expr::SymbolicUtils.Symbolic)
         self_energy[self_energy_type(dict)] += to_add
     end
     return self_energy
+end
+
+struct SelfEnergy{Tk,Tr,Ta}
+    keldysh::Tk
+    retarded::Tr
+    advanced::Ta
+    function SelfEnergy(G::DressedPropagator)
+        self_energy = Dict{PropagatorType,SNuN}((
+            Advanced => 0, Retarded => 0, Keldysh => 0
+        ))
+        construct_self_energy!(self_energy, G.keldysh)
+        construct_self_energy!(self_energy, G.advanced)
+        construct_self_energy!(self_energy, G.retarded)
+
+        # quantum-quantum is the keldysh term in the self-energy
+        # classical-classical is zero
+        qq, cq, qc = self_energy[Keldysh], self_energy[Retarded], self_energy[Advanced]
+        return new{typeof(qq),typeof(cq),typeof(qc)}(qq, cq, qc)
+    end
 end

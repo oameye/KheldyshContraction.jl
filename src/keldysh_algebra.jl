@@ -94,7 +94,8 @@ Keldysh contour enum for the Keldysh quantum field. The Keldysh contour is used 
     Quantum = 0
     Classical = 1
 end
-
+is_quantum(x::QSym) = iszero(Int(contour(x)))
+is_classical(x::QSym) = isone(Int(contour(x)))
 """
     Position `In` `Out` `Bulk`
 
@@ -199,6 +200,11 @@ function ismergeable(a::Create, b::Destroy)
     pos_b = acts_on(b)
     return pos_a == pos_b
 end
+
+is_annihilation(x::Destroy) = true
+is_creation(x::Create) = true
+is_creation(x::Destroy) = false
+is_annihilation(x::Create) = false
 
 """
     @qfields

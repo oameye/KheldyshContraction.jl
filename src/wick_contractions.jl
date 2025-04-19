@@ -75,6 +75,15 @@ end
 #################################
 #       Contraction
 #################################
+
+function wick_contraction(L::InteractionLagrangian)
+    ϕ = L.qfield
+    ψ = L.cfield
+    expr_cc = wick_contraction(ψ(Out) * ψ'(In) * L.lagrangian)
+    expr_cq = wick_contraction(ϕ(Out) * ψ'(In) * L.lagrangian)
+    expr_qc = wick_contraction(ψ(Out) * ϕ'(In) * L.lagrangian)
+    DressedPropagator(expr_cc, expr_cq, expr_qc)
+end
 """
     wick_contraction(expr::Union{QAdd,QMul})
 
