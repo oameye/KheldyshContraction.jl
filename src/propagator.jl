@@ -121,7 +121,8 @@ struct DressedPropagator{Tk,Tr,Ta}
     keldysh::Tk
     retarded::Tr
     advanced::Ta
-    function DressedPropagator(expr_cc::SNuN, expr_cq::SNuN, expr_qc::SNuN)
-        new{typeof(expr_cc),typeof(expr_cq),typeof(expr_qc)}(expr_cc, expr_cq, expr_qc)
+    function DressedPropagator(keldysh::SNuN, retarded::SNuN, advanced::SNuN)
+        new{typeof(keldysh),typeof(retarded),typeof(advanced)}(keldysh, retarded, advanced)
     end
 end
+matrix(G::DressedPropagator) = SNuN[G.retarded G.keldysh; G.advanced 0]

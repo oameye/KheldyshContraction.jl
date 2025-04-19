@@ -59,4 +59,13 @@ end
     L = InteractionLagrangian(L_int)
     GF = wick_contraction(L)
     Σ = SelfEnergy(GF)
+
+    # pretty sure Gerbino thesis is wrong here
+
+    # G_cq (Retarded dessed GF)
+    expr = ϕᶜ(Out) * ϕᴾ'(In) * L_int
+    # G_R(1) =  G₀_R Σ_A G₀_R
+    GR1 = wick_contraction(expr)
+    # Σ_A = G^K + G^A
+    construct_self_energy(GR1)
 end

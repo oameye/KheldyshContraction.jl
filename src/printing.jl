@@ -78,7 +78,7 @@ end
 
 function Base.show(io::IO, mime::MIME"text/plain", Σ::Union{SelfEnergy,DressedPropagator})
     print(io, "Self Energy:")
-    X = SNuN[0 Σ.advanced; Σ.retarded Σ.keldysh]
+    X = matrix(Σ)
     # compute new IOContext
     if !haskey(io, :compact) && length(axes(X, 2)) > 1
         io = IOContext(io, :compact => true)
