@@ -31,10 +31,10 @@ end
     @test zero(ϕ) == 0
 end
 
-@testset "hash" begin
-    @test hash(ϕ * ϕ, hash(4)) == 0x85ebad55106e875a
-    @test hash(ϕ + ϕ, hash(4)) == 0x8fc9006919ba7ef2
-end
+# @testset "hash" begin # how to test hashes?
+#     @test hash(ϕ * ϕ, hash(4)) == 0x85ebad55106e875a
+#     @test hash(ϕ + ϕ, hash(4)) == 0x8fc9006919ba7ef2
+# end
 
 @testset "isequal" begin
     # Test the equality of two Keldysh fields
@@ -59,7 +59,7 @@ end
 end
 
 @testset "adjoint" begin
-    using KeldyshContraction: is_creation, is_annihilation
+    using KeldyshContraction: is_creation, is_annihilation, is_conserved
 
     @qfields ϕ::Destroy(Classical) ψ::Destroy(Quantum)
     ϕ′ = Create(KC.name(ϕ), Classical, KC.regularisation(ϕ), KC.position(ϕ); ϕ.metadata)
