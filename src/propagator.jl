@@ -25,6 +25,9 @@ function propagator_type(out::QSym, in::QSym)::PropagatorType
         return Advanced
     end
 end
+is_advanced(x::PropagatorType) = Int(x) == Int(Advanced)
+is_retarded(x::PropagatorType) = Int(x) == Int(Retarded)
+is_keldysh(x::PropagatorType) = Int(x) == Int(Keldysh)
 
 function propagator_checks(out::QField, in::QField)::Nothing
     @assert isa(in, Create) "The `in` field must be a Create operator"

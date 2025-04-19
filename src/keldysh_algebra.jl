@@ -8,7 +8,7 @@
 Abstract type representing any expression involving Fields.
 """
 abstract type QField end
-const SNuN = Union{SymbolicUtils.Symbolic{Number},Number}
+const SNuN = Union{SymbolicUtils.Symbolic{<:Number},Number}
 const QSymbol = Union{QField,SNuN}
 
 """
