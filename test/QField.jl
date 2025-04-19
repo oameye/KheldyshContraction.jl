@@ -31,6 +31,11 @@ end
     @test zero(ϕ) == 0
 end
 
+@testset "hash" begin
+    @test hash(ϕ * ϕ, hash(4)) == 0x85ebad55106e875a
+    @test hash(ϕ + ϕ, hash(4)) == 0x8fc9006919ba7ef2
+end
+
 @testset "isequal" begin
     # Test the equality of two Keldysh fields
     @test ϕ == ϕ
@@ -41,6 +46,9 @@ end
     @test isequal(ψ + ϕ, ϕ + ψ) broken = true
     @test isequal(ψ * ϕ, ϕ * ψ) broken = true
     @test isequal(1 + ϕ, ϕ + 1)
+    ϕ2 = ϕ + ϕ
+    @test isequal(ϕ2 + 1, ϕ + ϕ + 1)
+    @test isequal(ϕ2 + ϕ, ϕ + ϕ + ϕ)
 end
 @testset "simplification" begin
     @test isequal(ϕ + ϕ, 2 * ϕ) broken = true
@@ -59,6 +67,7 @@ end
 
     @test is_creation(ϕ′)
     @test is_annihilation(ϕ)
+    @test !is_conserved(ϕ)
 
     # Test the adjoint of Keldysh fields
     @test isequal(ϕ', ϕ′)
