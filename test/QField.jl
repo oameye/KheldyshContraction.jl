@@ -51,13 +51,19 @@ end
 end
 
 @testset "adjoint" begin
+    using KeldyshContraction: is_creation, is_annihilation
+
     @qfields ϕ::Destroy(Classical) ψ::Destroy(Quantum)
     ϕ′ = Create(KC.name(ϕ), Classical, KC.regularisation(ϕ), KC.position(ϕ); ϕ.metadata)
     ψ′ = Create(KC.name(ψ), Quantum, KC.regularisation(ψ), KC.position(ψ); ψ.metadata)
 
+    @test is_creation(ϕ′)
+    @test is_annihilation(ϕ)
+
     # Test the adjoint of Keldysh fields
     @test isequal(ϕ', ϕ′)
     @test adjoint(ψ) == ψ′
+    @test adjoint(ψ′) == ψ
     @test isequal(adjoint(ϕ * ψ), ψ′ * ϕ′) # fields switch under adjoint
     @test isequal(adjoint(ϕ + ψ), ϕ′ + ψ′)
 end
@@ -87,4 +93,13 @@ end
 
     @test isequal(ϕ + 0, ϕ)
     @test isequal(0 + ϕ, ϕ)
+end
+
+@testset "quantum-classical" begin
+    using KeldyshContraction: is_quantum, is_classical
+
+    @test is_quantum(ψ)
+    @test is_classical(ϕ)
+    @test !is_quantum(ϕ)
+    @test !is_classical(ψ)
 end

@@ -26,11 +26,6 @@ end
     @test KeldyshContraction.propagator_type(p) == KeldyshContraction.Advanced
 end
 
-# @testset "undo_average" begin
-#     p = propagator(ϕᶜ, ϕᶜ'(In))
-#     @test isequal(KeldyshContraction.undo_average(p), ϕᶜ*ϕᶜ'(In))
-# end
-
 @testset "math" begin
     p1 = propagator(ϕᶜ, ϕᶜ'(In))
     p2 = propagator(ϕᶜ, ϕᶜ'(In))
@@ -43,4 +38,13 @@ end
     @test KeldyshContraction.regular(p) == true
     KeldyshContraction.set_reg_to_zero!(p)
     @test KeldyshContraction.regularisations(p) == fill(KeldyshContraction.Zero, 2)
+end
+
+@testset "propagator type" begin
+    using KeldyshContraction: is_keldysh, is_retarded, is_advanced
+    using KeldyshContraction: Advanced, Retarded, Keldysh
+
+    @test is_keldysh(Keldysh)
+    @test is_retarded(Retarded)
+    @test is_advanced(Advanced)
 end
