@@ -10,7 +10,7 @@ L_int =
     0.5 * ϕᶜ(Plus) * ϕᴾ(Plus) * (ϕᶜ' * ϕᶜ' + ϕᴾ' * ϕᴾ') +
     ϕᶜ' * ϕᴾ' * (ϕᶜ(Plus) * ϕᴾ(Plus) + ϕᶜ(Minus) * ϕᴾ(Minus))
 
-@testset "vaccuum bubble" begin
+@testset "vacuum bubble" begin
     @test !isequal(wick_contraction(L_int; regularise=false), 0.0)
     @test isequal(wick_contraction(L_int; regularise=true), 0.0)
 end
