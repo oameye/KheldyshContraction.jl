@@ -57,19 +57,22 @@ end
     L = InteractionLagrangian(L_int)
     GF = wick_contraction(L)
     Σ = SelfEnergy(GF)
-    @test "correctness check" begin
-        @test isequal(Σ.advanced, propagator(ϕᶜ, ϕᶜ') + propagator(ϕᴾ, ϕᶜ'))
-        @test isequal(Σ.retarded, -1 * propagator(ϕᶜ, ϕᶜ') + propagator(ϕᶜ, ϕᴾ'))
-        @test isequal(
+    @testset "correctness check" begin
+        advanced_test = isequal(Σ.advanced, propagator(ϕᶜ, ϕᶜ') + propagator(ϕᴾ, ϕᶜ'))
+        retarded_test = isequal(Σ.retarded, -1 * propagator(ϕᶜ, ϕᶜ') + propagator(ϕᶜ, ϕᴾ'))
+        keldysh_test = isequal(
             Σ.keldysh, 2 * propagator(ϕᶜ, ϕᶜ') - propagator(ϕᶜ, ϕᴾ') + propagator(ϕᴾ, ϕᶜ')
         )
+        @test advanced_test
+        @test retarded_test
+        @test keldysh_test
         # ^ pretty sure Gerbino thesis is wrong and switshes retarded and advanced
         # and we compute the correct
         # In his paper it is correct https://arxiv.org/pdf/2406.20028 :)
     end
 
     @testset "Keldysh GF is enough" begin
-        expr_R = ϕᶜ(Out) * ϕᴾ'(In) * L_int
+        expr_K = ϕᶜ(Out) * ϕᶜ'(In) * L_int
         G_K1 = wick_contraction(expr_K)
 
         @test isequal(construct_self_energy(G_K1)[Advanced], Σ.advanced)
