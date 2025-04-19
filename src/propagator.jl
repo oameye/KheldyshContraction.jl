@@ -13,7 +13,11 @@ The Quantum-Quantum propagator should always be zero.
     Advanced
     Retarded
 end
+"""
+    propagator_type(out::QSym, in::QSym)::PropagatorType
 
+Determine the type of the propagator in the Retarded-Advance-Keldysh ([`PropagatorType`](@ref)) based on the contour of the output and input quantum field.
+"""
 function propagator_type(out::QSym, in::QSym)::PropagatorType
     contours = Int.(contour.((out, in)))
     diff_contour = first(-(contours...))
@@ -25,6 +29,9 @@ function propagator_type(out::QSym, in::QSym)::PropagatorType
         return Advanced
     end
 end
+is_advanced(x::PropagatorType) = Int(x) == Int(Advanced)
+is_retarded(x::PropagatorType) = Int(x) == Int(Retarded)
+is_keldysh(x::PropagatorType) = Int(x) == Int(Keldysh)
 
 function propagator_checks(out::QField, in::QField)::Nothing
     @assert isa(in, Create) "The `in` field must be a Create operator"
@@ -110,35 +117,31 @@ propagator_type(p::SymbolicUtils.BasicSymbolic{Propagator{T}}) where {T} = T
 acts_on(p::Average) = acts_on(fields(p)...)
 acts_on(x::QSym, y::QSym) = sum(acts_on.((x, y)))
 
-# function acts_on(s::SymbolicUtils.Symbolic)
-#     if SymbolicUtils.iscall(s)
-#         f = SymbolicUtils.operation(s)
-#         if f === sym_average
-#             return acts_on(SymbolicUtils.arguments(s)...)
-#         else
-#             aon = []
-#             for arg in SymbolicUtils.arguments(s)
-#                 append!(aon, acts_on(arg))
-#             end
-#             unique!(aon)
-#             sort!(aon)
-#             return aon
-#         end
-#     else
-#         return Int[]
-#     end
-# end
+##########################################
+#       dressed green's function
+##########################################
 
-# function undo_average(t) # TODO slow because return type  uncertain?
-#     if SymbolicUtils.iscall(t)
-#         f = SymbolicUtils.operation(t)
-#         if isequal(f, sym_average)
-#             return QMul(1, SymbolicUtils.arguments(t))
-#         else
-#             args = map(undo_average, SymbolicUtils.arguments(t))
-#             return f(args...)
-#         end
-#     else
-#         return t
-#     end
-# end
+"""
+    DressedPropagator
+
+A structure representing dressed propagator in the the Retarded-Advanced-Keldysh basis ([`PropagatorType`](@ref)).
+
+# Fields
+- `keldysh`: The Keldysh component of the propagator
+- `retarded`: The retarded component of the propagator
+- `advanced`: The advanced component of the propagator
+
+# Constructor
+    DressedPropagator(keldysh::T, retarded::T, advanced::T) where {T<:SymbolicUtils.Symbolic}
+
+Constructs a `DressedPropagator` with the given Keldysh, retarded, and advanced components.
+"""
+struct DressedPropagator{Tk,Tr,Ta}
+    keldysh::Tk
+    retarded::Tr
+    advanced::Ta
+    function DressedPropagator(keldysh::SNuN, retarded::SNuN, advanced::SNuN)
+        new{typeof(keldysh),typeof(retarded),typeof(advanced)}(keldysh, retarded, advanced)
+    end
+end
+matrix(G::DressedPropagator) = SNuN[G.retarded G.keldysh; G.advanced 0]

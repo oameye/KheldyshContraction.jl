@@ -75,3 +75,35 @@ function Base.show(io::IO, x::Average)
     )
     return write(io, s)
 end
+
+function Base.show(io::IO, mime::MIME"text/plain", Σ::Union{SelfEnergy,DressedPropagator})
+    print(io, "Self Energy:")
+    X = matrix(Σ)
+    # compute new IOContext
+    if !haskey(io, :compact) && length(axes(X, 2)) > 1
+        io = IOContext(io, :compact => true)
+    end
+    if get(io, :limit, false)::Bool && eltype(X) === Method
+        # override usual show method for Vector{Method}: don't abbreviate long lists
+        io = IOContext(io, :limit => false)
+    end
+
+    if get(io, :limit, false)::Bool && displaysize(io)[1] - 4 <= 0
+        return print(io, " …")
+    else
+        println(io)
+    end
+
+    # 3) update typeinfo
+    #
+    # it must come after printing the summary, which can exploit :typeinfo itself
+    # (e.g. views)
+    # we assume this function is always called from top-level, i.e. that it's not nested
+    # within another "show" method; hence we always print the summary, without
+    # checking for current :typeinfo (this could be changed in the future)
+    io = Base.IOContext(io, :typeinfo => eltype(X))
+
+    # 4) show actual content
+    recur_io = Base.IOContext(io, :SHOWN_SET => X)
+    Base.print_array(recur_io, X)
+end

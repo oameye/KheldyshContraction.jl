@@ -5,6 +5,13 @@
 is_qq_contraction(v::Vector{T}) where {T<:QField} = iszero(sum(Int.(contour.(v))))
 has_qq_contraction(vv::Vector{Vector{QField}}) = any(is_qq_contraction.(vv))
 
+"""
+    is_conserved(a::QTerm)
+
+Checks if an expression [`QTerm`])(@ref) is conserved. A conserved expression is one that has equal numbers of creation and annihilation operators.
+
+See also: [`is_physical`](@ref)
+"""
 function is_conserved(a::QMul)
     args_nc_ = a.args_nc
     n_destroy = isa.(args_nc_, Destroy)
@@ -19,6 +26,13 @@ is_conserved(a::Vector{QField}) = is_conserved(QMul(1, a))
 is_conserved(a::QAdd) = all(is_conserved.(arguments(a)))
 is_conserved(a::QSym) = false
 
+"""
+    is_physical(a::QTerm)
+
+Checks if an expression [`QTerm`])(@ref) is physical. A physical expression is one that if it has an `In` position field it also has an `Out` position field and vice versa ([`Position`])(@ref). Furthermore, `In` position field can only creation fields ([`Create`](@ref)) and `Out` position field can only have annihilation fields ([`Destroy`](@ref)).
+
+See also: [`is_conserved`](@ref)
+"""
 function is_physical(a::QMul)
     args_nc_ = a.args_nc
     positions = acts_on.(args_nc_)
@@ -75,6 +89,15 @@ end
 #################################
 #       Contraction
 #################################
+
+function wick_contraction(L::InteractionLagrangian)
+    ϕ = L.qfield
+    ψ = L.cfield
+    keldysh = wick_contraction(ψ(Out) * ψ'(In) * L.lagrangian)
+    retarded = wick_contraction(ψ(Out) * ϕ'(In) * L.lagrangian)
+    advanced = wick_contraction(ϕ(Out) * ψ'(In) * L.lagrangian)
+    DressedPropagator(keldysh, retarded, advanced)
+end
 """
     wick_contraction(expr::Union{QAdd,QMul})
 

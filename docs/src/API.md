@@ -67,16 +67,37 @@ KeldyshContraction.QMul
 KeldyshContraction.QAdd
 ```
 
-## Propagator
+The properties of the expression can be checked using:
 
 ```@docs
-KeldyshContraction.Propagator
-KeldyshContraction.PropagatorType
-KeldyshContraction.propagator
+KeldyshContraction.isbulk
+KeldyshContraction.is_conserved
+KeldyshContraction.is_physical
+```
+
+## Systems
+
+```@docs
+InteractionLagrangian
 ```
 
 ## Wick Contraction
   
 ```@docs
 wick_contraction
+```
+
+### Propagator
+
+```@docs
+KeldyshContraction.Propagator
+KeldyshContraction.PropagatorType
+KeldyshContraction.propagator
+DressedPropagator
+```
+
+### Self-Energy
+
+```@docs
+KeldyshContraction.SelfEnergy
 ```

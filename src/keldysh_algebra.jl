@@ -8,7 +8,7 @@
 Abstract type representing any expression involving Fields.
 """
 abstract type QField end
-const SNuN = Union{SymbolicUtils.Symbolic{Number},Number}
+const SNuN = Union{SymbolicUtils.Symbolic{<:Number},Number}
 const QSymbol = Union{QField,SNuN}
 
 """
@@ -94,7 +94,8 @@ Keldysh contour enum for the Keldysh quantum field. The Keldysh contour is used 
     Quantum = 0
     Classical = 1
 end
-
+is_quantum(x::QSym) = iszero(Int(contour(x)))
+is_classical(x::QSym) = isone(Int(contour(x)))
 """
     Position `In` `Out` `Bulk`
 
@@ -176,9 +177,20 @@ for f in [:Destroy, :Create]
     )
 end
 
+"""
+    adjoint(op::Destroy)
+
+Adjoint of the operator [`Destroy`](@ref) annihilation field constructing the corresponding creation field [`Create`](@ref).
+"""
 function Base.adjoint(op::Destroy)
     return Create(name(op), contour(op), regularisation(op), position(op); op.metadata)
 end
+
+"""
+    adjoint(op::Create)
+
+Adjoint of the [`Create`](@ref) creation field constructing the corresponding annihilation field [`Destroy`](@ref).
+"""
 function Base.adjoint(op::Create)
     return Destroy(name(op), contour(op), regularisation(op), position(op); op.metadata)
 end
@@ -199,6 +211,22 @@ function ismergeable(a::Create, b::Destroy)
     pos_b = acts_on(b)
     return pos_a == pos_b
 end
+
+"""
+    is_creation(x::QSym)
+
+Returns if the field `x` is a creation operator.
+"""
+is_creation(x::Create) = true
+is_creation(x::Destroy) = false
+
+"""
+    is_annihilation(x::QSym)
+
+Returns if the field `x` is an annihilation operator.
+"""
+is_annihilation(x::Destroy) = true
+is_annihilation(x::Create) = false
 
 """
     @qfields

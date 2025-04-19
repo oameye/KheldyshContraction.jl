@@ -3,6 +3,7 @@ module KeldyshContraction
 using TermInterface: TermInterface, metadata
 using SymbolicUtils: SymbolicUtils, arguments, operation
 using Combinatorics: partitions
+using OrderedCollections: OrderedCollections
 
 using Latexify
 using MacroTools: MacroTools
@@ -19,11 +20,20 @@ include("hashing.jl")
 # Propagators
 include("propagator.jl")
 include("wick_contractions.jl")
+include("self_energy.jl")
 
 # show methods
 include("latexify_recipes.jl")
 include("printing.jl")
 
-export @qfields, Destroy, Create, wick_contraction, Quantum, Classical
+export @qfields,
+    Destroy,
+    Create,
+    wick_contraction,
+    Quantum,
+    Classical,
+    DressedPropagator,
+    SelfEnergy,
+    InteractionLagrangian
 
 end

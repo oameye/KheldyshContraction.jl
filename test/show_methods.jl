@@ -26,3 +26,6 @@ for (i, o) in zip(input[1:4], output_latex)
     @test sprint(show, MIME"text/latex"(), i) == o
     @test repr(MIME"text/latex"(), i) == o
 end
+
+DP = DressedPropagator(propagator(ϕ, ϕ'), propagator(ϕ, ϕ'), propagator(ϕ, ϕ'))
+@test repr(MIME"text/plain"(), DP) == "Self Energy:\n Gᴷ(y,y)   Gᴷ(y,y)\n Gᴷ(y,y)  0"
