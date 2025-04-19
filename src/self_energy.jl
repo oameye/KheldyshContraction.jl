@@ -51,6 +51,25 @@ function construct_self_energy!(
     return self_energy
 end
 
+"""
+    SelfEnergy
+
+A struct representing the self-energy components in the Retarded-Advance-Keldysh basis ([`PropagatorType`])(@ref).
+The self-energy is divided into three components: Keldysh, retarded, and advanced.
+
+# Fields
+- `keldysh::T`: The Keldysh component of the self-energy.
+- `retarded::T`: The retarded component of the self-energy.
+- `advanced::T`: The advanced component of the self-energy.
+with `T<:SymbolicUtils.Symbolic`.
+
+
+# Constructor
+- `SelfEnergy(G::DressedPropagator)`: Constructs a `SelfEnergy` object from a [`DressedPropagator`](@ref).
+  The self-energy is computed based on the Keldysh Green's function (`G.keldysh`) and expanded into
+  its quantum-quantum (`qq`), classical-quantum (`cq`), and quantum-classical (`qc`) components.
+
+"""
 struct SelfEnergy{Tk,Tr,Ta}
     keldysh::Tk
     retarded::Tr
@@ -78,3 +97,4 @@ struct SelfEnergy{Tk,Tr,Ta}
     end
 end
 matrix(Σ::SelfEnergy) = SNuN[0 Σ.advanced; Σ.retarded Σ.keldysh]
+# TODO: check matrix convention G_0 Σ G_0 and define above matric accordingly

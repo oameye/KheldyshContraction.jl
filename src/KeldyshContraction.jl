@@ -26,6 +26,14 @@ include("self_energy.jl")
 include("latexify_recipes.jl")
 include("printing.jl")
 
-export @qfields, Destroy, Create, wick_contraction, Quantum, Classical
+export @qfields,
+    Destroy,
+    Create,
+    wick_contraction,
+    Quantum,
+    Classical,
+    DressedPropagator,
+    SelfEnergy,
+    InteractionLagrangian
 
 end

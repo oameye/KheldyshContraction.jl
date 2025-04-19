@@ -65,6 +65,7 @@ end
         )
         # ^ pretty sure Gerbino thesis is wrong and switshes retarded and advanced
         # and we compute the correct
+        # In his paper it is correct https://arxiv.org/pdf/2406.20028 :)
     end
 
     @testset "Keldysh GF is enough" begin

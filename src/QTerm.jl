@@ -60,6 +60,11 @@ function Base.isequal(a::QMul, b::QMul)
     return true
 end
 
+"""
+    isbulk(q::QTerm)
+
+Checks if a term is in the bulk. A term is bulk if it has no `In` or `Out` position fields ([`Position`](@ref)).
+"""
 isbulk(q::QMul) = all(isbulk.(q.args_nc))
 allfields(q::QMul) = q.args_nc
 
@@ -127,6 +132,30 @@ acts_on(x) = Int[]
 #  Interaction Lagrangian
 ###########################
 
+"""
+    InteractionLagrangian{T}
+
+Represents an interaction Lagrangian
+
+# Fields
+- `lagrangian::T`: The Lagrangian expression as a [`QTerm`](@ref)
+- `qfield::Destroy{Quantum,Zero,Nothing}`: The quantum field destruction operator
+- `cfield::Destroy{Classical,Zero,Nothing}`: The classical field destruction operator
+
+# Constructor
+    InteractionLagrangian(expr::QTerm)
+
+Constructs an InteractionLagrangian from a given [`QTerm`](@ref) expression.
+
+# Requirements
+The constructor enforces several constraints on the input expression and throws `AssertionError` if any of them are not met:
+- Must be a bulk term ([`KeldyshContraction.isbulk`](@ref))
+- Must be conserved ([`KeldyshContraction.is_conserved`](@ref))
+- Must be physical ([`KeldyshContraction.is_physical`](@ref))
+- Can only contain up to two different fields
+- Fields must have opposite contours
+
+"""
 struct InteractionLagrangian{T}
     lagrangian::T
     qfield::Destroy{Quantum,Zero,Nothing}

@@ -13,7 +13,11 @@ The Quantum-Quantum propagator should always be zero.
     Advanced
     Retarded
 end
+"""
+    propagator_type(out::QSym, in::QSym)::PropagatorType
 
+Determine the type of the propagator in the Retarded-Advance-Keldysh ([`PropagatorType`](@ref)) based on the contour of the output and input quantum field.
+"""
 function propagator_type(out::QSym, in::QSym)::PropagatorType
     contours = Int.(contour.((out, in)))
     diff_contour = first(-(contours...))
@@ -117,6 +121,21 @@ acts_on(x::QSym, y::QSym) = sum(acts_on.((x, y)))
 #       dressed green's function
 ##########################################
 
+"""
+    DressedPropagator
+
+A structure representing dressed propagator in the the Retarded-Advanced-Keldysh basis ([`PropagatorType`](@ref)).
+
+# Fields
+- `keldysh`: The Keldysh component of the propagator
+- `retarded`: The retarded component of the propagator
+- `advanced`: The advanced component of the propagator
+
+# Constructor
+    DressedPropagator(keldysh::T, retarded::T, advanced::T) where {T<:SymbolicUtils.Symbolic}
+
+Constructs a `DressedPropagator` with the given Keldysh, retarded, and advanced components.
+"""
 struct DressedPropagator{Tk,Tr,Ta}
     keldysh::Tk
     retarded::Tr
