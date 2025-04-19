@@ -4,6 +4,8 @@ using KeldyshContraction: propagator, position, contour
 
 @qfields ϕᶜ::Destroy(Classical) ϕᴾ::Destroy(Quantum)
 
+@test_skip - propagator(ϕᶜ, ϕᶜ') # this errors
+
 @testset "propagator checks" begin
     @test_throws AssertionError propagator(ϕᶜ, ϕᶜ) # annihilation creation
     # @test_throws AssertionError Propagator(ϕᶜ, ϕᶜ') # same coordinate

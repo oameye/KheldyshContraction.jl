@@ -66,10 +66,9 @@ struct SelfEnergy{Tk,Tr,Ta}
 
         # quantum-quantum is the keldysh term in the self-energy
         # classical-classical is zero
-        qq, cq, qc =
-            SymbolicUtils.expand.((
-                self_energy[Keldysh], self_energy[Retarded], self_energy[Advanced]
-            ))
+        qq, cq, qc = SymbolicUtils.expand.((
+            self_energy[Keldysh], self_energy[Retarded], self_energy[Advanced]
+        ))
         # G_R(1) =  G₀_R Σ_A G₀_R
         # G_A(1) = G₀_A Σ_R G₀_A
         # G_K(1) = G₀_R Σ_K G₀_A + G₀_R Σ_A G₀_K + G₀_K Σ_R G₀_A
