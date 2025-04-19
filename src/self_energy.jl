@@ -20,9 +20,7 @@ function self_energy_type(dict::PositionPropagatorType)
 end
 
 function construct_self_energy(expr::SymbolicUtils.Symbolic)
-    self_energy = Dict{PropagatorType,SNuN}((
-        Advanced => 0, Retarded => 0, Keldysh => 0
-    ))
+    self_energy = Dict{PropagatorType,SNuN}((Advanced => 0, Retarded => 0, Keldysh => 0))
 
     terms = SymbolicUtils.arguments(expr)
 
