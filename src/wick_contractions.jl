@@ -59,7 +59,7 @@ function regular(p::Average)
     end
 end
 regular(v::Vector{Average}) = all(regular.(v))
-regularise(vp::Vector{Vector{Average}}) = filter(regular, vp)
+_regularise(vp::Vector{Vector{Average}}) = filter(regular, vp)
 
 function set_reg_to_zero!(p::Average)
     p.arguments .= set_reg_to_zero.(arguments(p))
@@ -96,18 +96,22 @@ The function returns a new expression of propagators of type `SymbolicUtils.Symb
 
 ```
 """
-function wick_contraction(a::QAdd)
-    return SymbolicUtils.expand(sum(wick_contraction.(SymbolicUtils.arguments(a))))
+function wick_contraction(a::QAdd; regularise=true)
+    wick_contractions = wick_contraction.(SymbolicUtils.arguments(a); regularise)
+    wick_contractions = sum(wick_contractions)
+    return SymbolicUtils.expand(wick_contractions)
 end
-function wick_contraction(a::QMul)
+function wick_contraction(a::QMul; regularise=true)
     @assert is_conserved(a)
     @assert is_physical(a)
 
     contraction = wick_contraction(a.args_nc)
     propagators = make_propagators(contraction)
-    regular_propagators = regularise(propagators)
-    set_reg_to_zero!(regular_propagators)
-    return a.arg_c * make_term(regular_propagators)
+    if regularise
+        propagators = _regularise(propagators)
+        set_reg_to_zero!(propagators)
+    end
+    return a.arg_c * make_term(propagators)
 end
 
 function wick_contraction(args_nc::Vector{QField})::Vector{Vector{Vector{QField}}}
