@@ -9,49 +9,32 @@ Using these packages, we can define the algebra of quantum fields in a symbolic 
 
 ```@example interface
 using GraphRecipes, Plots, KeldyshContraction, Random
-Random.seed!(1)
-theme(:dracula)
-plot(KeldyshContraction.QField, method=:tree, fontsize=10,
-markersize = 0.12, nodeshape=:ellipse)
+Random.seed!(1) # hide
+theme(:dracula) # hide
+plot(KeldyshContraction.QField; method=:tree, fontsize=10, markersize = 0.12, nodeshape=:ellipse)
 ```
 
-`Qsym` will be abstract type representing the individual field of type `Destroy` and `Create`. `QTerm` will represent the terms of the algebra, which are the *products* and *sum* of the fields. The type naming and hierarchy is heavily inspired by the implementation in `QuantumCumulants.jl`.
+[`KeldyshContraction.QSym`](@ref) will be abstract type representing the individual field of type [`Destroy`](@ref) and [`Create`](@ref). [`KeldyshContraction.QTerm`](@ref) will represent the terms of the algebra, which are the *products* and *sum* of the fields. The type naming and hierarchy is heavily inspired by the implementation in `QuantumCumulants.jl`.
 
 QSym can then have additional properties to make it Keldsysh-specific type fields. In the package this is done by adding fields to `Create` and `Destroys` using *Enum* objects:
 
-- `KeldyshContour` - the Keldysh contour of the field, which can be either `KeldyshContour.Quantum` or `KeldyshContour.Classical`.
-- `Regularisation` - the tadpole regularisation of the field, which can be either `Regularisation.Zero`, `Regularisation.Plus` or `KeldyshRegularisation.Minus`.
-- `Position` - the position of the field, which can be either `Position.In`, `Position.Out` or `Position.Bulk`.
+- [`KeldyshContraction.KeldyshContour`](@ref) - the Keldysh contour of the field, which can be either `KeldyshContour.Quantum` or `KeldyshContour.Classical`.
+- [`KeldyshContraction.Regularisation`](@ref) - the tadpole regularisation of the field, which can be either `Regularisation.Zero`, `Regularisation.Plus` or `Regularisation.Minus`.
+- [`KeldyshContraction.Position`](@ref) - the position of the field, which can be either `Position.In`, `Position.Out` or `Position.Bulk`.
 
 To make our quantum field types work with the symbolic algebra system, we need to implement several interface functions from SymbolicUtils.jl and TermInterface.jl:
 
-```@example interface
+```julia
 using KeldyshContraction: SymbolicUtils, TermInterface
 
 @qfields ϕ::Destroy(Classical)
 
-# Basic interface requirements
-TermInterface.head(ϕ)
-```
-
-```@example interface
-SymbolicUtils.iscall(ϕ)
-```
-
-```@example interface
-SymbolicUtils.iscall(ϕ*ϕ)
-```
-
-```@example interface
-TermInterface.metadata(ϕ)
-```
-
-```@example interface
-SymbolicUtils.symtype(ϕ) 
-```
-
-```@example interface
-(one(ϕ), zero(ϕ))
+TermInterface.head(ϕ) = :call
+SymbolicUtils.iscall(ϕ) = false
+SymbolicUtils.iscall(ϕ*ϕ) = true
+TermInterface.metadata(ϕ) = nothing
+SymbolicUtils.symtype(ϕ) = Destroy{Classical, KeldyshContraction.Zero, Nothing} 
+(one(ϕ), zero(ϕ)) = (1, 0)
 ```
 
 The key interfaces are:
