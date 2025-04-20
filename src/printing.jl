@@ -65,7 +65,7 @@ function Base.show(io::IO, ::MIME"text/latex", L::InteractionLagrangian)
     # write(io, " and ")
     # write(io, latexify(L.qfield))
     # println(io, ": \\newline")
-    return write(io,latexify(L.lagrangian))
+    return write(io, latexify(L.lagrangian))
 end
 # function Base.show(io::IO, ::MIME"text/latex", L::DressedPropagator)
 #     return write(io,latexify([L.retarded,L.advanced, L.keldysh]))

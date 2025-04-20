@@ -1,11 +1,7 @@
 using KeldyshContraction, Test
 using KeldyshContraction: In, Out, Classical, Quantum, Plus, Minus
 using KeldyshContraction:
-    is_physical,
-    is_conserved,
-    make_propagators,
-    propagator,
-    construct_self_energy
+    is_physical, is_conserved, make_propagators, propagator, construct_self_energy
 
 @qfields ϕᶜ::Destroy(Classical) ϕᴾ::Destroy(Quantum)
 
