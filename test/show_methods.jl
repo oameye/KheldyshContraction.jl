@@ -27,5 +27,10 @@ for (i, o) in zip(input[1:4], output_latex)
     @test repr(MIME"text/latex"(), i) == o
 end
 
+L = InteractionLagrangian(ϕ * ψ * ϕ' * ψ')
+@test repr(MIME"text/plain"(), L) ==
+    "Interaction Lagrangian with fields ϕ and ψ:\n(ϕ*ψ*̄ϕ*̄ψ)"
+
 DP = DressedPropagator(propagator(ϕ, ϕ'), propagator(ϕ, ϕ'), propagator(ϕ, ϕ'))
-@test repr(MIME"text/plain"(), DP) == "Self Energy:\n Gᴷ(y,y)   Gᴷ(y,y)\n Gᴷ(y,y)  0"
+@test repr(MIME"text/plain"(), DP) ==
+    "Dressed Propagator:\nkeldysh:  Gᴷ(y,y)\nretarded: Gᴷ(y,y)\nadvanced: Gᴷ(y,y)"

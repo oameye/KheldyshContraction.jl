@@ -171,5 +171,5 @@ struct InteractionLagrangian{T}
         q_idx = findfirst(iszero, contours)
         c_idx = findfirst(isone, contours)
         return new{typeof(expr)}(expr, fields[q_idx], fields[c_idx])
-    end
+    end # TODO what if only quantum or only classical
 end
