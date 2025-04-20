@@ -25,12 +25,11 @@ end
     return ex
 end
 
-@latexrecipe function f(op::SymbolicUtils.Symbolic{<:Number})
+@latexrecipe function f(op::SymbolicUtils.Symbolic{<:Propagator})
     # Options
     cdot --> false
     return latexify(repr(MIME"text/plain"(), op))
 end
-
 
 _to_expression(x::Number) = x
 function _to_expression(x::Complex) # For brackets when using latexify
