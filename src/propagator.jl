@@ -81,7 +81,9 @@ end
 """
     propagator(ψ::QSym, ϕ::QSym)
 
-Create the Keldysh two-point green's functions over two field `ψ` and `ϕ`. Here `ψ` is the incoming [`Create`](@ref) field and `ψ` the outgoing [`Destroy`](@ref) field. The created propagator will be of type `SymbolicUtils.BasicSymbolic{Propagator{T}}` where `T` is the type [`PropagatorType`](@ref).
+Create the Keldysh two-point green's functions over two field `ψ` and `ϕ`. Here `ψ` is the incoming [`Create`](@ref) field and `ψ` the outgoing [`Destroy`](@ref) field. The created propagator will be a symbolic function of `SymbolicUtils.FnType` which maps Tuple `Tuple{QSym,QSym}` to `SymbolicUtils.BasicSymbolic{Propagator{T}}` where `T` is the type [`PropagatorType`](@ref).
+
+The name of the symbolic function is `:avg` and is reserved as it is used internally for printing.
 """
 function propagator(x::QSym, y::QSym)
     propagator_checks(x, y)

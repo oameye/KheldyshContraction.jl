@@ -58,9 +58,18 @@ function Base.show(io::IO, L::InteractionLagrangian)
 end
 
 const T_LATEX = Union{<:QField,<:SymbolicUtils.Symbolic{<:Number}}
-
 Base.show(io::IO, ::MIME"text/latex", x::T_LATEX) = write(io, latexify(x))
-
+function Base.show(io::IO, ::MIME"text/latex", L::InteractionLagrangian)
+    # write(io, "Interaction Lagrangian with fields ")
+    # write(io, latexify(L.cfield))
+    # write(io, " and ")
+    # write(io, latexify(L.qfield))
+    # println(io, ": \\newline")
+    return write(io,latexify(L.lagrangian))
+end
+# function Base.show(io::IO, ::MIME"text/latex", L::DressedPropagator)
+#     return write(io,latexify([L.retarded,L.advanced, L.keldysh]))
+# end
 function Base.show(io::IO, x::Average)
     prop_type = Dict(Retarded => "ᴿ", Advanced => "ᴬ", Keldysh => "ᴷ")
     pos_string = Dict(In => "x₂", Out => "x₁", Bulk => "y")
