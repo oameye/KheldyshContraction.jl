@@ -5,9 +5,7 @@ using KeldyshContraction:
     is_conserved,
     make_propagators,
     propagator,
-    construct_self_energy,
-    InteractionLagrangian,
-    SelfEnergy
+    construct_self_energy
 
 @qfields ϕᶜ::Destroy(Classical) ϕᴾ::Destroy(Quantum)
 

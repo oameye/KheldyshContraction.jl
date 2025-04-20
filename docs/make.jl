@@ -17,7 +17,7 @@ makedocs(;
     authors="Orjan Ameyep",
     modules=KeldyshContraction,
     format=Documenter.HTML(;
-        canonical="https://oameye.github.io/KeldyshContraction.jl/stable/"
+        canonical="https://oameye.github.io/KeldyshContraction.jl"
     ),
     pages=pages,
     clean=true,

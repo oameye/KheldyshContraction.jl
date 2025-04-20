@@ -48,13 +48,28 @@ function Base.show(io::IO, x::QMul)
     return show_brackets[] && write(io, ")")
 end
 
-const T_LATEX = Union{
-    <:QField,
-    #  <:SymbolicUtils.Symbolic{<:Number},
-}
+function Base.show(io::IO, L::InteractionLagrangian)
+    write(io, "Interaction Lagrangian with fields ")
+    show(io, L.cfield)
+    write(io, " and ")
+    show(io, L.qfield)
+    write(io, ":\n")
+    return show(io, L.lagrangian)
+end
 
+const T_LATEX = Union{<:QField,<:SymbolicUtils.Symbolic{<:Number}}
 Base.show(io::IO, ::MIME"text/latex", x::T_LATEX) = write(io, latexify(x))
-
+function Base.show(io::IO, ::MIME"text/latex", L::InteractionLagrangian)
+    # write(io, "Interaction Lagrangian with fields ")
+    # write(io, latexify(L.cfield))
+    # write(io, " and ")
+    # write(io, latexify(L.qfield))
+    # println(io, ": \\newline")
+    return write(io,latexify(L.lagrangian))
+end
+# function Base.show(io::IO, ::MIME"text/latex", L::DressedPropagator)
+#     return write(io,latexify([L.retarded,L.advanced, L.keldysh]))
+# end
 function Base.show(io::IO, x::Average)
     prop_type = Dict(Retarded => "ᴿ", Advanced => "ᴬ", Keldysh => "ᴷ")
     pos_string = Dict(In => "x₂", Out => "x₁", Bulk => "y")
@@ -77,33 +92,11 @@ function Base.show(io::IO, x::Average)
 end
 
 function Base.show(io::IO, mime::MIME"text/plain", Σ::Union{SelfEnergy,DressedPropagator})
-    print(io, "Self Energy:")
-    X = matrix(Σ)
-    # compute new IOContext
-    if !haskey(io, :compact) && length(axes(X, 2)) > 1
-        io = IOContext(io, :compact => true)
-    end
-    if get(io, :limit, false)::Bool && eltype(X) === Method
-        # override usual show method for Vector{Method}: don't abbreviate long lists
-        io = IOContext(io, :limit => false)
-    end
-
-    if get(io, :limit, false)::Bool && displaysize(io)[1] - 4 <= 0
-        return print(io, " …")
-    else
-        println(io)
-    end
-
-    # 3) update typeinfo
-    #
-    # it must come after printing the summary, which can exploit :typeinfo itself
-    # (e.g. views)
-    # we assume this function is always called from top-level, i.e. that it's not nested
-    # within another "show" method; hence we always print the summary, without
-    # checking for current :typeinfo (this could be changed in the future)
-    io = Base.IOContext(io, :typeinfo => eltype(X))
-
-    # 4) show actual content
-    recur_io = Base.IOContext(io, :SHOWN_SET => X)
-    Base.print_array(recur_io, X)
+    Σ isa SelfEnergy ? print(io, "Self Energy:\n") : print(io, "Dressed Propagator:\n")
+    write(io, "keldysh:  ")
+    show(io, Σ.keldysh)
+    write(io, "\nretarded: ")
+    show(io, Σ.retarded)
+    write(io, "\nadvanced: ")
+    return show(io, Σ.advanced)
 end
