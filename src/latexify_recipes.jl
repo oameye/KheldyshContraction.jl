@@ -25,7 +25,7 @@ end
     return ex
 end
 
-@latexrecipe function f(op::SymbolicUtils.Symbolic{<:Number})
+@latexrecipe function f(op::SymbolicUtils.Symbolic{<:Propagator})
     # Options
     cdot --> false
     return latexify(repr(MIME"text/plain"(), op))

@@ -57,7 +57,7 @@ function Base.show(io::IO, L::InteractionLagrangian)
     return show(io, L.lagrangian)
 end
 
-const T_LATEX = Union{<:QField,<:SymbolicUtils.Symbolic{<:Number}}
+const T_LATEX = Union{<:QField,<:SymbolicUtils.Symbolic{<:Propagator}}
 Base.show(io::IO, ::MIME"text/latex", x::T_LATEX) = write(io, latexify(x))
 function Base.show(io::IO, ::MIME"text/latex", L::InteractionLagrangian)
     # write(io, "Interaction Lagrangian with fields ")
