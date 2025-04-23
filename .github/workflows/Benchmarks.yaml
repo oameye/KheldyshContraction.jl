@@ -3,26 +3,9 @@ on:
   push:
     branches:
       - 'main'
-    paths:
-      - '.github/workflows/Benchmarks.yml'
-      - 'src/**'
-      - 'ext/**'
-      - 'benchmarks/**'
-      - 'Project.toml'
+    tags: '*'
   pull_request:
-    branches:
-      - 'main'
-    paths:
-      - '.github/workflows/Benchmarks.yml'
-      - 'src/**'
-      - 'ext/**'
-      - 'benchmarks/**'
-      - 'Project.toml'
-    types:
-      - opened
-      - reopened
-      - synchronize
-      - ready_for_review
+
 
 permissions:
     actions: write
