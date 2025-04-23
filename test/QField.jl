@@ -57,8 +57,8 @@ end
 
     @test isequal((ϕ + ϕ) * (ϕ + ϕ), 4 * ϕ^2) broken = true
     @test isequal((ϕ + ϕ) * (ϕ + ϕ), ϕ^2 + ϕ^2 + ϕ^2 + ϕ^2)
-    SymbolicUtils.simplify((ϕ + ϕ) * (ψ + ϕ) + 3* (ϕ + ϕ) * (ψ + ϕ))
-    SymbolicUtils.expand((ϕ + ϕ) * (ψ + ϕ) + 3* (ϕ + ϕ) * (ψ + ϕ))
+    SymbolicUtils.simplify((ϕ + ϕ) * (ψ + ϕ) + 3 * (ϕ + ϕ) * (ψ + ϕ))
+    SymbolicUtils.expand((ϕ + ϕ) * (ψ + ϕ) + 3 * (ϕ + ϕ) * (ψ + ϕ))
 end
 
 @testset "adjoint" begin
