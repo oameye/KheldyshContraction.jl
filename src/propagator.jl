@@ -154,6 +154,13 @@ for ff in [:regularisations, :contours, :isbulk, :positions, :acts_on, :propagat
     end
 end
 
+# function Base.adjoint(q::Average)
+#     T = propagator_type(q)
+#     if is_advanced(T)
+#         return SymbolicUtils.BasicSymbolic{Propagator{Retarded}}(q)
+
+# end
+
 ##########################################
 #       dressed green's function
 ##########################################
