@@ -157,16 +157,27 @@ function wick_contraction(a::QMul; regularise=true)
 end
 
 function wick_contraction(args_nc::Vector{QField})::Vector{Vector{Vector{QField}}}
-    _partitions = collect(partitions(args_nc, length(args_nc) ÷ 2))
-    equal_partitions = filter(v -> length(unique(length.(v))) == 1, _partitions)
-
-    wick_contractions = filter(equal_partitions) do v
-        conserved = all(is_conserved.(v))
-        physical = all(is_physical_propagator.(v))
-        no_qq = !has_qq_contraction(v)
-        conserved && physical && no_qq
+    _partitions = Combinatorics.partitions(args_nc, length(args_nc) ÷ 2)
+    wick_contractions = Vector{Vector{QField}}[]
+    for v in _partitions
+        if contraction_filter(v)
+            push!(wick_contractions, v)
+        end
     end
     return wick_contractions
+end
+
+function contraction_filter(v)
+    istwo = all(length.(v) .== 2) # only two-point contractions
+    if !istwo
+        return false
+    elseif !all(is_conserved.(v)) # contractions with creation/annihilation
+        return false
+    elseif !all(is_physical_propagator.(v)) # propagators are physical
+        return false
+    else # there should be no quantum-quantum contractions
+        return !has_qq_contraction(v)
+    end
 end
 
 function make_propagators(contraction::Vector{Vector{Vector{QField}}})::Vector{Vector{SNuN}}
