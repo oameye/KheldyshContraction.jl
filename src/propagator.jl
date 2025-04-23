@@ -50,7 +50,9 @@ end
 """
     Propagator <: Number
 
-Symbolic number representing the Propagator of two fields ϕ and ψ. By convention a propagator is shown as G(ϕ, ψ) with ψ the incoming [`Create`](@ref) field and ϕ the outgoing [`Destroy`](@ref) field.
+Symbolic number representing the Propagator of two fields ϕ and ψ.
+By convention apropagator is shown as G(ϕ, ψ) with ψ the incoming [`Create`](@ref) field
+ and ϕ the outgoing [`Destroy`](@ref) field.
 
 See also: [`propagator`](@ref)
 """
@@ -60,7 +62,7 @@ const Average = SymbolicUtils.BasicSymbolic{<:Propagator}
 
 function sym_average(T::PropagatorType) # Symbolic function for averages
     Tf = SymbolicUtils.FnType{Tuple{QSym,QSym},Propagator{T}}
-    SymbolicUtils.Sym{Tf}(:avg)
+    return SymbolicUtils.Sym{Tf}(:avg)
 end
 
 # Type promotion -- average(::QField)::Number
@@ -75,18 +77,30 @@ end
 # needs a specific symtype overload, otherwise we build the wrong expressions with maketerm
 # and `SymbolicUtils.expand` and `SymbolicUtils.simplify` will not work
 function SymbolicUtils.symtype(::SymbolicUtils.BasicSymbolic{Propagator{T}}) where {T}
-    Propagator{T}
+    return Propagator{T}
 end
 
 """
     propagator(ψ::QSym, ϕ::QSym)
 
-Create the Keldysh two-point green's functions over two field `ψ` and `ϕ`. Here `ψ` is the incoming [`Create`](@ref) field and `ψ` the outgoing [`Destroy`](@ref) field. The created propagator will be a symbolic function of `SymbolicUtils.FnType` which maps Tuple `Tuple{QSym,QSym}` to `SymbolicUtils.BasicSymbolic{Propagator{T}}` where `T` is the type [`PropagatorType`](@ref).
+Create the Keldysh two-point green's functions over two field `ψ` and `ϕ`:
+```math
+G(x_1,x_2) = -i \\langle \\phi(x_1) \\overline{\\psi}(x_2) \\rangle.
+```
+
+Here `ψ` is the incoming [`Create`](@ref) field at coordinate ``x_2=(\\vec{x}_1, t_1)``
+and `ψ` the outgoing [`Destroy`](@ref) field at coordinate ``x_2=(\\vec{x}_2, t_2)``.
+The created propagator will be a symbolic function of `SymbolicUtils.FnType` which maps
+Tuple `Tuple{QSym,QSym}` to `SymbolicUtils.BasicSymbolic{Propagator{T}}` where `T` is
+the type [`PropagatorType`](@ref).
 
 The name of the symbolic function is `:avg` and is reserved as it is used internally for printing.
 """
 function propagator(x::QSym, y::QSym)
     propagator_checks(x, y)
+    return im * make_propagator(x, y)
+end
+function make_propagator(x::QSym, y::QSym)
     T = propagator_type(x, y)
     return SymbolicUtils.Term{Propagator{T}}(sym_average(T), [x, y])
 end
@@ -115,9 +129,30 @@ function positions(p::Average)
     return position.(fields(p))
 end
 propagator_type(p::SymbolicUtils.BasicSymbolic{Propagator{T}}) where {T} = T
-
 acts_on(p::Average) = acts_on(fields(p)...)
 acts_on(x::QSym, y::QSym) = sum(acts_on.((x, y)))
+
+function get_propagator_idx(x::CSym)::Int
+    args = KeldyshContraction.arguments(x)
+    return get_propagator_idx(args)
+end
+function get_propagator_idx(args::SymbolicUtils.SmallVec{Any,Vector{Any}})
+    p_idxs = isa.(args, KeldyshContraction.Average)
+    @assert isone(sum(p_idxs)) "Only one propagator allowed"
+    p_idx = findfirst(p_idxs)
+    @assert p_idx !== nothing "No propagator found"
+    return p_idx
+end
+function get_propagator(x::CSym)::Average
+    args = KeldyshContraction.arguments(x)
+    p_idx = get_propagator_idx(x)
+    return args[p_idx]
+end
+for ff in [:regularisations, :contours, :isbulk, :positions, :acts_on, :propagator_type]
+    @eval begin
+        $(ff)(x::CSym) = $(ff)(get_propagator(x))
+    end
+end
 
 ##########################################
 #       dressed green's function
@@ -143,7 +178,9 @@ struct DressedPropagator{Tk,Tr,Ta}
     retarded::Tr
     advanced::Ta
     function DressedPropagator(keldysh::SNuN, retarded::SNuN, advanced::SNuN)
-        new{typeof(keldysh),typeof(retarded),typeof(advanced)}(keldysh, retarded, advanced)
+        return new{typeof(keldysh),typeof(retarded),typeof(advanced)}(
+            keldysh, retarded, advanced
+        )
     end
 end
 matrix(G::DressedPropagator) = SNuN[G.retarded G.keldysh; G.advanced 0]

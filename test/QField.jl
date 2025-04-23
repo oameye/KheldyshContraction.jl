@@ -51,11 +51,14 @@ end
     @test isequal(ϕ2 + ϕ, ϕ + ϕ + ϕ)
 end
 @testset "simplification" begin
+    using SymbolicUtils
     @test isequal(ϕ + ϕ, 2 * ϕ) broken = true
     @test isequal(ϕ + ϕ + ϕ, 3 * ϕ) broken = true
 
     @test isequal((ϕ + ϕ) * (ϕ + ϕ), 4 * ϕ^2) broken = true
     @test isequal((ϕ + ϕ) * (ϕ + ϕ), ϕ^2 + ϕ^2 + ϕ^2 + ϕ^2)
+    SymbolicUtils.simplify((ϕ + ϕ) * (ψ + ϕ) + 3 * (ϕ + ϕ) * (ψ + ϕ))
+    SymbolicUtils.expand((ϕ + ϕ) * (ψ + ϕ) + 3 * (ϕ + ϕ) * (ψ + ϕ))
 end
 
 @testset "adjoint" begin
@@ -66,6 +69,7 @@ end
     ψ′ = Create(KC.name(ψ), Quantum, KC.regularisation(ψ), KC.position(ψ); ψ.metadata)
 
     @test is_creation(ϕ′)
+    @test !is_creation(ϕ)
     @test is_annihilation(ϕ)
     @test !is_conserved(ϕ)
 
