@@ -125,6 +125,13 @@ function Base.:*(a::QField, b::QAdd)
     q = QAdd(args)
     return q
 end
+function Base.:*(b::QAdd, a::QField)
+    args = QSymbol[b_ * a for b_ in arguments(b)]
+    flatten_adds!(args)
+    isempty(args) && return 0
+    q = QAdd(args)
+    return q
+end
 
 function Base.:*(a::QAdd, b::QAdd)
     args = []

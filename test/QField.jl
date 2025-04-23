@@ -112,3 +112,11 @@ end
     @test !is_quantum(ϕ)
     @test !is_classical(ψ)
 end
+
+@testset "some lagrangians" begin
+    eleactic2boson = -0.5 * (ϕ' * ψ' * (ϕ^2 + ψ^2) + (ϕ'^2 + ψ'^2) * ϕ * ψ)
+
+    loss2boson =
+        0.5 * ϕ' * ψ' * (ϕ(Minus)^2 + ψ(Minus)^2) -
+        0.5 * ϕ(Plus) * ψ(Plus) * (ϕ'^2 + ψ'^2) + ϕ' * ψ' * (ϕ(Plus)^2 + ϕ(Minus)^2)
+end
