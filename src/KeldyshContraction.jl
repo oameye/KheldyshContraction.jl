@@ -2,7 +2,7 @@ module KeldyshContraction
 
 using TermInterface: TermInterface, metadata
 using SymbolicUtils: SymbolicUtils, arguments, operation, @syms
-using Combinatorics: partitions
+using Combinatorics: Combinatorics
 using OrderedCollections: OrderedCollections
 
 using Latexify
