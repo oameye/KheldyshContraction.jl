@@ -1,7 +1,7 @@
 module KeldyshContraction
 
 using TermInterface: TermInterface, metadata
-using SymbolicUtils: SymbolicUtils, arguments, operation
+using SymbolicUtils: SymbolicUtils, arguments, operation, @syms
 using Combinatorics: partitions
 using OrderedCollections: OrderedCollections
 
@@ -34,6 +34,7 @@ export @qfields,
     Classical,
     DressedPropagator,
     SelfEnergy,
-    InteractionLagrangian
+    InteractionLagrangian,
+    @syms
 
 end

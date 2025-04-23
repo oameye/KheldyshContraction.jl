@@ -11,10 +11,10 @@ function self_energy_type(dict::PositionPropagatorType)
     if Int.([right, left]) == [0, 0]
         # G_K(1) = ...
         return Keldysh
-    elseif Int.([right, left]) == [0, 1]
+    elseif Int.([right, left]) == [1, 0]
         # G_R(1) =  G₀_R Σ_A G₀_R
         return Advanced
-    elseif Int.([right, left]) == [1, 0]
+    elseif Int.([right, left]) == [0, 1]
         # G_A(1) = G₀_A Σ_R G₀_A
         return Retarded
     else

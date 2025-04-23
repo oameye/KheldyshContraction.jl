@@ -26,6 +26,12 @@ end
     @test KeldyshContraction.propagator_type(p) == KeldyshContraction.Advanced
 end
 
+@testset "sort" begin
+    p1 = propagator(ϕᴾ, ϕᶜ'(In))
+    p2 = propagator(ϕᴾ, ϕᶜ')
+    @test isequal(sort!([p1, p2], by=KeldyshContraction.acts_on), [p2, p1])
+end
+
 @testset "math" begin
     p1 = propagator(ϕᶜ, ϕᶜ'(In))
     p2 = propagator(ϕᶜ, ϕᶜ'(In))
@@ -34,10 +40,18 @@ end
 end
 
 @testset "regularisation" begin
+    p = propagator(ϕᴾ(Plus), ϕᶜ')
+    @test KeldyshContraction.regular(p) == false
+
     p = propagator(ϕᶜ(Minus), ϕᶜ'(In))
     @test KeldyshContraction.regular(p) == true
     KeldyshContraction.set_reg_to_zero!(p)
     @test KeldyshContraction.regularisations(p) == fill(KeldyshContraction.Zero, 2)
+
+    p1 = propagator(ϕᶜ, ϕᶜ'(In))
+    p2 = propagator(ϕᴾ, ϕᶜ'(In))
+
+    @test_throws AssertionError KeldyshContraction.regular(-im*p1*p2)
 end
 
 @testset "propagator type" begin

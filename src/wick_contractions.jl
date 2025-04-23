@@ -58,6 +58,15 @@ end
 #     regularise
 ######################
 
+"""
+    regular(p::Average)
+
+Checks if the propagator `p` is regular.
+A regular propagator is one that is:
+- not in the bulk
+- or `p` is not of [`KeldyshContraction.PropagatorType`](@ref) `Retarded` while also having a negative [`KeldyshContraction.Regularisation`](@ref)
+- or `p` is not of [`KeldyshContraction.PropagatorType`](@ref) `Advanced` while also having a positive [`KeldyshContraction.Regularisation`](@ref)
+"""
 function regular(p::Average)
     _isbulk = isbulk(p)
     _reg = regularisations(p)
@@ -72,19 +81,29 @@ function regular(p::Average)
         return true
     end
 end
+regular(p) = true
+regular(x::CSym) = regular(get_propagator(x))
+
+regular(v::Vector{SNuN}) = all(regular.(v))
 regular(v::Vector{Average}) = all(regular.(v))
-_regularise(vp::Vector{Vector{Average}}) = filter(regular, vp)
+
+_regularise(vp::Vector{Vector{SNuN}}) = filter(regular, vp)
 
 function set_reg_to_zero!(p::Average)
     p.arguments .= set_reg_to_zero.(arguments(p))
-    p
+    return p
 end
-function set_reg_to_zero!(vp::Union{Vector{Average},Vector{Vector{Average}}})
+function set_reg_to_zero!(vp::Union{Vector{SNuN},Vector{Vector{SNuN}}})
     for p in vp
         set_reg_to_zero!(p)
     end
     return vp
 end
+function set_reg_to_zero!(p::CSym)
+    p_idx = get_propagator_idx(p)
+    return set_reg_to_zero!(p.arguments[p_idx])
+end
+set_reg_to_zero!(p::Number) = nothing
 
 #################################
 #       Contraction
@@ -96,7 +115,7 @@ function wick_contraction(L::InteractionLagrangian)
     keldysh = wick_contraction(ψ(Out) * ψ'(In) * L.lagrangian)
     retarded = wick_contraction(ψ(Out) * ϕ'(In) * L.lagrangian)
     advanced = wick_contraction(ϕ(Out) * ψ'(In) * L.lagrangian)
-    DressedPropagator(keldysh, retarded, advanced)
+    return DressedPropagator(keldysh, retarded, advanced)
 end
 """
     wick_contraction(expr::Union{QAdd,QMul})
@@ -150,9 +169,7 @@ function wick_contraction(args_nc::Vector{QField})::Vector{Vector{Vector{QField}
     return wick_contractions
 end
 
-function make_propagators(
-    contraction::Vector{Vector{Vector{QField}}}
-)::Vector{Vector{Average}}
+function make_propagators(contraction::Vector{Vector{Vector{QField}}})::Vector{Vector{SNuN}}
     propagators = map(contraction) do factor
         to_prop = x -> propagator(x...)
         _propagators = to_prop.(factor)
@@ -161,5 +178,5 @@ function make_propagators(
     return propagators
 end
 
-make_mul(v::Vector{Average}) = isempty(v) ? 0 : prod(v)
-make_term(vp::Vector{Vector{Average}}) = isempty(vp) ? 0 : sum(make_mul, vp)
+make_mul(v::Vector{SNuN}) = isempty(v) ? 0 : prod(v)
+make_term(vp::Vector{Vector{SNuN}}) = isempty(vp) ? 0 : sum(make_mul, vp)
