@@ -154,6 +154,16 @@ for ff in [:regularisations, :contours, :isbulk, :positions, :acts_on, :propagat
     end
 end
 
+function Base.conj(q::Average)
+    T = propagator_type(q)
+    if is_keldysh(T)
+        return -1 * q
+    else # retarded || advanced
+        x, y = fields(q)
+        return make_propagator(y(position(x))', x(position(y))')
+    end
+end
+Base.adjoint(q::Average) = conj(q)
 ##########################################
 #       dressed green's function
 ##########################################
