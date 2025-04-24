@@ -9,6 +9,10 @@ Pages = ["API.md"]
 Depth = 2:3
 ```
 
+```@docs
+KeldyshContraction
+```
+
 ## Field Types
 
 ### Individual Fields

@@ -14,7 +14,7 @@ The Quantum-Quantum propagator should always be zero.
     Retarded
 end
 """
-    propagator_type(out::QSym, in::QSym)::PropagatorType
+$(TYPEDSIGNATURES)
 
 Determine the type of the propagator in the Retarded-Advance-Keldysh ([`PropagatorType`](@ref)) based on the contour of the output and input quantum field.
 """
@@ -48,7 +48,7 @@ function propagator_checks(out::QField, in::QField)::Nothing
 end
 
 """
-    Propagator <: Number
+$(TYPEDEF)
 
 Symbolic number representing the Propagator of two fields ϕ and ψ.
 By convention apropagator is shown as G(ϕ, ψ) with ψ the incoming [`Create`](@ref) field
@@ -81,7 +81,7 @@ function SymbolicUtils.symtype(::SymbolicUtils.BasicSymbolic{Propagator{T}}) whe
 end
 
 """
-    propagator(ψ::QSym, ϕ::QSym)
+$(TYPEDSIGNATURES)
 
 Create the Keldysh two-point green's functions over two field `ψ` and `ϕ`:
 ```math
@@ -167,25 +167,27 @@ Base.adjoint(q::Average) = conj(q)
 ##########################################
 #       dressed green's function
 ##########################################
-
 """
-    DressedPropagator
+$(TYPEDEF)
 
-A structure representing dressed propagator in the the Retarded-Advanced-Keldysh basis ([`PropagatorType`](@ref)).
+A structure representing dressed propagator in the Retarded-Advanced-Keldysh basis
+([`PropagatorType`](@ref)).
 
 # Fields
-- `keldysh`: The Keldysh component of the propagator
-- `retarded`: The retarded component of the propagator
-- `advanced`: The advanced component of the propagator
+$(FIELDS)
+where it assumed that the fields are of type `Union{SymbolicUtils.Symbolic{<:Number}, Number}`.
 
 # Constructor
-    DressedPropagator(keldysh::T, retarded::T, advanced::T) where {T<:SymbolicUtils.Symbolic}
+$(TYPEDSIGNATURES)
 
 Constructs a `DressedPropagator` with the given Keldysh, retarded, and advanced components.
 """
 struct DressedPropagator{Tk,Tr,Ta}
+    "The Keldysh component of the propagator"
     keldysh::Tk
+    "The retarded component of the propagator"
     retarded::Tr
+    "The advanced component of the propagator"
     advanced::Ta
     function DressedPropagator(keldysh::SNuN, retarded::SNuN, advanced::SNuN)
         return new{typeof(keldysh),typeof(retarded),typeof(advanced)}(
