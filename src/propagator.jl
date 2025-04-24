@@ -167,25 +167,26 @@ Base.adjoint(q::Average) = conj(q)
 ##########################################
 #       dressed green's function
 ##########################################
-
 """
-    DressedPropagator
+$(TYPEDEF)
 
-A structure representing dressed propagator in the the Retarded-Advanced-Keldysh basis ([`PropagatorType`](@ref)).
+A structure representing dressed propagator in the Retarded-Advanced-Keldysh basis
+([`PropagatorType`](@ref)).
 
 # Fields
-- `keldysh`: The Keldysh component of the propagator
-- `retarded`: The retarded component of the propagator
-- `advanced`: The advanced component of the propagator
+$(TYPEDFIELDS)
 
 # Constructor
-    DressedPropagator(keldysh::T, retarded::T, advanced::T) where {T<:SymbolicUtils.Symbolic}
+$(TYPEDSIGNATURES)
 
 Constructs a `DressedPropagator` with the given Keldysh, retarded, and advanced components.
 """
 struct DressedPropagator{Tk,Tr,Ta}
+    "The Keldysh component of the propagator"
     keldysh::Tk
+    "The retarded component of the propagator"
     retarded::Tr
+    "The advanced component of the propagator"
     advanced::Ta
     function DressedPropagator(keldysh::SNuN, retarded::SNuN, advanced::SNuN)
         return new{typeof(keldysh),typeof(retarded),typeof(advanced)}(
