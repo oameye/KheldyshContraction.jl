@@ -1,5 +1,3 @@
-_adjoint(s::SymbolicUtils.Symbolic{<:Number}) = _conj(s)
-
 function _conj(v::T) where {T<:SymbolicUtils.Symbolic}
     if SymbolicUtils.iscall(v)
         f = SymbolicUtils.operation(v)
@@ -11,6 +9,7 @@ function _conj(v::T) where {T<:SymbolicUtils.Symbolic}
 end
 _conj(q::Average) = conj(q)
 _conj(x::Number) = Base.conj(x)
+# _adjoint(s::SymbolicUtils.Symbolic{<:Number}) = _conj(s)
 
 function make_real(v::T) where {T<:SymbolicUtils.Symbolic}
     if SymbolicUtils.iscall(v)
