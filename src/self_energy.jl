@@ -52,27 +52,29 @@ function construct_self_energy!(
 end
 
 """
-    SelfEnergy
+$(TYPEDEF)
 
-A struct representing the self-energy components in the Retarded-Advance-Keldysh basis ([`PropagatorType`])(@ref).
+A struct representing the self-energy components in the Retarded-Advance-Keldysh basis ([`KeldyshContraction.PropagatorType`](@ref)).
 The self-energy is divided into three components: Keldysh, retarded, and advanced.
 
 # Fields
-- `keldysh::T`: The Keldysh component of the self-energy.
-- `retarded::T`: The retarded component of the self-energy.
-- `advanced::T`: The advanced component of the self-energy.
-with `T<:SymbolicUtils.Symbolic`.
+$(FIELDS)
+where it assumed that the fields are of type `Union{SymbolicUtils.Symbolic{<:Number}, Number}`.
 
 
 # Constructor
-- `SelfEnergy(G::DressedPropagator)`: Constructs a `SelfEnergy` object from a [`DressedPropagator`](@ref).
-  The self-energy is computed based on the Keldysh Green's function (`G.keldysh`) and expanded into
-  its quantum-quantum (`qq`), classical-quantum (`cq`), and quantum-classical (`qc`) components.
+$(TYPEDSIGNATURES)
+Constructs a `SelfEnergy` object from a [`DressedPropagator`](@ref).
+The self-energy is computed based on the Keldysh Green's function (`G.keldysh`) and expanded into
+its quantum-quantum (`qq`), classical-quantum (`cq`), and quantum-classical (`qc`) components.
 
 """
 struct SelfEnergy{Tk,Tr,Ta}
+    "The Keldysh component of the self-energy."
     keldysh::Tk
+    " The retarded component of the self-energy."
     retarded::Tr
+    "The advanced component of the self-energy."
     advanced::Ta
     function SelfEnergy(G::DressedPropagator)
         self_energy = OrderedCollections.LittleDict{PropagatorType,SNuN}((

@@ -3,19 +3,18 @@
 ########################
 
 """
-    QMul <: QTerm
+$(TYPEDEF)
 
-Represent a multiplication involving [`QSym`](@ref) types.
+Represent a multiplication involving quantum fields  of [`QSym`](@ref) types.
 
-Fields:
-======
-
-* arg_c: The commutative prefactor.
-* args_nc: A vector containing all [`QSym`](@ref) types.
+$(FIELDS)
 """
 struct QMul{M,T} <: QTerm
+    "The commutative prefactor."
     arg_c::T
+    "A vector containing all [`QSym`](@ref) types."
     args_nc::Vector{QField}
+    "The metadata associated with the term. Should default to `nothing`."
     metadata::M
     function QMul{M,T}(arg_c, args_nc, metadata) where {M,T}
         if SymbolicUtils._isone(arg_c) && length(args_nc) == 1
@@ -133,17 +132,15 @@ acts_on(x) = Int[]
 ###########################
 
 """
-    InteractionLagrangian{T}
+$(TYPEDEF)
 
 Represents an interaction Lagrangian
 
 # Fields
-- `lagrangian::T`: The Lagrangian expression as a [`QTerm`](@ref)
-- `qfield::Destroy{Quantum,Zero,Nothing}`: The quantum field destruction operator
-- `cfield::Destroy{Classical,Zero,Nothing}`: The classical field destruction operator
+$(FIELDS)
 
 # Constructor
-    InteractionLagrangian(expr::QTerm)
+$(TYPEDSIGNATURES)
 
 Constructs an InteractionLagrangian from a given [`QTerm`](@ref) expression.
 
@@ -157,8 +154,11 @@ The constructor enforces several constraints on the input expression and throws 
 
 """
 struct InteractionLagrangian{T}
+    "The Lagrangian expression as a [`QTerm`](@ref)"
     lagrangian::T
+    "The quantum field destruction operator"
     qfield::Destroy{Quantum,Zero,Nothing}
+    "The classical field destruction operator"
     cfield::Destroy{Classical,Zero,Nothing}
     function InteractionLagrangian(expr::QTerm)
         @assert isbulk(expr) "An interaction Lagrangian only accepts bulk terms"

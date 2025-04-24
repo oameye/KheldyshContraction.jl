@@ -14,7 +14,7 @@ The Quantum-Quantum propagator should always be zero.
     Retarded
 end
 """
-    propagator_type(out::QSym, in::QSym)::PropagatorType
+$(TYPEDSIGNATURES)
 
 Determine the type of the propagator in the Retarded-Advance-Keldysh ([`PropagatorType`](@ref)) based on the contour of the output and input quantum field.
 """
@@ -48,7 +48,7 @@ function propagator_checks(out::QField, in::QField)::Nothing
 end
 
 """
-    Propagator <: Number
+$(TYPEDEF)
 
 Symbolic number representing the Propagator of two fields ϕ and ψ.
 By convention apropagator is shown as G(ϕ, ψ) with ψ the incoming [`Create`](@ref) field
@@ -81,7 +81,7 @@ function SymbolicUtils.symtype(::SymbolicUtils.BasicSymbolic{Propagator{T}}) whe
 end
 
 """
-    propagator(ψ::QSym, ϕ::QSym)
+$(TYPEDSIGNATURES)
 
 Create the Keldysh two-point green's functions over two field `ψ` and `ϕ`:
 ```math
@@ -174,7 +174,8 @@ A structure representing dressed propagator in the Retarded-Advanced-Keldysh bas
 ([`PropagatorType`](@ref)).
 
 # Fields
-$(TYPEDFIELDS)
+$(FIELDS)
+where it assumed that the fields are of type `Union{SymbolicUtils.Symbolic{<:Number}, Number}`.
 
 # Constructor
 $(TYPEDSIGNATURES)
