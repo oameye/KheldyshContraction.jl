@@ -12,7 +12,9 @@ ENV["GKSwstype"] = "100"
 
 include("pages.jl")
 
-# cp(normpath(@__FILE__, "../../README.md"), normpath(@__FILE__, "../src/index.md"); force=true)
+# The README.md file is used index (home) page of the documentation.
+CI ? cp(normpath(@__FILE__, "../../README.md"), normpath(@__FILE__, "../src/index.md"); force=true) : nothing
+# ^ when using LiveServer, this will generate a loop
 
 makedocs(;
     sitename="KeldyshContraction.jl",
