@@ -5,18 +5,12 @@ preamble="\\usetikzlibrary{backgrounds}\n\\usepackage{tikz-feynman}"
 
 figure = """
   \\begin{feynman}
-    \\vertex (a) {\\(\\mu^{-}\\)};
+    \\vertex (a) {\\(x_1\\)};
     \\vertex [right=of a] (b);
-    \\vertex [above right=of b] (f1) {\\(\\nu_{\\mu}\\)};
-    \\vertex [below right=of b] (c);
-    \\vertex [above right=of c] (f2) {\\(\\overline \\nu_{e}\\)};
-    \\vertex [below right=of c] (f3) {\\(e^{-}\\)};
+    \\vertex [right=of b] (c) {\\(x_2\\)};
 
     \\diagram* {
-      (a) -- [fermion] (b) -- [fermion] (f1),
-      (b) -- [boson, edge label'=\\(W^{-}\\)] (c),
-      (c) -- [anti fermion] (f2),
-      (c) -- [fermion] (f3),
+      (a) -- [scalar] (b) [dot] -- [out=125, in=55, loop, min distance=2cm] b -- [anti fermion] (c)
     };
   \\end{feynman}
 """
