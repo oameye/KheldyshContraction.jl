@@ -19,6 +19,7 @@ include("hashing.jl")
 
 # Propagators
 include("propagator.jl")
+include("symbolic_utils.jl")
 include("wick_contractions.jl")
 include("self_energy.jl")
 

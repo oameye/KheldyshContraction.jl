@@ -68,9 +68,12 @@ end
         @test advanced_test
         @test retarded_test
         @test keldysh_test
-        # ^ pretty sure Gerbino thesis is wrong and switshes retarded and advanced
-        # and we compute the correct
-        # In his paper it is correct https://arxiv.org/pdf/2406.20028 :)
+        # ^ pretty sure Gerbino et al ttps://arxiv.org/pdf/2406.20028
+        # is wrong and switshes retarded and advanced
+        # and we compute the correct with a overall minus sign
+
+        @test isequal(KeldyshContraction._conj(Σ.advanced), Σ.retarded)
+        @test isequal(KeldyshContraction._conj(Σ.keldysh), -1*Σ.keldysh)
     end
 
     @testset "Keldysh GF is enough" begin

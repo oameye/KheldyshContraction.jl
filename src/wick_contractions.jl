@@ -141,7 +141,7 @@ The function returns a new expression of propagators of type `SymbolicUtils.Symb
 function wick_contraction(a::QAdd; regularise=true)
     wick_contractions = wick_contraction.(SymbolicUtils.arguments(a); regularise)
     wick_contractions = sum(wick_contractions)
-    return SymbolicUtils.expand(wick_contractions)
+    return make_real(SymbolicUtils.expand(wick_contractions))
 end
 function wick_contraction(a::QMul; regularise=true)
     @assert is_conserved(a)

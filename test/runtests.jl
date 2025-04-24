@@ -42,6 +42,10 @@ end
     include("QField.jl")
 end
 
+@testset "symbolic utils" begin
+    include("symbolic_utils.jl")
+end
+
 @testset "propagator" begin
     include("propagator.jl")
 end
