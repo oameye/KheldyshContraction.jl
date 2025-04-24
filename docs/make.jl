@@ -12,6 +12,8 @@ ENV["GKSwstype"] = "100"
 
 include("pages.jl")
 
+# cp(normpath(@__FILE__, "../../README.md"), normpath(@__FILE__, "../src/index.md"); force=true)
+
 makedocs(;
     sitename="KeldyshContraction.jl",
     authors="Orjan Ameyep",

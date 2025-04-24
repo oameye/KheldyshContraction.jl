@@ -1,4 +1,9 @@
+"""
+$(DocStringExtensions.README)
+"""
 module KeldyshContraction
+
+using DocStringExtensions
 
 using TermInterface: TermInterface, metadata
 using SymbolicUtils: SymbolicUtils, arguments, operation, @syms
