@@ -1,13 +1,32 @@
 name: Tests
+
 on:
   push:
-    tags:
-      - '*'
     branches:
       - 'main'
+    paths:
+      - '.github/workflows/Tests.yml'
+      - 'src/**'
+      - 'ext/**'
+      - 'test/runtests.jl'
+      - 'test/core-test/**'
+      - 'test/ext-test/cpu/**'
+      - 'Project.toml'
   pull_request:
     branches:
       - 'main'
+    paths:
+      - '.github/workflows/Tests.yml'
+      - 'src/**'
+      - 'ext/**'
+      - 'test/**'
+      - 'Project.toml'
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - ready_for_review
+
 concurrency:
   # Skip intermediate builds: always.
   # Cancel intermediate builds: only if it is a pull request build.
