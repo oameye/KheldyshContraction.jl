@@ -8,9 +8,7 @@ on:
       - '.github/workflows/Tests.yml'
       - 'src/**'
       - 'ext/**'
-      - 'test/runtests.jl'
-      - 'test/core-test/**'
-      - 'test/ext-test/cpu/**'
+      - 'test/**'
       - 'Project.toml'
   pull_request:
     branches:
