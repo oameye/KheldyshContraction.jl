@@ -50,10 +50,10 @@ end
     include("propagator.jl")
 end
 
-@testset "two_boson_loss" begin
-    include("second_order.jl")
+@testset "two boson loss" begin
+    include("two_boson_loss.jl")
 end
 
-@testset "two_boson_loss" begin
-    include("two_boson_loss.jl")
+@testset "second order" begin
+    include("second_order.jl")
 end

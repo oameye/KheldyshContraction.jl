@@ -69,12 +69,26 @@ set_reg_to_zero!(p::Number) = nothing
 #       Contraction
 #################################
 
-function wick_contraction(L::InteractionLagrangian)
+function wick_contraction(L::InteractionLagrangian; order=1)
     ϕ = L.qfield
     ψ = L.cfield
-    keldysh = wick_contraction(ψ(Out()) * ψ'(In()) * L.lagrangian)
-    retarded = wick_contraction(ψ(Out()) * ϕ'(In()) * L.lagrangian)
-    advanced = wick_contraction(ϕ(Out()) * ψ'(In()) * L.lagrangian)
+    if order == 1
+        keldysh = wick_contraction(ψ(Out()) * ψ'(In()) * L.lagrangian)
+        retarded = wick_contraction(ψ(Out()) * ϕ'(In()) * L.lagrangian)
+        advanced = wick_contraction(ϕ(Out()) * ψ'(In()) * L.lagrangian)
+    elseif order == 2
+        L1 = L
+        L2 = L(2)
+        prefactor = make_real(im^2)/2
+        keldysh =
+            prefactor*wick_contraction(ψ(Out()) * ψ'(In()) * L1.lagrangian * L2.lagrangian)
+        retarded =
+            prefactor*wick_contraction(ψ(Out()) * ϕ'(In()) * L1.lagrangian * L2.lagrangian)
+        advanced =
+            prefactor*wick_contraction(ϕ(Out()) * ψ'(In()) * L1.lagrangian * L2.lagrangian)
+    else
+        error("higher order then two not implemented")
+    end
     return DressedPropagator(keldysh, retarded, advanced)
 end
 """
