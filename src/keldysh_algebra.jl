@@ -229,6 +229,8 @@ for f in [:Destroy, :Create]
         name(ϕ), contour(ϕ), Zero, position(ϕ); ϕ.metadata
     )
 end
+ladder(::Destroy) = 0
+ladder(::Create) = 1
 
 """
     adjoint(op::Destroy)
