@@ -1,5 +1,5 @@
 Base.show(io::IO, x::QSym) = write(io, name(x))
-function Base.show(io::IO, x::Create{C,R}) where {C,R}
+function Base.show(io::IO, x::Create{C,P,R}) where {C,P,R}
     reg = Int(R)
     if iszero(reg)
         s = string("̄", name(x))
@@ -10,7 +10,7 @@ function Base.show(io::IO, x::Create{C,R}) where {C,R}
     end
     return write(io, s)
 end
-function Base.show(io::IO, x::Destroy{C,R}) where {C,R}
+function Base.show(io::IO, x::Destroy{C,P,R}) where {C,P,R}
     reg = Int(R)
     if iszero(reg)
         s = string(name(x))
@@ -36,7 +36,9 @@ end
 
 function Base.show(io::IO, x::QMul)
     if !SymbolicUtils._isone(x.arg_c)
+        x.arg_c isa Complex ? write(io, "(") : write(io, "")
         show(io, x.arg_c)
+        x.arg_c isa Complex ? write(io, ")") : write(io, "")
         show(io, *)
     end
     show_brackets[] && write(io, "(")
@@ -72,7 +74,7 @@ end
 # end
 function Base.show(io::IO, x::Average)
     prop_type = Dict(Retarded => "ᴿ", Advanced => "ᴬ", Keldysh => "ᴷ")
-    pos_string = Dict(In => "x₂", Out => "x₁", Bulk => "y")
+    pos_string = Dict(In() => "x₂", Out() => "x₁", Bulk() => "y")
     reg_string = Dict(Plus => "⁺", Zero => "", Minus => "⁻")
 
     (out, in) = positions(x)

@@ -43,7 +43,7 @@ function _to_expression(x::Complex) # For brackets when using latexify
     end
 end
 _to_expression(op::QSym) = name(op)
-function _to_expression(op::Create{C,R}) where {C,R}
+function _to_expression(op::Create{C,P,R}) where {C,P,R}
     reg = Int(R)
     if iszero(reg)
         return :(dagger($(name(op))))
@@ -53,7 +53,7 @@ function _to_expression(op::Create{C,R}) where {C,R}
         return :(power(dagger($(name(op))), -1))
     end
 end
-function _to_expression(op::Destroy{C,R}) where {C,R}
+function _to_expression(op::Destroy{C,P,R}) where {C,P,R}
     reg = Int(R)
     if iszero(reg)
         return :($(name(op)))

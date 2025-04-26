@@ -19,7 +19,7 @@ end
 
 @testset "wick contractions" begin
     @testset "classical-classical Green's function" begin
-        expr = ϕᶜ(Out) * ϕᶜ'(In) * L_int
+        expr = ϕᶜ(Out()) * ϕᶜ'(In()) * L_int
 
         @test is_conserved(expr)
         @test is_physical(expr)
@@ -36,7 +36,7 @@ end
         a = wick_contraction(expr)
     end
     @testset "quantum-quantum Green's function" begin
-        expr = ϕᴾ(Out) * ϕᴾ'(In) * L_int
+        expr = ϕᴾ(Out()) * ϕᴾ'(In()) * L_int
 
         @test is_conserved(expr)
         @test is_physical(expr)
@@ -77,7 +77,7 @@ end
     end
 
     @testset "Keldysh GF is enough" begin
-        expr_K = ϕᶜ(Out) * ϕᶜ'(In) * L_int
+        expr_K = ϕᶜ(Out()) * ϕᶜ'(In()) * L_int
         G_K1 = wick_contraction(expr_K)
 
         @test isequal(construct_self_energy(G_K1)[Advanced], Σ.advanced)

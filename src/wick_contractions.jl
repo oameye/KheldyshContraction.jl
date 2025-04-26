@@ -5,51 +5,11 @@
 is_qq_contraction(v::Vector{T}) where {T<:QField} = iszero(sum(Int.(contour.(v))))
 has_qq_contraction(vv::Vector{Vector{QField}}) = any(is_qq_contraction.(vv))
 
-"""
-    is_conserved(a::QTerm)
-
-Checks if an expression [`KeldyshContraction.QTerm`])(@ref) is conserved. A conserved expression is one that has equal numbers of creation and annihilation operators.
-
-See also: [`is_physical`](@ref)
-"""
-function is_conserved(a::QMul)
-    args_nc_ = a.args_nc
-    n_destroy = isa.(args_nc_, Destroy)
-    if length(args_nc_) == 0 || iszero(sum(n_destroy))
-        return false
-    else
-        length(args_nc_) == 1
-        return length(args_nc_) ÷ sum(n_destroy) == 2
-    end
-end
-is_conserved(a::Vector{QField}) = is_conserved(QMul(1, a))
-is_conserved(a::QAdd) = all(is_conserved.(arguments(a)))
-is_conserved(a::QSym) = false
-
-"""
-    is_physical(a::QTerm)
-
-Checks if an expression [`KeldyshContraction.QTerm`])(@ref) is physical. A physical expression is one that if it has an `In` position field it also has an `Out` position field and vice versa ([`Position`])(@ref). Furthermore, `In` position field can only creation fields ([`Create`](@ref)) and `Out` position field can only have annihilation fields ([`Destroy`](@ref)).
-
-See also: [`is_conserved`](@ref)
-"""
-function is_physical(a::QMul)
-    args_nc_ = a.args_nc
-    positions = acts_on.(args_nc_)
-    in_out = iszero(sum(positions)) # checks if a mul has both in-out in a lagrangian
-    physical = all(map(is_physical, args_nc_)) # individual field are physical
-    return physical && in_out
-end
-is_physical(a::Vector{QField}) = is_physical(QMul(1, a))
-is_physical(a::QAdd) = all(is_physical.(arguments(a)))
-is_physical(a::Destroy) = Int(position(a)) <= 0
-is_physical(a::Create) = Int(position(a)) >= 0
-
 function is_physical_propagator(a::Vector{QField})
     len = length(a) == 2 # propagator has length 2
-    positions = acts_on.(a)
+    positions = position.(a)
     # ∨ Can't make a propagator with In and Out coordinate
-    in_out = abs(-(positions...)) < 2
+    in_out = In() ∈ positions ? !(Out() ∈ positions) : true
     physical = all(is_physical.(a))
     return len && in_out && physical
 end
@@ -112,9 +72,9 @@ set_reg_to_zero!(p::Number) = nothing
 function wick_contraction(L::InteractionLagrangian)
     ϕ = L.qfield
     ψ = L.cfield
-    keldysh = wick_contraction(ψ(Out) * ψ'(In) * L.lagrangian)
-    retarded = wick_contraction(ψ(Out) * ϕ'(In) * L.lagrangian)
-    advanced = wick_contraction(ϕ(Out) * ψ'(In) * L.lagrangian)
+    keldysh = wick_contraction(ψ(Out()) * ψ'(In()) * L.lagrangian)
+    retarded = wick_contraction(ψ(Out()) * ϕ'(In()) * L.lagrangian)
+    advanced = wick_contraction(ϕ(Out()) * ψ'(In()) * L.lagrangian)
     return DressedPropagator(keldysh, retarded, advanced)
 end
 """
@@ -183,7 +143,7 @@ function make_propagators(contraction::Vector{Vector{Vector{QField}}})::Vector{V
     propagators = map(contraction) do factor
         to_prop = x -> propagator(x...)
         _propagators = to_prop.(factor)
-        sort!(_propagators; by=acts_on)
+        sort!(_propagators; by=position)
     end
     return propagators
 end
