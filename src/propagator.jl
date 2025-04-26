@@ -33,7 +33,7 @@ is_advanced(x::PropagatorType) = Int(x) == Int(Advanced)
 is_retarded(x::PropagatorType) = Int(x) == Int(Retarded)
 is_keldysh(x::PropagatorType) = Int(x) == Int(Keldysh)
 
-function propagator_checks(out::QField, in::QField)::Nothing
+function propagator_checks(out::QSym, in::QSym)::Nothing
     @assert isa(in, Create) "The `in` field must be a Create operator"
     @assert isa(out, Destroy) "The `out` field must be a Destroy operator"
     v = [out, in]

@@ -5,7 +5,7 @@
 is_qq_contraction(v::Vector{T}) where {T<:QField} = iszero(sum(Int.(contour.(v))))
 has_qq_contraction(vv::Vector{Vector{QField}}) = any(is_qq_contraction.(vv))
 
-function is_physical_propagator(a::Vector{QField})
+function is_physical_propagator(a::Vector{QSym})
     len = length(a) == 2 # propagator has length 2
     positions = position.(a)
     # ∨ Can't make a propagator with In and Out coordinate
@@ -116,26 +116,49 @@ function wick_contraction(a::QMul; regularise=true)
 end
 
 function wick_contraction(args_nc::Vector{QField})::Vector{Vector{Vector{QField}}}
-    _partitions = Combinatorics.partitions(args_nc, length(args_nc) ÷ 2)
+    # _partitions = Combinatorics.partitions(args_nc, length(args_nc) ÷ 2)
+    _length = length(args_nc)
+    @assert _length % 2 == 0 "Number of fields must be even"
+    n_destroy = _length ÷ 2
+    destroys = args_nc[1:n_destroy]
+    creates = reverse(args_nc[(n_destroy + 1):end])
+    number_of_combinations = factorial(n_destroy)
+    to_skip = factorial(n_destroy - 1) # due in-out contraction constaint
+
     wick_contractions = Vector{Vector{QField}}[]
-    for v in _partitions
-        if contraction_filter(v)
-            push!(wick_contractions, v)
+    perm = Combinatorics.nthperm(1:n_destroy, 1)
+    for i in (to_skip+1):number_of_combinations
+        perm = Combinatorics.nthperm(perm, i)
+        contraction = Vector{QField}[]
+        fail = false
+        for (k, l) in pairs(perm)
+            potential_contraction = QSym[destroys[k], creates[l]]
+            if contraction_filter(potential_contraction)
+                push!(contraction, potential_contraction)
+            else
+                fail = true
+                break
+            end
+        end
+        if fail
+            continue
+        else
+            push!(wick_contractions, contraction)
         end
     end
     return wick_contractions
 end
 
 function contraction_filter(v)
-    istwo = all(length.(v) .== 2) # only two-point contractions
-    if !istwo
+    # istwo = all(length.(v) .== 2) # only two-point contractions
+    # if !istwo
+    #     return false
+    if !is_conserved(v) # contractions with creation/annihilation
         return false
-    elseif !all(is_conserved.(v)) # contractions with creation/annihilation
-        return false
-    elseif !all(is_physical_propagator.(v)) # propagators are physical
+    elseif !is_physical_propagator(v) # propagators are physical
         return false
     else # there should be no quantum-quantum contractions
-        return !has_qq_contraction(v)
+        return !is_qq_contraction(v)
     end
 end
 
