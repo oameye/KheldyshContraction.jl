@@ -38,9 +38,8 @@ TermInterface.metadata(x::QSym) = x.metadata
 
 # Symbolic type promotion
 for f in SymbolicUtils.basic_diadic # [+, -, *, /, //, \, ^]
-    @eval SymbolicUtils.promote_symtype(::$(typeof(f)), Ts::Type{<:QField}...) = promote_type(
-        Ts...
-    )
+    @eval SymbolicUtils.promote_symtype(::$(typeof(f)), Ts::Type{<:QField}...) =
+        promote_type(Ts...)
     @eval SymbolicUtils.promote_symtype(::$(typeof(f)), T::Type{<:QField}, Ts...) = T
     @eval SymbolicUtils.promote_symtype(
         ::$(typeof(f)), T::Type{<:QField}, S::Type{<:Number}
@@ -97,16 +96,29 @@ Keldysh contour enum for the Keldysh quantum field. The Keldysh contour is used 
 end
 is_quantum(x::QSym) = iszero(Int(contour(x)))
 is_classical(x::QSym) = isone(Int(contour(x)))
-"""
-    Position `In` `Out` `Bulk`
 
-Position enum for the Keldysh quantum field. The position is used to determine the coordinate of the field.
+#########################
+#       Position
+#########################
+
 """
-@enum Position begin
-    In = 1
-    Out = -1
-    Bulk = 0
+    AbstractPosition `In` `Out` `Bulk`
+
+Position for the Keldysh quantum field. The position is used to determine the coordinate of the field.
+"""
+abstract type AbstractPosition end
+
+struct In <: AbstractPosition end
+struct Out <: AbstractPosition end
+struct Bulk <: AbstractPosition
+    index::Int
+    Bulk() = new(0)
+    Bulk(i::Int) = new(i)
 end
+Base.isless(x::Bulk, y::Bulk) = x.index < y.index
+Base.isless(::Bulk, ::In) = true
+Base.isless(::Out, ::Bulk) = true
+Base.isless(::Out, ::In) = true
 
 #########################
 # Destroy and Create
@@ -119,13 +131,13 @@ Bosonic field representing the quantum field annihilation operator.
 """
 struct Destroy{contour,regularisation,M} <: QSym
     name::Symbol
-    position::Position
+    position::AbstractPosition
     metadata::M  # M should stay parametric such that symbolics can work with it
     function Destroy(
         name::Symbol,
         contour::KeldyshContour,
         reg::Regularisation=Zero,
-        pos::Position=Bulk;
+        pos::AbstractPosition=Bulk();
         metadata::M=NO_METADATA,
     ) where {M}
         return new{contour,reg,M}(name, pos, metadata)
@@ -139,13 +151,13 @@ Bosonic field representing the quantum field creation operator.
 """
 struct Create{contour,regularisation,M} <: QSym
     name::Symbol
-    position::Position
+    position::AbstractPosition
     metadata::M # M should stay parametric such that symbolics can work with it
     function Create(
         name::Symbol,
         contour::KeldyshContour,
         reg::Regularisation=Zero,
-        pos::Position=Bulk;
+        pos::AbstractPosition=Bulk();
         metadata::M=NO_METADATA,
     ) where {M}
         return new{contour,reg,M}(name, pos, metadata)
@@ -161,7 +173,7 @@ for T in (:Create, :Destroy)
 end
 
 for f in [:Destroy, :Create]
-    @eval function (ff::$f)(pos::Position)
+    @eval function (ff::$f)(pos::AbstractPosition)
         return $(f)(name(ff), contour(ff), regularisation(ff), pos; ff.metadata)
     end
     @eval function (ff::$f)(reg::Regularisation)
@@ -171,11 +183,10 @@ for f in [:Destroy, :Create]
     @eval regularisation(ϕ::$(f){C,R}) where {C,R} = R
     @eval contour(ϕ::$(f){C}) where {C} = C
     @eval position(ϕ::$(f)) = ϕ.position
-    @eval isbulk(ϕ::$(f)) = iszero(Int(position(ϕ)))
+    @eval isbulk(ϕ::$(f)) = position(ϕ) isa Bulk
 
-    @eval set_reg_to_zero(ϕ::$(f)) = $(f)(
-        name(ϕ), contour(ϕ), Zero, position(ϕ); ϕ.metadata
-    )
+    @eval set_reg_to_zero(ϕ::$(f)) =
+        $(f)(name(ϕ), contour(ϕ), Zero, position(ϕ); ϕ.metadata)
 end
 
 """
