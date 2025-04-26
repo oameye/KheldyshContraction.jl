@@ -3,7 +3,7 @@
 #################################
 
 is_qq_contraction(v::Vector{T}) where {T<:QField} = iszero(sum(Int.(contour.(v))))
-has_qq_contraction(vv::Vector{Vector{QField}}) = any(is_qq_contraction.(vv))
+has_qq_contraction(vv::Vector{Vector{<:QField}}) = any(is_qq_contraction.(vv))
 
 function is_physical_propagator(a::Vector{<:QField})
     len = length(a) == 2 # propagator has length 2
@@ -129,7 +129,7 @@ function wick_contraction(a::QMul; regularise=true)
     return a.arg_c * make_term(propagators)
 end
 
-function wick_contraction(args_nc::Vector{QField})::Vector{Vector{Vector{QField}}}
+function wick_contraction(args_nc::Vector{<:QField})::Vector{Vector{Vector{QField}}}
     # _partitions = Combinatorics.partitions(args_nc, length(args_nc) ÷ 2)
     _length = length(args_nc)
     @assert _length % 2 == 0 "Number of fields must be even"
