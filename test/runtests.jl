@@ -51,5 +51,9 @@ end
 end
 
 @testset "two_boson_loss" begin
+    include("second_order.jl")
+end
+
+@testset "two_boson_loss" begin
     include("two_boson_loss.jl")
 end
