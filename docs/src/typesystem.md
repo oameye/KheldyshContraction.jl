@@ -11,7 +11,10 @@ Using these packages, we can define the algebra of quantum fields in a symbolic 
 using GraphRecipes, Plots, KeldyshContraction, Random
 Random.seed!(1) # hide
 theme(:dracula) # hide
-plot(KeldyshContraction.QField; method=:tree, fontsize=10, markersize = 0.12, nodeshape=:ellipse)
+plot(
+  KeldyshContraction.QField;
+  method=:tree, fontsize=10, markersize = 0.12, nodeshape=:ellipse
+)
 ```
 
 [`KeldyshContraction.QSym`](@ref) will be abstract type representing the individual field of type [`Destroy`](@ref) and [`Create`](@ref). [`KeldyshContraction.QTerm`](@ref) will represent the terms of the algebra, which are the *products* and *sum* of the fields. The type naming and hierarchy is heavily inspired by the implementation in `QuantumCumulants.jl`.
