@@ -74,7 +74,7 @@ end
 # end
 function Base.show(io::IO, x::Average)
     prop_type = Dict(Retarded => "ᴿ", Advanced => "ᴬ", Keldysh => "ᴷ")
-    pos_string = Dict(In() => "x₂", Out() => "x₁", Bulk() => "y")
+
     reg_string = Dict(Plus => "⁺", Zero => "", Minus => "⁻")
 
     (out, in) = positions(x)
@@ -83,14 +83,28 @@ function Base.show(io::IO, x::Average)
         "G",
         prop_type[propagator_type(x)],
         "(",
-        pos_string[out],
+        pos_string(out),
         reg_string[r2],
         ",",
-        pos_string[in],
+        pos_string(in),
         reg_string[r1],
         ")",
     )
     return write(io, s)
+end
+
+const underscore_dict = Dict(
+    1 => "₁", 2 => "₂", 3 => "₃", 4 => "₄", 5 => "₅", 6 => "₆", 7 => "₇", 8 => "₈", 9 => "₉"
+)
+
+function pos_string(p)
+    if p isa In
+        return "x₂"
+    elseif p isa Out
+        return "x₁"
+    else
+        return "y"*underscore_dict[p.index]
+    end
 end
 
 function Base.show(io::IO, mime::MIME"text/plain", Σ::Union{SelfEnergy,DressedPropagator})

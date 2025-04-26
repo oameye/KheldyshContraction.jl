@@ -84,7 +84,7 @@ end
 @testset "position" begin
     using KeldyshContraction: position
     # Test the position function
-    @test KC.position(ϕ).index == 0
+    @test KC.position(ϕ).index == 1
     @test KC.position(ψ(In())) == In()
     @test KC.position(ψ(Out())) == Out()
     # @test KC.position(ϕ + ψ) == [0]
@@ -109,6 +109,11 @@ end
 
     @test isequal(ϕ + 0, ϕ)
     @test isequal(0 + ϕ, ϕ)
+
+    mul = ϕ * ϕ
+    add = ϕ + ϕ
+    @test isequal(ϕ * mul, ϕ^3)
+    @test isequal(ϕ + add, ϕ + ϕ + ϕ)
 end
 
 @testset "quantum-classical" begin
