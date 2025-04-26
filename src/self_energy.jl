@@ -1,12 +1,12 @@
 const PositionPropagatorType = OrderedCollections.LittleDict{
-    Int64,
+    AbstractPosition,
     PropagatorType,
-    Tuple{Int64,Int64,Int64},
+    Tuple{<:AbstractPosition,<:AbstractPosition,<:AbstractPosition},
     Tuple{PropagatorType,PropagatorType,PropagatorType},
 }
-function self_energy_type(dict::PositionPropagatorType)
-    right = is_retarded(dict[-1]) ? Quantum : Classical
-    left = is_advanced(dict[1]) ? Quantum : Classical
+function self_energy_type(dict::OrderedCollections.LittleDict)
+    right = is_retarded(dict[Out()]) ? Quantum : Classical
+    left = is_advanced(dict[In()]) ? Quantum : Classical
 
     if Int.([right, left]) == [0, 0]
         # G_K(1) = ...
@@ -39,8 +39,8 @@ function construct_self_energy!(
         idxs_p = setdiff(eachindex(args), idxs_c)
         args_p = args[idxs_p]
 
-        positions = KeldyshContraction.acts_on.(args_p)
-        bulk_propagator = args_p[findfirst(iszero, positions)]
+        positions = KeldyshContraction.position.(args_p)
+        bulk_propagator = args_p[findfirst(isbulk, positions)]
         dict = OrderedCollections.freeze(
             OrderedCollections.OrderedDict(zip(positions, propagator_type.(args_p)))
         )

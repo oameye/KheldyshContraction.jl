@@ -36,7 +36,15 @@ The field properties are determined by the Enum objects:
 ```@docs
 KeldyshContraction.KeldyshContour
 KeldyshContraction.Regularisation
-KeldyshContraction.Position
+```
+
+And the position of the field is determined by the `AbstractPosition` object:
+
+```@docs
+KeldyshContraction.AbstractPosition
+KeldyshContraction.In
+KeldyshContraction.Out
+KeldyshContraction.Bulk
 ```
 
 #### Field Constructors

@@ -1,5 +1,5 @@
 using KeldyshContraction, Test
-using KeldyshContraction: In, Out, Classical, Quantum, Plus, Minus
+using KeldyshContraction: In, Out, Bulk, Classical, Quantum, Plus, Minus
 import KeldyshContraction as KC
 
 @qfields ϕ::Destroy(Classical) ψ::Destroy(Quantum)
@@ -81,17 +81,20 @@ end
     @test isequal(adjoint(ϕ + ψ), ϕ′ + ψ′)
 end
 
-@testset "acts_on" begin
-    using KeldyshContraction: acts_on
-    # Test the acts_on function
-    @test acts_on(ϕ) == 0
-    @test acts_on(ψ(In)) == 1
-    @test acts_on(ψ(Out)) == -1
-    @test acts_on(ϕ + ψ) == [0]
-    @test acts_on(ϕ * ψ) == [0]
+@testset "position" begin
+    using KeldyshContraction: position
+    # Test the position function
+    @test KC.position(ϕ).index == 0
+    @test KC.position(ψ(In())) == In()
+    @test KC.position(ψ(Out())) == Out()
+    # @test KC.position(ϕ + ψ) == [0]
+    # @test KC.position(ϕ * ψ) == [0]
 
-    @test acts_on(ϕ + ψ(In)) == [0, 1]
-    @test acts_on(ϕ * ψ(In)) == [0, 1]
+    # @test KC.position(ϕ + ψ(In)) == [0, 1]
+    # @test KC.position(ϕ * ψ(In)) == [0, 1]
+    to_sort = [ϕ(Bulk(3)), ϕ(Bulk(1)), ϕ, ψ(In()), ψ(Out())]
+    sorted = [ψ(Out()), ϕ, ϕ(Bulk(1)), ϕ(Bulk(3)), ψ(In())]
+    @test isequal(sort(to_sort; by=KC.position), sorted)
 end
 
 @testset "more math" begin

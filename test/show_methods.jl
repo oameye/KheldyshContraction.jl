@@ -3,16 +3,21 @@ using KeldyshContraction: Classical, Quantum, Plus, Minus, In, Out, make_propaga
 
 @qfields ϕ::Destroy(Classical) ψ::Destroy(Quantum)
 
+@qfields ϕᶜ::Destroy(Classical) ϕᴾ::Destroy(Quantum)
+
+L_int = im*(0.5 * ϕᶜ' * ϕᴾ' * (ϕᶜ(Minus) * ϕᶜ(Minus)))
+repr(L_int)
+
 @testset "Symbols" begin
     input = [
         ϕ,
         ϕ',
         ϕ(Plus)',
         ϕ(Minus)',
-        make_propagator(ϕ, ϕ'(In)),
-        make_propagator(ϕ(Out), ϕ'),
-        make_propagator(ϕ(Out), ψ'),
-        make_propagator(ψ(Out), ϕ'),
+        make_propagator(ϕ, ϕ'(In())),
+        make_propagator(ϕ(Out()), ϕ'),
+        make_propagator(ϕ(Out()), ψ'),
+        make_propagator(ψ(Out()), ϕ'),
     ]
     output = ["ϕ", "̄ϕ", "̄ϕ⁺", "̄ϕ⁻", "Gᴷ(y,x₂)", "Gᴷ(x₁,y)", "Gᴿ(x₁,y)", "Gᴬ(x₁,y)"]
     for (i, o) in zip(input, output)
@@ -35,6 +40,13 @@ using KeldyshContraction: Classical, Quantum, Plus, Minus, In, Out, make_propaga
         @test sprint(show, MIME"text/latex"(), i) == o
         @test repr(MIME"text/latex"(), i) == o
     end
+end
+
+@testset "Term" begin
+    @qfields ϕᶜ::Destroy(Classical) ϕᴾ::Destroy(Quantum)
+
+    L_int = im*(0.5 * ϕᶜ' * ϕᴾ' * (ϕᶜ * ϕᶜ))
+    @test repr(L_int) == "(0.0 + 0.5im)*(ϕᶜ*ϕᶜ*̄ϕᶜ*̄ϕᴾ)"
 end
 
 @testset "Structs" begin

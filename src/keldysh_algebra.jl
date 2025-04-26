@@ -38,8 +38,9 @@ TermInterface.metadata(x::QSym) = x.metadata
 
 # Symbolic type promotion
 for f in SymbolicUtils.basic_diadic # [+, -, *, /, //, \, ^]
-    @eval SymbolicUtils.promote_symtype(::$(typeof(f)), Ts::Type{<:QField}...) =
-        promote_type(Ts...)
+    @eval SymbolicUtils.promote_symtype(::$(typeof(f)), Ts::Type{<:QField}...) = promote_type(
+        Ts...
+    )
     @eval SymbolicUtils.promote_symtype(::$(typeof(f)), T::Type{<:QField}, Ts...) = T
     @eval SymbolicUtils.promote_symtype(
         ::$(typeof(f)), T::Type{<:QField}, S::Type{<:Number}
@@ -113,13 +114,20 @@ struct Out <: AbstractPosition end
 struct Bulk <: AbstractPosition
     index::Int
     Bulk() = new(0)
-    Bulk(i::Int) = new(i)
+    function Bulk(i::Int)
+        @assert i >= 0 "Bulk index must be positive"
+        new(i)
+    end
 end
 Base.isless(x::Bulk, y::Bulk) = x.index < y.index
 Base.isless(::Bulk, ::In) = true
+Base.isless(::In, ::Bulk) = false
 Base.isless(::Out, ::Bulk) = true
+Base.isless(::Bulk, ::Out) = false
 Base.isless(::Out, ::In) = true
+Base.isless(::In, ::Out) = false
 
+isbulk(x::AbstractPosition) = x isa Bulk
 #########################
 # Destroy and Create
 #########################
@@ -129,9 +137,8 @@ Base.isless(::Out, ::In) = true
 
 Bosonic field representing the quantum field annihilation operator.
 """
-struct Destroy{contour,regularisation,M} <: QSym
+struct Destroy{contour,position,regularisation,M} <: QSym
     name::Symbol
-    position::AbstractPosition
     metadata::M  # M should stay parametric such that symbolics can work with it
     function Destroy(
         name::Symbol,
@@ -140,7 +147,7 @@ struct Destroy{contour,regularisation,M} <: QSym
         pos::AbstractPosition=Bulk();
         metadata::M=NO_METADATA,
     ) where {M}
-        return new{contour,reg,M}(name, pos, metadata)
+        return new{contour,pos,reg,M}(name, metadata)
     end
 end
 
@@ -149,9 +156,8 @@ end
 
 Bosonic field representing the quantum field creation operator.
 """
-struct Create{contour,regularisation,M} <: QSym
+struct Create{contour,position,regularisation,M} <: QSym
     name::Symbol
-    position::AbstractPosition
     metadata::M # M should stay parametric such that symbolics can work with it
     function Create(
         name::Symbol,
@@ -160,7 +166,7 @@ struct Create{contour,regularisation,M} <: QSym
         pos::AbstractPosition=Bulk();
         metadata::M=NO_METADATA,
     ) where {M}
-        return new{contour,reg,M}(name, pos, metadata)
+        return new{contour,pos,reg,M}(name, metadata)
     end
 end
 
@@ -180,13 +186,14 @@ for f in [:Destroy, :Create]
         return $(f)(name(ff), contour(ff), reg, position(ff); ff.metadata)
     end
 
-    @eval regularisation(ϕ::$(f){C,R}) where {C,R} = R
+    @eval regularisation(ϕ::$(f){C,P,R}) where {C,P,R} = R
     @eval contour(ϕ::$(f){C}) where {C} = C
-    @eval position(ϕ::$(f)) = ϕ.position
+    @eval position(ϕ::$(f){C,P}) where {C,P} = P
     @eval isbulk(ϕ::$(f)) = position(ϕ) isa Bulk
 
-    @eval set_reg_to_zero(ϕ::$(f)) =
-        $(f)(name(ϕ), contour(ϕ), Zero, position(ϕ); ϕ.metadata)
+    @eval set_reg_to_zero(ϕ::$(f)) = $(f)(
+        name(ϕ), contour(ϕ), Zero, position(ϕ); ϕ.metadata
+    )
 end
 
 """
@@ -209,8 +216,8 @@ end
 
 # reverse normal ordered
 function Base.:*(a::Create, b::Destroy)
-    pos_a = acts_on(a)
-    pos_b = acts_on(b)
+    pos_a = position(a)
+    pos_b = position(b)
     if pos_a < pos_b
         return QMul(1, [a, b])
     else
@@ -219,9 +226,9 @@ function Base.:*(a::Create, b::Destroy)
 end
 
 function ismergeable(a::Create, b::Destroy)
-    pos_a = acts_on(a)
-    pos_b = acts_on(b)
-    return pos_a == pos_b
+    pos_a = position(a)
+    pos_b = position(b)
+    return isequal(pos_a, pos_b)
 end
 
 """

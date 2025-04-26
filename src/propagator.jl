@@ -38,10 +38,11 @@ function propagator_checks(out::QField, in::QField)::Nothing
     @assert isa(out, Destroy) "The `out` field must be a Destroy operator"
     v = [out, in]
 
-    positions = Int.(position.(v))
-    @assert first(positions) <= 0 "The outgoing field can't be the In<:Position` coordinate"
-    @assert last(positions) >= 0 "The incoming field can't be the Out<:Position` coordinate"
-    @assert abs(-(positions...)) < 2 "Can't make a propagator with `In<:Position` and `Out<:Position` coordinate"
+    positions = position.(v)
+    @assert !(first(positions) isa In) "The outgoing field can't be the In<:Position` coordinate"
+    @assert !(last(positions) isa Out) "The incoming field can't be the Out<:Position` coordinate"
+    in_out = (In() ∈ positions ? !(Out() ∈ positions) : true)
+    @assert in_out "Can't make a propagator with `In<:Position` and `Out<:Position` coordinate"
     contours = Int.(contour.(v))
     @assert !is_qq_contraction(v) "The quantum-quantum progator is zero"
     return nothing
@@ -129,8 +130,17 @@ function positions(p::Average)
     return position.(fields(p))
 end
 propagator_type(p::SymbolicUtils.BasicSymbolic{Propagator{T}}) where {T} = T
-acts_on(p::Average) = acts_on(fields(p)...)
-acts_on(x::QSym, y::QSym) = sum(acts_on.((x, y)))
+
+function position(p::Average)
+    _positions = positions(p)
+    if In() ∈ _positions
+        return In()
+    elseif Out() ∈ _positions
+        return Out()
+    else
+        return minimum(_positions) # TODO what to do if both are bulk?
+    end
+end
 
 function get_propagator_idx(x::CSym)::Int
     args = KeldyshContraction.arguments(x)
@@ -148,7 +158,7 @@ function get_propagator(x::CSym)::Average
     p_idx = get_propagator_idx(x)
     return args[p_idx]
 end
-for ff in [:regularisations, :contours, :isbulk, :positions, :acts_on, :propagator_type]
+for ff in [:regularisations, :contours, :isbulk, :positions, :position, :propagator_type]
     @eval begin
         $(ff)(x::CSym) = $(ff)(get_propagator(x))
     end
