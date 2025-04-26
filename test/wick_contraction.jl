@@ -7,5 +7,4 @@ using KeldyshContraction: wick_contraction
 L_int = ϕᶜ' * ϕᴾ' * ϕᶜ(Minus) * ϕᶜ(Minus)
 expr = ϕᶜ(Out()) * ϕᶜ'(In()) * L_int
 
-
 wick_contraction(expr.args_nc)

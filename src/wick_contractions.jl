@@ -126,14 +126,16 @@ function wick_contraction(args_nc::Vector{QField})::Vector{Vector{Vector{QField}
     to_skip = factorial(n_destroy - 1) # due in-out contraction constaint
 
     wick_contractions = Vector{Vector{QField}}[]
-    perm = Combinatorics.nthperm(1:n_destroy, 1)
-    for i in (to_skip+1):number_of_combinations
-        perm = Combinatorics.nthperm(perm, i)
+    iter = 1:n_destroy
+    for i in (to_skip + 1):number_of_combinations
+        perm = Combinatorics.nthperm(iter, i)
         contraction = Vector{QField}[]
         fail = false
         for (k, l) in pairs(perm)
             potential_contraction = QSym[destroys[k], creates[l]]
+            # ^ TODO make a Tuple
             if contraction_filter(potential_contraction)
+                # ^ TODO put regularisation here too
                 push!(contraction, potential_contraction)
             else
                 fail = true
