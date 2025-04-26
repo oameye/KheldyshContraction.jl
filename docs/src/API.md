@@ -40,6 +40,11 @@ KeldyshContraction.Regularisation
 
 And the position of the field is determined by the `AbstractPosition` object:
 
+```@example API
+using Term, KeldyshContraction # hide
+Term.typestree(KeldyshContraction.Bulk) # hide
+```
+
 ```@docs
 KeldyshContraction.AbstractPosition
 KeldyshContraction.In
@@ -59,11 +64,11 @@ The created fields are callable to change a property of the individual fields:
 
 ```@example API
 using KeldyshContraction
-using KeldyshContraction: In, Classical, position
+using KeldyshContraction: position
 
 @qfields ϕ::Destroy(Classical) 
 
-position(ϕ(In))
+position(ϕ)
 ```
 
 ### Field Algebra
