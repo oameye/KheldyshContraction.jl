@@ -109,6 +109,11 @@ end
 
     @test isequal(ϕ + 0, ϕ)
     @test isequal(0 + ϕ, ϕ)
+
+    mul = ϕ * ϕ
+    add = ϕ + ϕ
+    @test isequal(ϕ * mul, ϕ^3)
+    @test isequal(ϕ + add, ϕ + ϕ + ϕ)
 end
 
 @testset "quantum-classical" begin
