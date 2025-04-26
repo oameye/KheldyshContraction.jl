@@ -84,7 +84,7 @@ end
 @testset "position" begin
     using KeldyshContraction: position
     # Test the position function
-    @test KC.position(ϕ).index == 0
+    @test KC.position(ϕ).index == 1
     @test KC.position(ψ(In())) == In()
     @test KC.position(ψ(Out())) == Out()
     # @test KC.position(ϕ + ψ) == [0]
