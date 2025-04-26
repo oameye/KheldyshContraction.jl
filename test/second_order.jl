@@ -35,4 +35,6 @@ end
     @test wick_contraction(expr.arguments[1]) == 0.0
 
     wick_contraction(L; order=2)
+
+    @test_throws "not implemented" wick_contraction(L; order=3)
 end

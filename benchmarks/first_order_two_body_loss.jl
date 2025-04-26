@@ -16,7 +16,7 @@ function benchmark_two_body_loss!(SUITE)
 
     order = 2
     SUITE["two body loss"]["Green's function second_order"] = @benchmarkable wick_contraction(
-        $L_int; order=$order
+        $L_int; order=($order)
     ) seconds = 50
     return nothing
 end
