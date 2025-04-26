@@ -21,6 +21,7 @@ include("keldysh_algebra.jl")
 include("QTerm.jl")
 include("field_math.jl")
 include("hashing.jl")
+include("InteractionLagrangian.jl")
 
 # Propagators
 include("propagator.jl")
