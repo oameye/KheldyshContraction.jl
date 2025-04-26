@@ -5,7 +5,7 @@
 is_qq_contraction(v::Vector{T}) where {T<:QField} = iszero(sum(Int.(contour.(v))))
 has_qq_contraction(vv::Vector{Vector{QField}}) = any(is_qq_contraction.(vv))
 
-function is_physical_propagator(a::Vector{QSym})
+function is_physical_propagator(a::Vector{<:QField})
     len = length(a) == 2 # propagator has length 2
     positions = position.(a)
     # ∨ Can't make a propagator with In and Out coordinate
