@@ -3,7 +3,6 @@ using Combinatorics
 using KeldyshContraction: In, Out, Classical, Quantum, Plus, Minus, arguments
 import KeldyshContraction as KC
 
-
 @qfields ϕᶜ::Destroy(Classical) ϕᴾ::Destroy(Quantum)
 
 L_int =
@@ -14,7 +13,6 @@ L_int =
     )
 
 expr = ϕᶜ(Out()) * ϕᶜ'(In()) * L_int
-
 
 function _wick_contraction(args_nc::Vector{KC.QField})::Vector{Vector{Vector{KC.QField}}}
     _partitions = Combinatorics.partitions(args_nc, length(args_nc) ÷ 2)

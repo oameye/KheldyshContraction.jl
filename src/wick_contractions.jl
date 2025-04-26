@@ -123,7 +123,7 @@ function wick_contraction(args_nc::Vector{QField})::Vector{Vector{Vector{QField}
     destroys = args_nc[1:n_destroy]
     creates = reverse(args_nc[(n_destroy + 1):end])
     number_of_combinations = factorial(n_destroy)
-    to_skip = factorial(n_destroy - 1) # due in-out contraction constaint
+    to_skip = factorial(n_destroy - 1) # due in-out contraction constraint
 
     wick_contractions = Vector{Vector{QField}}[]
     iter = 1:n_destroy
