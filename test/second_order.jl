@@ -13,6 +13,6 @@ L_int =
 L = InteractionLagrangian(L_int)
 
 @testset "set_position" begin
-    @test position(L) == Bulk(0)
-    @test position(L(1)) == Bulk(1)
+    @test position(L) == Bulk(1)
+    @test position(L(2)) == Bulk(2)
 end

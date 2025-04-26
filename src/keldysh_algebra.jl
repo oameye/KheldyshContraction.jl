@@ -147,9 +147,9 @@ struct Bulk <: AbstractPosition
     This is used to distinguish between different bulk coordinates.
     """
     index::Int
-    Bulk() = new(0)
+    Bulk() = new(1)
     function Bulk(i::Int)
-        @assert i >= 0 "Bulk index must be positive"
+        @assert i > 0 "Bulk index must be positive"
         new(i)
     end
 end
