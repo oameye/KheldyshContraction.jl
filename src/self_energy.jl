@@ -4,6 +4,8 @@ const PositionPropagatorType = OrderedCollections.LittleDict{
     Tuple{<:AbstractPosition,<:AbstractPosition,<:AbstractPosition},
     Tuple{PropagatorType,PropagatorType,PropagatorType},
 }
+
+"compute the self-energy type from positions save in `dict`."
 function self_energy_type(dict::OrderedCollections.LittleDict)
     right = is_retarded(dict[Out()]) ? Quantum : Classical
     left = is_advanced(dict[In()]) ? Quantum : Classical
@@ -23,12 +25,15 @@ function self_energy_type(dict::OrderedCollections.LittleDict)
     end
 end
 
+"Construct the self-energy from `expr`."
 function construct_self_energy(expr::SymbolicUtils.Symbolic)
     self_energy = OrderedCollections.LittleDict{PropagatorType,SNuN}((
         Advanced => 0, Retarded => 0, Keldysh => 0
     ))
     return construct_self_energy!(self_energy, expr)
 end
+
+"Construct the self-energy from `expr` and save in LittleDict `self_energy`."
 function construct_self_energy!(
     self_energy::OrderedCollections.LittleDict, expr::SymbolicUtils.Symbolic
 )
@@ -98,5 +103,19 @@ struct SelfEnergy{Tk,Tr,Ta}
         return new{typeof(qq),typeof(cq),typeof(qc)}(qq, cq, qc)
     end
 end
+
+"""
+    matrix(Σ::SelfEnergy)
+
+Returns the matrix representation of the self energy `Σ`
+in the Retarded-Advanced-Keldysh basis.
+```math
+\\hat{\\Sigma}\\left(y_1, y_2\\right)=
+\\left(\\begin{array}{cc}0 & \\Sigma^A\\left(y_1, y_2\\right) \\\\
+\\Sigma^R\\left(y_1, y_2\\right) & \\Sigma^K\\left(y_1, y_2\\right)
+\\end{array}
+\\right)
+```
+"""
 matrix(Σ::SelfEnergy) = SNuN[0 Σ.advanced; Σ.retarded Σ.keldysh]
 # TODO: check matrix convention G_0 Σ G_0 and define above matric accordingly

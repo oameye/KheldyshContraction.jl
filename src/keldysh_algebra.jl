@@ -251,6 +251,7 @@ function Base.adjoint(op::Create)
 end
 
 # reverse normal ordered
+"Defines the reverse normal order for the creation and annihilation operators."
 function Base.:*(a::Create, b::Destroy)
     pos_a = position(a)
     pos_b = position(b)
