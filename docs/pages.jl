@@ -1,6 +1,7 @@
 pages = [
     "Home" => "index.md",
+    "API" => "API.md",
     "Symbolic fields" => "typesystem.md",
     "Keldysh Conventions" => "conventions.md",
-    "API" => "API.md",
+    "Literature" => "literature.md",
 ]
