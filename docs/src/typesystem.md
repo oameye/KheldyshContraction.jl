@@ -19,11 +19,11 @@ plot(
 
 [`KeldyshContraction.QSym`](@ref) will be abstract type representing the individual field of type [`Destroy`](@ref) and [`Create`](@ref). [`KeldyshContraction.QTerm`](@ref) will represent the terms of the algebra, which are the *products* and *sum* of the fields. The type naming and hierarchy is heavily inspired by the implementation in `QuantumCumulants.jl`.
 
-QSym can then have additional properties to make it Keldsysh-specific type fields. In the package this is done by adding fields to `Create` and `Destroys` using *Enum* objects:
+QSym can then have additional properties to make it Keldsysh-specific type fields. In the package this is done by adding fields to `Create` and `Destroys` using *Enum* objects and Singletons. The `KeldyshContraction` module defines the following types:
 
 - [`KeldyshContraction.KeldyshContour`](@ref) - the Keldysh contour of the field, which can be either `KeldyshContour.Quantum` or `KeldyshContour.Classical`.
 - [`KeldyshContraction.Regularisation`](@ref) - the tadpole regularisation of the field, which can be either `Regularisation.Zero`, `Regularisation.Plus` or `Regularisation.Minus`.
-- [`KeldyshContraction.AbstractPosition`](@ref) - the position of the field, which can be either `Position.In`, `Position.Out` or `Position.Bulk`.
+- [`KeldyshContraction.AbstractPosition`](@ref) - the position of the field, which can be either `In`, `Out` or `Bulk`.
 
 To make our quantum field types work with the symbolic algebra system, we need to implement several interface functions from SymbolicUtils.jl and TermInterface.jl:
 
@@ -56,7 +56,7 @@ SymbolicUtils.promote_symtype(::typeof(*), T::Type{<:QField}, S::Type{<:Number})
 
 These implementations allow our quantum field types to:
 
-1. Be recognized as symbolic terms
-2. Participate in algebraic operations
+1. Be recognized as symbolic terms by SymbolicUtils such that we can use there rule-based term rewriting
+2. Participate in algebraic operations defined in `src/field_math.jl`
 3. Follow proper type promotion rules
 4. Handle basic mathematical concepts like identities and zeros
