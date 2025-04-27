@@ -109,9 +109,9 @@ Abstract Position type for the Keldysh quantum field.
 The position is used to determine the coordinate of the field during the wick contraction.
 
 AbstractPosition has subtypes:
-- [`KeldyshContraction.In`](@ref)
-- [`KeldyshContraction.Out`](@ref)
-- [`KeldyshContraction.Bulk`](@ref).
+- [`In`](@ref)
+- [`Out`](@ref)
+- [`Bulk`](@ref).
 """
 abstract type AbstractPosition end
 
@@ -120,7 +120,7 @@ abstract type AbstractPosition end
 
 The `In` singleton to mark a field the incoming field.
 
-See also: [`KeldyshContraction.Out`](@ref), [`KeldyshContraction.Bulk`](@ref).
+See also: [`Out`](@ref), [`Bulk`](@ref).
 """
 struct In <: AbstractPosition end
 
@@ -129,7 +129,7 @@ struct In <: AbstractPosition end
 
 The `Out` singleton to mark a field the outgoing field.
 
-See also: [`KeldyshContraction.In`](@ref), [`KeldyshContraction.Bulk`](@ref).
+See also: [`In`](@ref), [`Bulk`](@ref).
 """
 struct Out <: AbstractPosition end
 
@@ -139,7 +139,7 @@ struct Out <: AbstractPosition end
 The `Bulk` struct to mark a field relies in the bulk of a feyman diagram.
 This means the field will contribute to the self-energy ([`SelfEnergy`](@ref).
 
-See also: [`KeldyshContraction.In`](@ref), [`KeldyshContraction.Out`](@ref).
+See also: [`In`](@ref), [`Out`](@ref).
 """
 struct Bulk <: AbstractPosition
     """

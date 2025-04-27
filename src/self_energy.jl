@@ -54,7 +54,7 @@ end
 """
 $(TYPEDEF)
 
-A struct representing the self-energy components in the Retarded-Advance-Keldysh basis ([`KeldyshContraction.PropagatorType`](@ref)).
+A struct representing the self-energy components in the Retarded-Advance-Keldysh basis ([`PropagatorType`](@ref)).
 The self-energy is divided into three components: Keldysh, retarded, and advanced.
 
 # Fields
