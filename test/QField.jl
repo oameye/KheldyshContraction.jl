@@ -10,6 +10,7 @@ import KeldyshContraction as KC
     @test TermInterface.head(ϕ) == :call
     @test SymbolicUtils.iscall(ϕ) == false
     @test SymbolicUtils.iscall(ϕ * ϕ) == true
+    @test SymbolicUtils.iscall(ϕ + ϕ) == true
     @test SymbolicUtils.operation(ϕ + ϕ) == +
     @test SymbolicUtils.operation(ϕ * ϕ) == *
     @test SymbolicUtils.arguments(2 * ϕ * ϕ) == [2, ϕ, ϕ]
@@ -22,6 +23,10 @@ import KeldyshContraction as KC
         @test SymbolicUtils.promote_symtype(+, ϕ, 1) isa KC.QField broken = true
         @test SymbolicUtils.promote_symtype(*, ϕ, 1) isa KC.QField broken = true
     end
+end
+
+@testset "normal ordering" begin
+    @test isequal(ϕ' * ϕ, ϕ * ϕ')
 end
 
 @testset "ones and zeros" begin
@@ -50,6 +55,7 @@ end
     @test isequal(ϕ2 + 1, ϕ + ϕ + 1)
     @test isequal(ϕ2 + ϕ, ϕ + ϕ + ϕ)
 end
+
 @testset "simplification" begin
     using SymbolicUtils
     @test isequal(ϕ + ϕ, 2 * ϕ) broken = true
