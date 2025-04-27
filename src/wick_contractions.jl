@@ -24,8 +24,8 @@ end
 Checks if the propagator `p` is regular.
 A regular propagator is one that is:
 - not in the bulk
-- or `p` is not of [`KeldyshContraction.PropagatorType`](@ref) `Retarded` while also having a negative [`KeldyshContraction.Regularisation`](@ref)
-- or `p` is not of [`KeldyshContraction.PropagatorType`](@ref) `Advanced` while also having a positive [`KeldyshContraction.Regularisation`](@ref)
+- or `p` is not of [`PropagatorType`](@ref) `Retarded` while also having a negative [`Regularisation`](@ref)
+- or `p` is not of [`PropagatorType`](@ref) `Advanced` while also having a positive [`Regularisation`](@ref)
 """
 function regular(p::Average)
     _isbulk = isbulk(p)
@@ -101,8 +101,8 @@ of propagators (two-point correlation functions). The rules of the contraction a
   - Conservation (equal numbers of creation/annihilation operators)
   - Physicality (proper time ordering)
   - No quantum-quantum contractions
-  - If the fields have a [`KeldyshContraction.Regularisation`](@ref) applied, the contractions are
-    regularised. The [`KeldyshContraction.Regularisation`](@ref) property is set to zero after the reguralisation.
+  - If the fields have a [`Regularisation`](@ref) applied, the contractions are
+    regularised. The [`Regularisation`](@ref) property is set to zero after the reguralisation.
 
 The function handles two types of inputs:
 - `QAdd`: Distributes the contraction over sums

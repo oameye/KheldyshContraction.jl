@@ -18,9 +18,9 @@ Constructs an InteractionLagrangian from a given [`QTerm`](@ref) expression.
 
 # Requirements
 The constructor enforces several constraints on the input expression and throws `AssertionError` if any of them are not met:
-- Must be a bulk term ([`KeldyshContraction.isbulk`](@ref))
-- Must be conserved ([`KeldyshContraction.is_conserved`](@ref))
-- Must be physical ([`KeldyshContraction.is_physical`](@ref))
+- Must be a bulk term ([`isbulk`](@ref))
+- Must be conserved ([`is_conserved`](@ref))
+- Must be physical ([`is_physical`](@ref))
 - Can only contain up to two different fields
 - Fields must have opposite contours
 
@@ -52,7 +52,7 @@ position(::InteractionLagrangian{T,P}) where {T,P} = P
 """
     is_conserved(a::QTerm)
 
-Checks if an expression [`KeldyshContraction.QTerm`])(@ref) is conserved. A conserved expression is one that has equal numbers of creation and annihilation operators.
+Checks if an expression [`QTerm`])(@ref) is conserved. A conserved expression is one that has equal numbers of creation and annihilation operators.
 
 See also: [`is_physical`](@ref)
 """
@@ -72,7 +72,7 @@ is_conserved(a::QSym) = false
 """
     is_physical(a::QTerm)
 
-Checks if an expression [`KeldyshContraction.QTerm`])(@ref) is physical. A physical expression is one that if it has an `In` position field it also has an `Out` position field and vice versa ([`Position`])(@ref). Furthermore, `In` position field can only creation fields ([`Create`](@ref)) and `Out` position field can only have annihilation fields ([`Destroy`](@ref)).
+Checks if an expression [`QTerm`])(@ref) is physical. A physical expression is one that if it has an `In` position field it also has an `Out` position field and vice versa ([`Position`])(@ref). Furthermore, `In` position field can only creation fields ([`Create`](@ref)) and `Out` position field can only have annihilation fields ([`Destroy`](@ref)).
 
 See also: [`is_conserved`](@ref)
 """

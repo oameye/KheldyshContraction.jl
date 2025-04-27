@@ -55,6 +55,8 @@ end
 
     L_int = im*(0.5 * ϕᶜ' * ϕᴾ' * (ϕᶜ * ϕᶜ))
     @test repr(L_int) == "(0.0 + 0.5im)*(ϕᶜ*ϕᶜ*̄ϕᶜ*̄ϕᴾ)"
+    @test repr(MIME"text/latex"(), L_int) ==
+        "\$0.5 i \\phi^c \\phi^c \\bar{\\phi^c} \\bar{\\phi^P}\$"
 end
 
 @testset "Structs" begin

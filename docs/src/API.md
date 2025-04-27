@@ -111,10 +111,12 @@ KeldyshContraction.Propagator
 KeldyshContraction.PropagatorType
 KeldyshContraction.propagator
 DressedPropagator
+KeldyshContraction.matrix(::DressedPropagator)
 ```
 
 ### Self-Energy
 
 ```@docs
 KeldyshContraction.SelfEnergy
+KeldyshContraction.matrix(::KeldyshContraction.SelfEnergy)
 ```

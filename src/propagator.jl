@@ -33,6 +33,7 @@ is_advanced(x::PropagatorType) = Int(x) == Int(Advanced)
 is_retarded(x::PropagatorType) = Int(x) == Int(Retarded)
 is_keldysh(x::PropagatorType) = Int(x) == Int(Keldysh)
 
+"Collect and checks the rules for a physical propagator"
 function propagator_checks(out::QSym, in::QSym)::Nothing
     @assert isa(in, Create) "The `in` field must be a Create operator"
     @assert isa(out, Destroy) "The `out` field must be a Destroy operator"
@@ -59,14 +60,17 @@ See also: [`propagator`](@ref)
 """
 struct Propagator{T} <: Number end
 
+"BasicSymbolic type for propagators. What will be used in the symbolic expressions"
 const Average = SymbolicUtils.BasicSymbolic{<:Propagator}
 
+"The type expressing the propagator as a function over two QSym"
 function sym_average(T::PropagatorType) # Symbolic function for averages
     Tf = SymbolicUtils.FnType{Tuple{QSym,QSym},Propagator{T}}
     return SymbolicUtils.Sym{Tf}(:avg)
 end
 
 # Type promotion -- average(::QField)::Number
+"A propagator of two fields is a number is of type `Propagator`"
 function SymbolicUtils.promote_symtype(
     ::SymbolicUtils.BasicSymbolic{SymbolicUtils.FnType{Tuple{QSym,QSym},Propagator{T}}},
     ::Type{<:QSym},
@@ -101,6 +105,7 @@ function propagator(x::QSym, y::QSym)
     propagator_checks(x, y)
     return im * make_propagator(x, y)
 end
+"Make propagator without the prefactor, i.e., the imaginary unit"
 function make_propagator(x::QSym, y::QSym)
     T = propagator_type(x, y)
     return SymbolicUtils.Term{Propagator{T}}(sym_average(T), [x, y])
@@ -174,6 +179,7 @@ function Base.conj(q::Average)
     end
 end
 Base.adjoint(q::Average) = conj(q)
+
 ##########################################
 #       dressed green's function
 ##########################################
@@ -205,4 +211,19 @@ struct DressedPropagator{Tk,Tr,Ta}
         )
     end
 end
+"""
+    matrix(G::DressedPropagator)
+
+Returns the matrix representation of the dressed propagator `G`
+in the Retarded-Advanced-Keldysh basis.
+```math
+\\hat{G}\\left(x_1, x_2\\right)
+=\\left(
+\\begin{array}{cc}
+G^K\\left(x_1, x_2\\right) & G^R\\left(x_1, x_2\\right) \\\\
+G^A\\left(x_1, x_2\\right) & 0
+\\end{array}
+\\right)
+```
+"""
 matrix(G::DressedPropagator) = SNuN[G.retarded G.keldysh; G.advanced 0]
