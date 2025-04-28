@@ -31,6 +31,11 @@ function QMul(arg_c::T, args_nc; metadata::M=NO_METADATA) where {M,T}
 end
 
 SymbolicUtils.operation(::QMul) = (*)
+"""
+    arguments(a::QMul)
+
+Return the vector of the factors of [`QMul`](@ref).
+"""
 SymbolicUtils.arguments(a::QMul) = vcat(a.arg_c, a.args_nc)
 
 function SymbolicUtils.maketerm(::Type{<:QMul}, ::typeof(*), args, metadata)
@@ -81,6 +86,11 @@ struct QAdd <: QTerm
     arguments::Vector{QSymbol}
 end
 SymbolicUtils.operation(::QAdd) = (+)
+"""
+    arguments(a::QAdd)
+
+Return the vector of the arguments of [`QAdd`](@ref).
+"""
 SymbolicUtils.arguments(a::QAdd) = a.arguments
 SymbolicUtils.maketerm(::Type{<:QAdd}, ::typeof(+), args, metadata) = QAdd(args)
 
