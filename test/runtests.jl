@@ -50,6 +50,10 @@ end
     include("propagator.jl")
 end
 
+@testset "tadpole reguralisation" begin
+    include("reguralise.jl")
+end
+
 @testset "two boson loss" begin
     include("two_boson_loss.jl")
 end
