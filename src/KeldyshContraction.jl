@@ -42,6 +42,7 @@ export @qfields,
     DressedPropagator,
     SelfEnergy,
     InteractionLagrangian,
-    @syms
+    @syms,
+    arguments
 
 end
