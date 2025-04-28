@@ -86,10 +86,12 @@ end
 
 @testset "self-energy" begin
     using KeldyshContraction: Advanced, Retarded, Keldysh
-    using KeldyshContraction: Propagator, make_propagator
+    using KeldyshContraction: Propagator, make_propagator, matrix
     L = InteractionLagrangian(L_int)
     GF = wick_contraction(L)
+    matrix(GF)
     Σ = SelfEnergy(GF)
+    matrix(Σ)
 
     @testset "correctness check" begin
         advanced_test = isequal(
