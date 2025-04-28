@@ -58,13 +58,13 @@ end
 
         # ϕᶜ*ϕᶜ⁺*ϕᴾ⁺*̄ϕᶜ*̄ϕᴾ*̄ϕᶜ
         # @test repr(SymbolicUtils.expand(wick_contraction(expr.arguments[5]))) ==
-            # "Gᴷ(x₁,y₁)*Gᴬ(y₁,x₂)*Gᴿ(y₁,y₁) + Gᴬ(y₁,x₂)*Gᴿ(x₁,y₁)*Gᴷ(y₁,y₁)"
+        # "Gᴷ(x₁,y₁)*Gᴬ(y₁,x₂)*Gᴿ(y₁,y₁) + Gᴬ(y₁,x₂)*Gᴿ(x₁,y₁)*Gᴷ(y₁,y₁)"
 
         # ϕᶜ*ϕᶜ⁻*ϕᴾ⁻*̄ϕᶜ*̄ϕᴾ*̄ϕᶜ
         # @test repr(SymbolicUtils.expand(wick_contraction(expr.arguments[6]))) ==
-            # "Gᴬ(y₁,y₁)*Gᴷ(y₁,x₂)*Gᴿ(x₁,y₁) + Gᴬ(y₁,x₂)*Gᴿ(x₁,y₁)*Gᴷ(y₁,y₁)"
+        # "Gᴬ(y₁,y₁)*Gᴷ(y₁,x₂)*Gᴿ(x₁,y₁) + Gᴬ(y₁,x₂)*Gᴿ(x₁,y₁)*Gᴷ(y₁,y₁)"
 
-        # TODO the string comparison wil fail due to seed.
+        # TODO the string comparison will fail due to different seed so that the terms shuffle.
         result = make_real(SymbolicUtils.expand(sum(wick_contraction.(expr.arguments))))
 
         L = InteractionLagrangian(L_int)
