@@ -82,6 +82,8 @@ Term.typestree(KeldyshContraction.QTerm) # hide
 KeldyshContraction.QTerm
 KeldyshContraction.QMul
 KeldyshContraction.QAdd
+arguments(::QMul)
+arguments(::QAdd)
 ```
 
 The properties of the expression can be checked using:
