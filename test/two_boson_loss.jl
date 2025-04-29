@@ -68,8 +68,9 @@ end
         result = make_real(SymbolicUtils.expand(sum(wick_contraction.(expr.arguments))))
 
         L = InteractionLagrangian(L_int)
-        GF = wick_contraction(L)
+        GF = wick_contraction(L; simplify=false)
         @test isequal(GF.keldysh, result)
+        @test_broken construct_self_energy(arguments(GF.keldysh)[1])
     end
 
     @testset "quantum-quantum Green's function" begin
@@ -88,7 +89,7 @@ end
     using KeldyshContraction: Advanced, Retarded, Keldysh
     using KeldyshContraction: Propagator, make_propagator, matrix
     L = InteractionLagrangian(L_int)
-    GF = wick_contraction(L)
+    GF = wick_contraction(L; simplify=false)
     matrix(GF)
     Σ = SelfEnergy(GF)
     matrix(Σ)
