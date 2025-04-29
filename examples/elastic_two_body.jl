@@ -75,7 +75,6 @@ GF = wick_contraction(L_int)
 # Here, $F$ is the bosonic distribution function of the system.
 # However, from above calculation we find that ``i Σ^K(x, p) = 0`` and:
 # ```math
-#  \mathrm{Im}[G^K(x, p)]= \int \frac{d^d q}{(2\pi)^d} \mathrm{Im}G^K = 0.
+#  \mathrm{Im}[Σ^R(x, p)] =  \int \frac{d^d q}{(2\pi)^d}  \frac{d  \epsilon}{2\pi} \mathrm{Im}G_0^K
 # ```
 # where ``q = (\vec{q}, \epsilon)`` with $\epsilon$ the energy of the system.
-# Hence, the first order correction in $g$ does not contribute to the collision integral.
