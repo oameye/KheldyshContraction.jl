@@ -74,7 +74,7 @@ GF = wick_contraction(L_int)
 # I _\mathrm{coll}= i Σ^K(x, p) + 2 F (x, p) \mathrm{Im}[Σ^R(x, p)].
 # ```
 # Here, $F$ is the bosonic distribution function of the system.
-# However, from aboves calculation we find that ``i Σ^K(x, p) = 0`` and:
+# However, from above calculation we find that ``i Σ^K(x, p) = 0`` and:
 # ```math
 #  \mathrm{Im}[G^K(x, p)]= \int \frac{d^d q}{(2\pi)^d} \mathrm{Im}G^K = 0.
 # ```
