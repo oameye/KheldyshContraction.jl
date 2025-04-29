@@ -15,9 +15,7 @@ end
     L = InteractionLagrangian(eleactic2boson)
     GF = wick_contraction(L)
 
-    for (x, y) in zip(arguments(_conj(GF.advanced)), arguments(GF.retarded))
-        @test x isa Number ? x == y : isequal(x, y)
-    end
+    @test iszero(_conj(GF.advanced) - GF.retarded)
     @test_broken isequal(KeldyshContraction._conj(GF.keldysh), -1 * GF.keldysh)
     # TODO this is not equal to do G^R and G^A being at different coordinates
 end
