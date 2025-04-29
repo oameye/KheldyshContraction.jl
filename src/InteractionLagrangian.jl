@@ -56,7 +56,7 @@ Checks if an expression [`QTerm`])(@ref) is conserved. A conserved expression is
 
 See also: [`is_physical`](@ref)
 """
-function is_conserved(args_nc_::Vector{QField})
+function is_conserved(args_nc_::Vector{<:QField})
     n_destroy = isa.(args_nc_, Destroy)
     if length(args_nc_) == 0 || iszero(sum(n_destroy))
         return false
@@ -76,7 +76,7 @@ Checks if an expression [`QTerm`])(@ref) is physical. A physical expression is o
 
 See also: [`is_conserved`](@ref)
 """
-function is_physical(args_nc_::Vector{QField})
+function is_physical(args_nc_::Vector{<:QField})
     positions = position.(args_nc_)
     # checks if a mul has both in-out in a lagrangian
     in_out = In() ∈ positions ? Out() ∈ positions : true
