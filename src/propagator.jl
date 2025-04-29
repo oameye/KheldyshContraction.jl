@@ -142,9 +142,9 @@ propagator_type(p::SymbolicUtils.BasicSymbolic{Propagator{T}}) where {T} = T
 
 function position(p::Average)
     _positions = positions(p)
-    if In() ∈ _positions
+    if length(findall(x -> x isa In, _positions)) == 1
         return In()
-    elseif Out() ∈ _positions
+    elseif length(findall(x -> x isa Out, _positions)) == 1
         return Out()
     elseif all(isbulk, _positions)
         idxs = getproperty.(_positions, :index)

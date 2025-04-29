@@ -70,6 +70,9 @@ end
     @test is_keldysh(Keldysh)
     @test is_retarded(Retarded)
     @test is_advanced(Advanced)
+    @test is_keldysh(make_propagator(ϕᶜ, ϕᶜ'))
+    @test is_retarded(make_propagator(ϕᶜ, ϕᴾ'))
+    @test is_advanced(make_propagator(ϕᴾ, ϕᶜ'))
 end
 
 @testset "position" begin
@@ -80,10 +83,22 @@ end
     @test !same_position(p)
     p = make_propagator(ϕᴾ(Bulk(3)), ϕᶜ(Bulk(3))')
     @test same_position(p)
+
+    p = make_propagator(ϕᴾ(In()), ϕᶜ'(In()))
+    @test_throws ArgumentError position(p)
 end
 
 @testset "simplification" begin
     using KeldyshContraction: make_propagator, advanced_to_retarded
     expr = make_propagator(ϕᴾ, ϕᶜ') + make_propagator(ϕᶜ, ϕᴾ')
     @test iszero(advanced_to_retarded(expr))
+
+    @syms a
+    @test isequal(advanced_to_retarded(a), a)
+end
+
+@testset "get_unique_propagators" begin
+    using KeldyshContraction: get_unique_propagators
+    @syms a
+    @test isempty(get_unique_propagators(a))
 end
