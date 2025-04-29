@@ -65,7 +65,6 @@ GF = wick_contraction(L_int)
 
 Σ = SelfEnergy(GF)
 
-
 # ## Transport
 
 # The self-energy can be used to compute derive a kinetic equation for the system.
