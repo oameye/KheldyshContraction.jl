@@ -70,6 +70,7 @@ end
         L = InteractionLagrangian(L_int)
         GF = wick_contraction(L)
         @test isequal(GF.keldysh, result)
+        @test_broken construct_self_energy(arguments(GF.keldysh)[1])
     end
 
     @testset "quantum-quantum Green's function" begin
