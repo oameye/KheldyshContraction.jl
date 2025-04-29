@@ -36,7 +36,20 @@ The field properties are determined by the Enum objects:
 ```@docs
 KeldyshContraction.KeldyshContour
 KeldyshContraction.Regularisation
-KeldyshContraction.Position
+```
+
+And the position of the field is determined by the `AbstractPosition` object:
+
+```@example API
+using Term, KeldyshContraction # hide
+Term.typestree(KeldyshContraction.Bulk) # hide
+```
+
+```@docs
+KeldyshContraction.AbstractPosition
+KeldyshContraction.In
+KeldyshContraction.Out
+KeldyshContraction.Bulk
 ```
 
 #### Field Constructors
@@ -51,11 +64,11 @@ The created fields are callable to change a property of the individual fields:
 
 ```@example API
 using KeldyshContraction
-using KeldyshContraction: In, Classical, position
+using KeldyshContraction: position
 
 @qfields ϕ::Destroy(Classical) 
 
-position(ϕ(In))
+position(ϕ)
 ```
 
 ### Field Algebra
@@ -69,6 +82,8 @@ Term.typestree(KeldyshContraction.QTerm) # hide
 KeldyshContraction.QTerm
 KeldyshContraction.QMul
 KeldyshContraction.QAdd
+arguments(::KeldyshContraction.QMul)
+arguments(::KeldyshContraction.QAdd)
 ```
 
 The properties of the expression can be checked using:
@@ -98,10 +113,12 @@ KeldyshContraction.Propagator
 KeldyshContraction.PropagatorType
 KeldyshContraction.propagator
 DressedPropagator
+KeldyshContraction.matrix(::DressedPropagator)
 ```
 
 ### Self-Energy
 
 ```@docs
 KeldyshContraction.SelfEnergy
+KeldyshContraction.matrix(::KeldyshContraction.SelfEnergy)
 ```

@@ -21,9 +21,11 @@ include("keldysh_algebra.jl")
 include("QTerm.jl")
 include("field_math.jl")
 include("hashing.jl")
+include("InteractionLagrangian.jl")
 
 # Propagators
 include("propagator.jl")
+include("dressed_propagator.jl")
 include("symbolic_utils.jl")
 include("wick_contractions.jl")
 include("self_energy.jl")
@@ -41,6 +43,7 @@ export @qfields,
     DressedPropagator,
     SelfEnergy,
     InteractionLagrangian,
-    @syms
+    @syms,
+    arguments
 
 end

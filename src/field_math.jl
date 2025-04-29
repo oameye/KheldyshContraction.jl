@@ -2,7 +2,8 @@
 
 function Base.:*(a::QSym, b::QSym)
     args = [a, b]
-    sort!(args; by=acts_on)
+    sort!(args; by=position)
+    sort!(args; by=ladder)
     return QMul(1, args)
 end
 
@@ -22,18 +23,21 @@ end
 
 function Base.:*(a::QSym, b::QMul)
     args_nc = vcat(a, b.args_nc)
-    sort!(args_nc; by=acts_on)
+    sort!(args_nc; by=position)
+    sort!(args_nc; by=ladder)
     return merge_commutators(b.arg_c, args_nc)
 end
 function Base.:*(a::QMul, b::QSym)
     args_nc = vcat(a.args_nc, b)
-    sort!(args_nc; by=acts_on)
+    sort!(args_nc; by=position)
+    sort!(args_nc; by=ladder)
     return merge_commutators(a.arg_c, args_nc)
 end
 
 function Base.:*(a::QMul, b::QMul)
     args_nc = vcat(a.args_nc, b.args_nc)
-    sort!(args_nc; by=acts_on)
+    sort!(args_nc; by=position)
+    sort!(args_nc; by=ladder)
     arg_c = a.arg_c * b.arg_c
     return merge_commutators(arg_c, args_nc)
 end
@@ -64,7 +68,7 @@ function merge_commutators(arg_c, args_nc)
 end
 
 function _ismergeable(a, b)
-    return isequal(acts_on(a), acts_on(b)) && ismergeable(a, b)
+    return isequal(position(a), position(b)) && ismergeable(a, b)
 end
 ismergeable(a, b) = false
 

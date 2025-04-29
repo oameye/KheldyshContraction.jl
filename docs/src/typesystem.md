@@ -11,7 +11,10 @@ Using these packages, we can define the algebra of quantum fields in a symbolic 
 using GraphRecipes, Plots, KeldyshContraction, Random
 Random.seed!(1) # hide
 theme(:dracula) # hide
-plot(KeldyshContraction.QField; method=:tree, fontsize=10, markersize = 0.12, nodeshape=:ellipse)
+plot(
+  KeldyshContraction.QField;
+  method=:tree, fontsize=10, markersize = 0.12, nodeshape=:ellipse
+)
 ```
 
 [`KeldyshContraction.QSym`](@ref) will be abstract type representing the individual field of type [`Destroy`](@ref) and [`Create`](@ref). [`KeldyshContraction.QTerm`](@ref) will represent the terms of the algebra, which are the *products* and *sum* of the fields. The type naming and hierarchy is heavily inspired by the implementation in `QuantumCumulants.jl`.
@@ -20,7 +23,7 @@ QSym can then have additional properties to make it Keldsysh-specific type field
 
 - [`KeldyshContraction.KeldyshContour`](@ref) - the Keldysh contour of the field, which can be either `KeldyshContour.Quantum` or `KeldyshContour.Classical`.
 - [`KeldyshContraction.Regularisation`](@ref) - the tadpole regularisation of the field, which can be either `Regularisation.Zero`, `Regularisation.Plus` or `Regularisation.Minus`.
-- [`KeldyshContraction.Position`](@ref) - the position of the field, which can be either `Position.In`, `Position.Out` or `Position.Bulk`.
+- [`KeldyshContraction.AbstractPosition`](@ref) - the position of the field, which can be either `Position.In`, `Position.Out` or `Position.Bulk`.
 
 To make our quantum field types work with the symbolic algebra system, we need to implement several interface functions from SymbolicUtils.jl and TermInterface.jl:
 

@@ -31,6 +31,11 @@ function QMul(arg_c::T, args_nc; metadata::M=NO_METADATA) where {M,T}
 end
 
 SymbolicUtils.operation(::QMul) = (*)
+"""
+    arguments(a::QMul)
+
+Return the vector of the factors of [`QMul`](@ref).
+"""
 SymbolicUtils.arguments(a::QMul) = vcat(a.arg_c, a.args_nc)
 
 function SymbolicUtils.maketerm(::Type{<:QMul}, ::typeof(*), args, metadata)
@@ -46,7 +51,8 @@ SymbolicUtils.metadata(a::QMul) = a.metadata
 function Base.adjoint(q::QMul)
     args_nc = map(adjoint, q.args_nc)
     reverse!(args_nc) # TODO fields switch under adjoint right?
-    sort!(args_nc; by=acts_on)
+    sort!(args_nc; by=position)
+    sort!(args_nc; by=ladder)
     return QMul(conj(q.arg_c), args_nc; q.metadata)
 end
 
@@ -62,7 +68,7 @@ end
 """
     isbulk(q::QTerm)
 
-Checks if a term is in the bulk. A term is bulk if it has no `In` or `Out` position fields ([`Position`](@ref)).
+Checks if a term is in the bulk. A term is bulk if it has no `In` or `Out` position fields ([`AbstractPosition`](@ref)).
 """
 isbulk(q::QMul) = all(isbulk.(q.args_nc))
 allfields(q::QMul) = q.args_nc
@@ -80,6 +86,11 @@ struct QAdd <: QTerm
     arguments::Vector{QSymbol}
 end
 SymbolicUtils.operation(::QAdd) = (+)
+"""
+    arguments(a::QAdd)
+
+Return the vector of the arguments of [`QAdd`](@ref).
+"""
 SymbolicUtils.arguments(a::QAdd) = a.arguments
 SymbolicUtils.maketerm(::Type{<:QAdd}, ::typeof(+), args, metadata) = QAdd(args)
 
@@ -94,82 +105,3 @@ end
 Base.adjoint(q::QAdd) = QAdd(map(adjoint, arguments(q)))
 isbulk(q::QAdd) = all(isbulk.(arguments(q)))
 allfields(q::QAdd) = reduce(vcat, allfields.(SymbolicUtils.arguments(q)))
-
-########################
-#       acts_on
-########################
-
-"""
-    acts_on(op)
-
-Shows on which position `op` acts. For [`QSym`](@ref) types, this
-returns an Integer, whereas for a `Term` it returns a `Vector{Int}`
-whose entries specify all subspaces on which the expression acts.
-"""
-acts_on(op::QSym) = Int(position(op))
-function acts_on(q::QMul)
-    pos = Int[]
-    for arg in q.args_nc
-        pos_ = acts_on(arg)
-        pos_ ∈ pos || push!(pos, pos_)
-    end
-    return pos
-end
-function acts_on(q::QAdd)
-    pos = Int[]
-    for arg in arguments(q)
-        append!(pos, acts_on(arg))
-    end
-    unique!(pos) # TODO should this unique be here?
-    sort!(pos)
-    return pos
-end
-acts_on(x) = Int[]
-# ^ used for sorting the arguments of a QMul and QAdd
-
-###########################
-#  Interaction Lagrangian
-###########################
-
-"""
-$(TYPEDEF)
-
-Represents an interaction Lagrangian
-
-# Fields
-$(FIELDS)
-
-# Constructor
-$(TYPEDSIGNATURES)
-
-Constructs an InteractionLagrangian from a given [`QTerm`](@ref) expression.
-
-# Requirements
-The constructor enforces several constraints on the input expression and throws `AssertionError` if any of them are not met:
-- Must be a bulk term ([`KeldyshContraction.isbulk`](@ref))
-- Must be conserved ([`KeldyshContraction.is_conserved`](@ref))
-- Must be physical ([`KeldyshContraction.is_physical`](@ref))
-- Can only contain up to two different fields
-- Fields must have opposite contours
-
-"""
-struct InteractionLagrangian{T}
-    "The Lagrangian expression as a [`QTerm`](@ref)"
-    lagrangian::T
-    "The quantum field destruction operator"
-    qfield::Destroy{Quantum,Zero,Nothing}
-    "The classical field destruction operator"
-    cfield::Destroy{Classical,Zero,Nothing}
-    function InteractionLagrangian(expr::QTerm)
-        @assert isbulk(expr) "An interaction Lagrangian only accepts bulk terms"
-        @assert is_conserved(expr) "An interaction Lagrangian only accepts conserved terms"
-        @assert is_physical(expr) "An interaction Lagrangian only accepts physical terms"
-        fields = filter(is_annihilation, unique(set_reg_to_zero.(allfields(expr))))
-        @assert length(fields) <= 2 "An interaction Lagrangian only accepts up to two different fields"
-        contours = Int.(contour.(fields))
-        @assert unique(contours) == contours "An interaction Lagrangian only accepts fields with opposite contours"
-        q_idx = findfirst(iszero, contours)
-        c_idx = findfirst(isone, contours)
-        return new{typeof(expr)}(expr, fields[q_idx], fields[c_idx])
-    end # TODO what if only quantum or only classical
-end

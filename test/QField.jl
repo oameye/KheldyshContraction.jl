@@ -1,5 +1,5 @@
 using KeldyshContraction, Test
-using KeldyshContraction: In, Out, Classical, Quantum, Plus, Minus
+using KeldyshContraction: In, Out, Bulk, Classical, Quantum, Plus, Minus
 import KeldyshContraction as KC
 
 @qfields ϕ::Destroy(Classical) ψ::Destroy(Quantum)
@@ -10,6 +10,7 @@ import KeldyshContraction as KC
     @test TermInterface.head(ϕ) == :call
     @test SymbolicUtils.iscall(ϕ) == false
     @test SymbolicUtils.iscall(ϕ * ϕ) == true
+    @test SymbolicUtils.iscall(ϕ + ϕ) == true
     @test SymbolicUtils.operation(ϕ + ϕ) == +
     @test SymbolicUtils.operation(ϕ * ϕ) == *
     @test SymbolicUtils.arguments(2 * ϕ * ϕ) == [2, ϕ, ϕ]
@@ -22,6 +23,10 @@ import KeldyshContraction as KC
         @test SymbolicUtils.promote_symtype(+, ϕ, 1) isa KC.QField broken = true
         @test SymbolicUtils.promote_symtype(*, ϕ, 1) isa KC.QField broken = true
     end
+end
+
+@testset "normal ordering" begin
+    @test isequal(ϕ' * ϕ, ϕ * ϕ')
 end
 
 @testset "ones and zeros" begin
@@ -50,6 +55,7 @@ end
     @test isequal(ϕ2 + 1, ϕ + ϕ + 1)
     @test isequal(ϕ2 + ϕ, ϕ + ϕ + ϕ)
 end
+
 @testset "simplification" begin
     using SymbolicUtils
     @test isequal(ϕ + ϕ, 2 * ϕ) broken = true
@@ -81,17 +87,20 @@ end
     @test isequal(adjoint(ϕ + ψ), ϕ′ + ψ′)
 end
 
-@testset "acts_on" begin
-    using KeldyshContraction: acts_on
-    # Test the acts_on function
-    @test acts_on(ϕ) == 0
-    @test acts_on(ψ(In)) == 1
-    @test acts_on(ψ(Out)) == -1
-    @test acts_on(ϕ + ψ) == [0]
-    @test acts_on(ϕ * ψ) == [0]
+@testset "position" begin
+    using KeldyshContraction: position
+    # Test the position function
+    @test KC.position(ϕ).index == 1
+    @test KC.position(ψ(In())) == In()
+    @test KC.position(ψ(Out())) == Out()
+    # @test KC.position(ϕ + ψ) == [0]
+    # @test KC.position(ϕ * ψ) == [0]
 
-    @test acts_on(ϕ + ψ(In)) == [0, 1]
-    @test acts_on(ϕ * ψ(In)) == [0, 1]
+    # @test KC.position(ϕ + ψ(In)) == [0, 1]
+    # @test KC.position(ϕ * ψ(In)) == [0, 1]
+    to_sort = [ϕ(Bulk(3)), ϕ(Bulk(1)), ϕ, ψ(In()), ψ(Out())]
+    sorted = [ψ(Out()), ϕ, ϕ(Bulk(1)), ϕ(Bulk(3)), ψ(In())]
+    @test isequal(sort(to_sort; by=KC.position), sorted)
 end
 
 @testset "more math" begin
@@ -106,6 +115,11 @@ end
 
     @test isequal(ϕ + 0, ϕ)
     @test isequal(0 + ϕ, ϕ)
+
+    mul = ϕ * ϕ
+    add = ϕ + ϕ
+    @test isequal(ϕ * mul, ϕ^3)
+    @test isequal(ϕ + add, ϕ + ϕ + ϕ)
 end
 
 @testset "quantum-classical" begin
@@ -123,4 +137,18 @@ end
     loss2boson =
         0.5 * ϕ' * ψ' * (ϕ(Minus)^2 + ψ(Minus)^2) -
         0.5 * ϕ(Plus) * ψ(Plus) * (ϕ'^2 + ψ'^2) + ϕ' * ψ' * (ϕ(Plus)^2 + ϕ(Minus)^2)
+end
+
+@testset "is_conserved" begin
+    using KeldyshContraction: is_conserved
+
+    @test !is_conserved(KeldyshContraction.QField[])
+    @test !is_conserved(KeldyshContraction.QField[ϕ])
+end
+
+@testset "QMul" begin
+    using KeldyshContraction: QMul
+
+    @test isequal(QMul(1, [ϕ]), ϕ)
+    @test isequal(QMul(0, [ϕ]), 0)
 end

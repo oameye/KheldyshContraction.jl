@@ -4,22 +4,22 @@ using KeldyshContraction: propagator, position, contour, make_propagator
 
 @qfields ϕᶜ::Destroy(Classical) ϕᴾ::Destroy(Quantum)
 
-@test_skip -propagator(ϕᶜ, ϕᶜ') # this errors
+@test_skip -make_propagator(ϕᶜ, ϕᶜ') # TODO this errors
 
 @testset "propagator checks" begin
     @test_throws AssertionError propagator(ϕᶜ, ϕᶜ) # annihilation creation
     # @test_throws AssertionError Propagator(ϕᶜ, ϕᶜ') # same coordinate
-    @test_throws AssertionError propagator(ϕᶜ(In), ϕᶜ'(Out)) # In-Out
-    @test_throws AssertionError propagator(ϕᶜ(Out), ϕᶜ'(In)) # In-Out
-    @test_throws AssertionError propagator(ϕᶜ(Out), ϕᶜ'(Out)) # same coordinate
-    @test_throws AssertionError propagator(ϕᴾ, ϕᴾ(In)') # quantum-quantum
-    @test_throws AssertionError propagator(ϕᶜ(In), ϕᴾ') # Out is In
-    @test_throws AssertionError propagator(ϕᶜ, ϕᶜ'(Out)) # In is Out
+    @test_throws AssertionError propagator(ϕᶜ(In()), ϕᶜ'(Out())) # In-Out
+    @test_throws AssertionError propagator(ϕᶜ(Out()), ϕᶜ'(In())) # In-Out
+    @test_throws AssertionError propagator(ϕᶜ(Out()), ϕᶜ'(Out())) # same coordinate
+    @test_throws AssertionError propagator(ϕᴾ, ϕᴾ(In())') # quantum-quantum
+    @test_throws AssertionError propagator(ϕᶜ(In()), ϕᴾ') # Out is In
+    @test_throws AssertionError propagator(ϕᶜ, ϕᶜ'(Out())) # In is Out
 end
 
 @testset "properties" begin
-    p = propagator(ϕᴾ, ϕᶜ'(In))
-    @test KeldyshContraction.acts_on(p) == 1
+    p = make_propagator(ϕᴾ, ϕᶜ'(In()))
+    @test KeldyshContraction.position(p) isa In
     @test KeldyshContraction.contours(p) == [Quantum, Classical]
     @test !KeldyshContraction.isbulk(p)
     @test KeldyshContraction.regularisations(p) == fill(KeldyshContraction.Zero, 2)
@@ -27,23 +27,23 @@ end
 end
 
 @testset "sort" begin
-    p1 = propagator(ϕᴾ, ϕᶜ'(In))
-    p2 = propagator(ϕᴾ, ϕᶜ')
-    @test isequal(sort!([p1, p2]; by=KeldyshContraction.acts_on), [p2, p1])
+    p1 = make_propagator(ϕᴾ, ϕᶜ'(In()))
+    p2 = make_propagator(ϕᴾ, ϕᶜ')
+    @test isequal(sort!([p1, p2]; by=KeldyshContraction.position), [p2, p1])
 end
 
 @testset "adjoint" begin
-    p1 = make_propagator(ϕᴾ, ϕᶜ'(In))
-    p2 = make_propagator(ϕᶜ, ϕᴾ'(In))
+    p1 = make_propagator(ϕᴾ, ϕᶜ'(In()))
+    p2 = make_propagator(ϕᶜ, ϕᴾ'(In()))
     @test isequal(p1', p2) # (G^R)† = G^A
 
-    p = make_propagator(ϕᶜ, ϕᶜ'(In))
+    p = make_propagator(ϕᶜ, ϕᶜ'(In()))
     @test isequal(p', -1 * p) # (G^K)† = -G^K
 end
 
 @testset "math" begin
-    p1 = propagator(ϕᶜ, ϕᶜ'(In))
-    p2 = propagator(ϕᶜ, ϕᶜ'(In))
+    p1 = propagator(ϕᶜ, ϕᶜ'(In()))
+    p2 = propagator(ϕᶜ, ϕᶜ'(In()))
     @test isequal(p1 + p2, 2 * p1)
     @test isequal(p1 * p2, p1^2)
 end
@@ -52,13 +52,13 @@ end
     p = propagator(ϕᴾ(Plus), ϕᶜ')
     @test KeldyshContraction.regular(p) == false
 
-    p = propagator(ϕᶜ(Minus), ϕᶜ'(In))
+    p = propagator(ϕᶜ(Minus), ϕᶜ'(In()))
     @test KeldyshContraction.regular(p) == true
     KeldyshContraction.set_reg_to_zero!(p)
     @test KeldyshContraction.regularisations(p) == fill(KeldyshContraction.Zero, 2)
 
-    p1 = propagator(ϕᶜ, ϕᶜ'(In))
-    p2 = propagator(ϕᴾ, ϕᶜ'(In))
+    p1 = propagator(ϕᶜ, ϕᶜ'(In()))
+    p2 = propagator(ϕᴾ, ϕᶜ'(In()))
 
     @test_throws AssertionError KeldyshContraction.regular(-im * p1 * p2)
 end
@@ -70,4 +70,35 @@ end
     @test is_keldysh(Keldysh)
     @test is_retarded(Retarded)
     @test is_advanced(Advanced)
+    @test is_keldysh(make_propagator(ϕᶜ, ϕᶜ'))
+    @test is_retarded(make_propagator(ϕᶜ, ϕᴾ'))
+    @test is_advanced(make_propagator(ϕᴾ, ϕᶜ'))
+end
+
+@testset "position" begin
+    using KeldyshContraction: position, same_position, Bulk, In, Out
+    p = make_propagator(ϕᴾ, ϕᶜ')
+    @test same_position(p)
+    p = make_propagator(ϕᴾ(In()), ϕᶜ')
+    @test !same_position(p)
+    p = make_propagator(ϕᴾ(Bulk(3)), ϕᶜ(Bulk(3))')
+    @test same_position(p)
+
+    p = make_propagator(ϕᴾ(In()), ϕᶜ'(In()))
+    @test_throws ArgumentError position(p)
+end
+
+@testset "simplification" begin
+    using KeldyshContraction: make_propagator, advanced_to_retarded
+    expr = make_propagator(ϕᴾ, ϕᶜ') + make_propagator(ϕᶜ, ϕᴾ')
+    @test iszero(advanced_to_retarded(expr))
+
+    @syms a
+    @test isequal(advanced_to_retarded(a), a)
+end
+
+@testset "get_unique_propagators" begin
+    using KeldyshContraction: get_unique_propagators
+    @syms a
+    @test isempty(get_unique_propagators(a))
 end

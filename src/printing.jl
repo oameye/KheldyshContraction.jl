@@ -1,5 +1,5 @@
 Base.show(io::IO, x::QSym) = write(io, name(x))
-function Base.show(io::IO, x::Create{C,R}) where {C,R}
+function Base.show(io::IO, x::Create{C,P,R}) where {C,P,R}
     reg = Int(R)
     if iszero(reg)
         s = string("̄", name(x))
@@ -10,7 +10,7 @@ function Base.show(io::IO, x::Create{C,R}) where {C,R}
     end
     return write(io, s)
 end
-function Base.show(io::IO, x::Destroy{C,R}) where {C,R}
+function Base.show(io::IO, x::Destroy{C,P,R}) where {C,P,R}
     reg = Int(R)
     if iszero(reg)
         s = string(name(x))
@@ -36,7 +36,9 @@ end
 
 function Base.show(io::IO, x::QMul)
     if !SymbolicUtils._isone(x.arg_c)
+        x.arg_c isa Complex ? write(io, "(") : write(io, "")
         show(io, x.arg_c)
+        x.arg_c isa Complex ? write(io, ")") : write(io, "")
         show(io, *)
     end
     show_brackets[] && write(io, "(")
@@ -72,7 +74,7 @@ end
 # end
 function Base.show(io::IO, x::Average)
     prop_type = Dict(Retarded => "ᴿ", Advanced => "ᴬ", Keldysh => "ᴷ")
-    pos_string = Dict(In => "x₂", Out => "x₁", Bulk => "y")
+
     reg_string = Dict(Plus => "⁺", Zero => "", Minus => "⁻")
 
     (out, in) = positions(x)
@@ -81,14 +83,28 @@ function Base.show(io::IO, x::Average)
         "G",
         prop_type[propagator_type(x)],
         "(",
-        pos_string[out],
+        pos_string(out),
         reg_string[r2],
         ",",
-        pos_string[in],
+        pos_string(in),
         reg_string[r1],
         ")",
     )
     return write(io, s)
+end
+
+const underscore_dict = Dict(
+    1 => "₁", 2 => "₂", 3 => "₃", 4 => "₄", 5 => "₅", 6 => "₆", 7 => "₇", 8 => "₈", 9 => "₉"
+)
+
+function pos_string(p)
+    if p isa In
+        return "x₂"
+    elseif p isa Out
+        return "x₁"
+    else
+        return "y"*underscore_dict[p.index]
+    end
 end
 
 function Base.show(io::IO, mime::MIME"text/plain", Σ::Union{SelfEnergy,DressedPropagator})

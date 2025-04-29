@@ -3,7 +3,7 @@ Base.hash(q::QMul, h::UInt) = hash(QMul, hash(q.arg_c, SymbolicUtils.hashvec(q.a
 
 Base.hash(q::QAdd, h::UInt) = hash(QAdd, SymbolicUtils.hashvec(arguments(q), h))
 
-function Base.hash(h::Union{KeldyshContour,Regularisation,Position}, i::UInt)
+function Base.hash(h::Union{KeldyshContour,Regularisation}, i::UInt)
     return hash(Int(h), i)
 end
 
@@ -12,7 +12,7 @@ for f in [:Destroy, :Create]
         return hash(
             $(f),
             hash(
-                name(op), hash(contour(op), hash(acts_on(op), hash(regularisation(op), h)))
+                name(op), hash(contour(op), hash(position(op), hash(regularisation(op), h)))
             ),
         )
     end

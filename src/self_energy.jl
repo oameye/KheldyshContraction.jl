@@ -1,34 +1,35 @@
 const PositionPropagatorType = OrderedCollections.LittleDict{
-    Int64,
+    AbstractPosition,
     PropagatorType,
-    Tuple{Int64,Int64,Int64},
+    Tuple{<:AbstractPosition,<:AbstractPosition,<:AbstractPosition},
     Tuple{PropagatorType,PropagatorType,PropagatorType},
 }
-function self_energy_type(dict::PositionPropagatorType)
-    right = is_retarded(dict[-1]) ? Quantum : Classical
-    left = is_advanced(dict[1]) ? Quantum : Classical
 
-    if Int.([right, left]) == [0, 0]
-        # G_K(1) = ...
-        return Keldysh
-    elseif Int.([right, left]) == [1, 0]
-        # G_R(1) =  G₀_R Σ_A G₀_R
+"compute the self-energy type from positions save in `dict`."
+function self_energy_type(dict::OrderedCollections.LittleDict)
+    # TODO only correct for first order with Keldysh
+    # G1K =  GA[y1,x2] GK[x1,y1] ΣA[y1,y1]+GA[y1,x2] GR[x1,y1] Σ+GK[y1,x2] GR[x1,y1]ΣR[y1,y1]
+    if is_keldysh(dict[Out()]) && is_advanced(dict[In()])
         return Advanced
-    elseif Int.([right, left]) == [0, 1]
-        # G_A(1) = G₀_A Σ_R G₀_A
+    elseif is_retarded(dict[Out()]) && is_keldysh(dict[In()])
         return Retarded
+    elseif is_retarded(dict[Out()]) && is_advanced(dict[In()])
+        return Keldysh
     else
         @show dict
         error("Classical-Classical for self-energy should be zero.")
     end
 end
 
+"Construct the self-energy from `expr`."
 function construct_self_energy(expr::SymbolicUtils.Symbolic)
     self_energy = OrderedCollections.LittleDict{PropagatorType,SNuN}((
         Advanced => 0, Retarded => 0, Keldysh => 0
     ))
     return construct_self_energy!(self_energy, expr)
 end
+
+"Construct the self-energy from `expr` and save in LittleDict `self_energy`."
 function construct_self_energy!(
     self_energy::OrderedCollections.LittleDict, expr::SymbolicUtils.Symbolic
 )
@@ -39,10 +40,11 @@ function construct_self_energy!(
         idxs_p = setdiff(eachindex(args), idxs_c)
         args_p = args[idxs_p]
 
-        positions = KeldyshContraction.acts_on.(args_p)
-        bulk_propagator = args_p[findfirst(iszero, positions)]
+        positions = KeldyshContraction.position.(args_p)
+        types_p = propagator_type.(args_p)
+        bulk_propagator = args_p[findfirst(isbulk, positions)]
         dict = OrderedCollections.freeze(
-            OrderedCollections.OrderedDict(zip(positions, propagator_type.(args_p)))
+            OrderedCollections.OrderedDict(zip(positions, types_p))
         )
 
         to_add = isempty(idxs_c) ? bulk_propagator : *(args[idxs_c]...) * bulk_propagator
@@ -54,7 +56,7 @@ end
 """
 $(TYPEDEF)
 
-A struct representing the self-energy components in the Retarded-Advance-Keldysh basis ([`KeldyshContraction.PropagatorType`](@ref)).
+A struct representing the self-energy components in the Retarded-Advance-Keldysh basis ([`PropagatorType`](@ref)).
 The self-energy is divided into three components: Keldysh, retarded, and advanced.
 
 # Fields
@@ -90,13 +92,26 @@ struct SelfEnergy{Tk,Tr,Ta}
         qq, cq, qc = SymbolicUtils.expand.((
             self_energy[Keldysh], self_energy[Retarded], self_energy[Advanced]
         ))
-        # G_R(1) =  G₀_R Σ_A G₀_R
-        # G_A(1) = G₀_A Σ_R G₀_A
-        # G_K(1) = G₀_R Σ_K G₀_A + G₀_R Σ_A G₀_K + G₀_K Σ_R G₀_A
+        # G_R(1) = G₀_R Σ_R G₀_R
+        # G_A(1) = G₀_A Σ_A G₀_A
+        # G_K(1) = G₀_K(x1) Σ_A(y) G₀_A(x2) + G_A(x2) Σ_A(y) G_R(x1) + G_R(x1) Σ_R(y) G_K(x2)
         # G₀_K Σ_K G₀_K = 0
 
         return new{typeof(qq),typeof(cq),typeof(qc)}(qq, cq, qc)
     end
 end
+
+"""
+    matrix(Σ::SelfEnergy)
+
+Returns the matrix representation of the self energy `Σ`
+in the Retarded-Advanced-Keldysh basis.
+```math
+\\hat{\\Sigma}\\left(y_1, y_2\\right)=
+\\left(\\begin{array}{cc}0 & \\Sigma^A\\left(y_1, y_2\\right) \\\\
+\\Sigma^R\\left(y_1, y_2\\right) & \\Sigma^K\\left(y_1, y_2\\right)
+\\end{array}
+\\right)
+```
+"""
 matrix(Σ::SelfEnergy) = SNuN[0 Σ.advanced; Σ.retarded Σ.keldysh]
-# TODO: check matrix convention G_0 Σ G_0 and define above matric accordingly

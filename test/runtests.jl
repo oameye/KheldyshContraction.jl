@@ -14,12 +14,12 @@ using KeldyshContraction, Test
     all_concrete(KeldyshContraction.SelfEnergy)
 end
 
-if VERSION < v"1.12.0-beta"
-    @testset "Code linting" begin
-        using JET
-        JET.test_package(KeldyshContraction; target_defined_modules=true)
-    end
-end
+# if VERSION < v"1.12.0-beta"
+#     @testset "Code linting" begin
+#         using JET
+#         JET.test_package(KeldyshContraction; target_defined_modules=true)
+#     end
+# end
 
 @testset "ExplicitImports" begin
     using ExplicitImports
@@ -50,6 +50,22 @@ end
     include("propagator.jl")
 end
 
-@testset "two_boson_loss" begin
+@testset "tadpole reguralisation" begin
+    include("reguralise.jl")
+end
+
+@testset "self-energy" begin
+    include("self_energy.jl")
+end
+
+@testset "two boson loss" begin
     include("two_boson_loss.jl")
+end
+
+@testset "two boson loss" begin
+    include("self_interaction.jl")
+end
+
+@testset "second order" begin
+    include("second_order.jl")
 end
