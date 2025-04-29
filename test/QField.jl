@@ -138,3 +138,17 @@ end
         0.5 * ϕ' * ψ' * (ϕ(Minus)^2 + ψ(Minus)^2) -
         0.5 * ϕ(Plus) * ψ(Plus) * (ϕ'^2 + ψ'^2) + ϕ' * ψ' * (ϕ(Plus)^2 + ϕ(Minus)^2)
 end
+
+@testset "is_conserved" begin
+    using KeldyshContraction: is_conserved
+
+    @test !is_conserved(KeldyshContraction.QField[])
+    @test !is_conserved(KeldyshContraction.QField[ϕ])
+end
+
+@testset "QMul" begin
+    using KeldyshContraction: QMul
+
+    @test isequal(QMul(1, [ϕ]), ϕ)
+    @test isequal(QMul(0, [ϕ]), 0)
+end
