@@ -70,11 +70,16 @@ GF = wick_contraction(L_int)
 # The self-energy can be used to compute derive a kinetic equation for the system.
 # In doing this one compute the so-called collision integral, which is given by
 # ```math
-# I _\mathrm{coll}= i Σ^K(x, p) + 2 F (x, p) \mathrm{Im}[Σ^R(x, p)].
+# I _\mathrm{coll}= i Σ^K(x, p) +  F (x, p) (Σ^R(x, p)-Σ^A(x, p)).
 # ```
 # Here, $F$ is the bosonic distribution function of the system.
-# However, from above calculation we find that ``i Σ^K(x, p) = 0`` and:
-# ```math
-#  \mathrm{Im}[Σ^R(x, p)] =  \int \frac{d^d q}{(2\pi)^d}  \frac{d  \epsilon}{2\pi} \mathrm{Im}G_0^K
-# ```
-# where ``q = (\vec{q}, \epsilon)`` with $\epsilon$ the energy of the system.
+# However, from above calculation we find that ``i Σ^K(x, p) = 0`` and ``Σ^R(x, p)=Σ^A(x, p)``,
+# such that the collision integral has not contribution at first order.
+
+
+## Second order
+
+GF = wick_contraction(L_int; order=2)
+
+using SymbolicUtils
+SymbolicUtils.expand(GF.keldysh) |> arguments
