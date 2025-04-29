@@ -68,8 +68,13 @@ set_reg_to_zero!(p::Number) = nothing
 #################################
 #       Contraction
 #################################
+"""
+    wick_contraction(L::InteractionLagrangian; order=1)
 
-function wick_contraction(L::InteractionLagrangian; order=1)
+
+All the same coordinate advanced propagators are converted to retarded propagators.
+"""
+function wick_contraction(L::InteractionLagrangian; order=1, simplify=true)
     ϕ = L.qfield
     ψ = L.cfield
     if order == 1
@@ -88,6 +93,9 @@ function wick_contraction(L::InteractionLagrangian; order=1)
             prefactor*wick_contraction(ϕ(Out()) * ψ'(In()) * L1.lagrangian * L2.lagrangian)
     else
         error("higher order then two not implemented")
+    end
+    if simplify
+        keldysh, retarded, advanced = advanced_to_retarded.((keldysh, retarded, advanced))
     end
     return DressedPropagator(keldysh, retarded, advanced)
 end

@@ -13,25 +13,6 @@ The Quantum-Quantum propagator should always be zero.
     Advanced
     Retarded
 end
-"""
-$(TYPEDSIGNATURES)
-
-Determine the type of the propagator in the Retarded-Advance-Keldysh ([`PropagatorType`](@ref)) based on the contour of the output and input quantum field.
-"""
-function propagator_type(out::QSym, in::QSym)::PropagatorType
-    contours = Int.(contour.((out, in)))
-    diff_contour = first(-(contours...))
-    if iszero(diff_contour)
-        return Keldysh
-    elseif isone(diff_contour)
-        return Retarded
-    else
-        return Advanced
-    end
-end
-is_advanced(x::PropagatorType) = Int(x) == Int(Advanced)
-is_retarded(x::PropagatorType) = Int(x) == Int(Retarded)
-is_keldysh(x::PropagatorType) = Int(x) == Int(Keldysh)
 
 "Collect and checks the rules for a physical propagator"
 function propagator_checks(out::QField, in::QField)::Nothing
@@ -84,6 +65,29 @@ end
 function SymbolicUtils.symtype(::SymbolicUtils.BasicSymbolic{Propagator{T}}) where {T}
     return Propagator{T}
 end
+
+"""
+$(TYPEDSIGNATURES)
+
+Determine the type of the propagator in the Retarded-Advance-Keldysh ([`PropagatorType`](@ref)) based on the contour of the output and input quantum field.
+"""
+function propagator_type(out::QSym, in::QSym)::PropagatorType
+    contours = Int.(contour.((out, in)))
+    diff_contour = first(-(contours...))
+    if iszero(diff_contour)
+        return Keldysh
+    elseif isone(diff_contour)
+        return Retarded
+    else
+        return Advanced
+    end
+end
+is_advanced(x::PropagatorType) = Int(x) == Int(Advanced)
+is_retarded(x::PropagatorType) = Int(x) == Int(Retarded)
+is_keldysh(x::PropagatorType) = Int(x) == Int(Keldysh)
+is_advanced(x::Average) = Int(propagator_type(x)) == Int(Advanced)
+is_retarded(x::Average) = Int(propagator_type(x)) == Int(Retarded)
+is_keldysh(x::Average) = Int(propagator_type(x)) == Int(Keldysh)
 
 """
 $(TYPEDSIGNATURES)
@@ -142,11 +146,21 @@ function position(p::Average)
         return In()
     elseif Out() ∈ _positions
         return Out()
+    elseif all(isbulk, _positions)
+        idxs = getproperty.(_positions, :index)
+        if isequal(idxs...)
+            return _positions[1]
+        else
+            return minimum(_positions) # TODO what to do if both are bulk?
+        end
     else
-        return minimum(_positions) # TODO what to do if both are bulk?
+        throw(ArgumentError("Not a valid propagator."))
     end
 end
-
+function same_position(p::Average)
+    _positions = positions(p)
+    return isequal(_positions...)
+end
 function get_propagator_idx(x::CSym)::Int
     args = KeldyshContraction.arguments(x)
     return get_propagator_idx(args)
@@ -180,50 +194,40 @@ function Base.conj(q::Average)
 end
 Base.adjoint(q::Average) = conj(q)
 
-##########################################
-#       dressed green's function
-##########################################
-"""
-$(TYPEDEF)
-
-A structure representing dressed propagator in the Retarded-Advanced-Keldysh basis
-([`PropagatorType`](@ref)).
-
-# Fields
-$(FIELDS)
-where it assumed that the fields are of type `Union{SymbolicUtils.Symbolic{<:Number}, Number}`.
-
-# Constructor
-$(TYPEDSIGNATURES)
-
-Constructs a `DressedPropagator` with the given Keldysh, retarded, and advanced components.
-"""
-struct DressedPropagator{Tk,Tr,Ta}
-    "The Keldysh component of the propagator"
-    keldysh::Tk
-    "The retarded component of the propagator"
-    retarded::Tr
-    "The advanced component of the propagator"
-    advanced::Ta
-    function DressedPropagator(keldysh::SNuN, retarded::SNuN, advanced::SNuN)
-        return new{typeof(keldysh),typeof(retarded),typeof(advanced)}(
-            keldysh, retarded, advanced
-        )
+function get_unique_propagators(v::T) where {T<:SymbolicUtils.Symbolic}
+    if v isa Average
+        return T[v]
+    elseif SymbolicUtils.iscall(v)
+        f = SymbolicUtils.operation(v)
+        args = map(get_unique_propagators, SymbolicUtils.arguments(v))
+        return unique(collect(Iterators.flatten(args)))
+    else
+        return T[]
     end
 end
-"""
-    matrix(G::DressedPropagator)
+get_unique_propagators(v) = SymbolicUtils.Symbolic[]
 
-Returns the matrix representation of the dressed propagator `G`
-in the Retarded-Advanced-Keldysh basis.
-```math
-\\hat{G}\\left(x_1, x_2\\right)
-=\\left(
-\\begin{array}{cc}
-G^K\\left(x_1, x_2\\right) & G^R\\left(x_1, x_2\\right) \\\\
-G^A\\left(x_1, x_2\\right) & 0
-\\end{array}
-\\right)
-```
+# find_retarded_idx(ps) = findfirst(is_retarded, propagator_type.(ps))
+function find_advanced_idx_with_equal_coordinate(ps)
+    return findfirst(x -> is_advanced(x) && same_position(x), ps)
+end
+
 """
-matrix(G::DressedPropagator) = SNuN[G.retarded G.keldysh; G.advanced 0]
+    advanced_to_retarded(x::T) where {T<:SymbolicUtils.Symbolic}
+
+Apply the transformation to change the advanced propagator to retarded:
+
+``G^A(y, y)=-G^R(y, y)``
+
+with ``y =(\\vec{y},t)``.
+Note the expression is only valid for equal space-time coordinates.
+"""
+function advanced_to_retarded(x::T) where {T<:SymbolicUtils.Symbolic}
+    props = get_unique_propagators(x)
+    adv_idx = find_advanced_idx_with_equal_coordinate(props)
+    if isnothing(adv_idx)
+        return x
+    end
+    to_sub = Dict(props[adv_idx] => -1 * _conj(props[adv_idx]))
+    return SymbolicUtils.substitute(x, to_sub)
+end

@@ -4,7 +4,7 @@ using KeldyshContraction: propagator, position, contour, make_propagator
 
 @qfields ϕᶜ::Destroy(Classical) ϕᴾ::Destroy(Quantum)
 
-@test_skip -propagator(ϕᶜ, ϕᶜ') # this errors
+@test_skip -make_propagator(ϕᶜ, ϕᶜ') # TODO this errors
 
 @testset "propagator checks" begin
     @test_throws AssertionError propagator(ϕᶜ, ϕᶜ) # annihilation creation
@@ -70,4 +70,20 @@ end
     @test is_keldysh(Keldysh)
     @test is_retarded(Retarded)
     @test is_advanced(Advanced)
+end
+
+@testset "position" begin
+    using KeldyshContraction: position, same_position, Bulk, In, Out
+    p = make_propagator(ϕᴾ, ϕᶜ')
+    @test same_position(p)
+    p = make_propagator(ϕᴾ(In()), ϕᶜ')
+    @test !same_position(p)
+    p = make_propagator(ϕᴾ(Bulk(3)), ϕᶜ(Bulk(3))')
+    @test same_position(p)
+end
+
+@testset "simplification" begin
+    using KeldyshContraction: make_propagator, advanced_to_retarded
+    expr = make_propagator(ϕᴾ, ϕᶜ') + make_propagator(ϕᶜ, ϕᴾ')
+    @test iszero(advanced_to_retarded(expr))
 end
