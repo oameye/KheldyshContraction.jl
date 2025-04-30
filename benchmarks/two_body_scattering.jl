@@ -7,13 +7,13 @@ function benchmark_two_body_scattering!(SUITE)
     # Σ = SelfEnergy(GF)
 
     simplify = false
-    SUITE["Two body loss"]["Green's function"] = @benchmarkable wick_contraction(
+    SUITE["Two body scattering"]["Green's function"] = @benchmarkable wick_contraction(
         $L_int; simplify=($(simplify))
     ) seconds = 10
     # SUITE["Two body loss"]["Self-energy"] = @benchmarkable SelfEnergy($GF) seconds = 10
 
     order = 2
-    SUITE["Two body loss"]["Green's function second order"] = @benchmarkable wick_contraction(
+    SUITE["Two body scattering"]["Green's function second order"] = @benchmarkable wick_contraction(
         $L_int; order=($order), simplify=($(simplify))
     ) seconds = 50
     return nothing
