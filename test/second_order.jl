@@ -38,3 +38,21 @@ end
 
     @test_throws "not implemented" wick_contraction(L; order=3)
 end
+
+@testset "zero loop filter" begin
+    using KeldyshContraction: has_zero_loop, QField
+    # Gᴿ(1,2) Gᴿ(2,1) = 0
+    vs = Vector{QField}[[ϕᶜ(Bulk(1)), ϕᴾ'(Bulk(2))], [ϕᶜ(Bulk(2)), ϕᴾ'(Bulk(1))]]
+    @test has_zero_loop(vs)
+
+    # Gᴬ(1,2) Gᴬ(2,1) = 0
+    vs = Vector{QField}[[ϕᴾ(Bulk(1)), ϕᶜ'(Bulk(2))], [ϕᴾ(Bulk(2)), ϕᶜ'(Bulk(1))]]
+    @test has_zero_loop(vs)
+
+    # Gᴿ(1,2) Gᴬ(1,2) = 0
+    vs = Vector{QField}[[ϕᶜ(Bulk(1)), ϕᴾ'(Bulk(2))], [ϕᴾ(Bulk(1)), ϕᶜ'(Bulk(2))]]
+    @test has_zero_loop(vs)
+
+    vs = Vector{QField}[[ϕᶜ(Bulk(1)), ϕᴾ'(Bulk(2))], [ϕᶜ(Bulk(1)), ϕᴾ'(Bulk(2))]]
+    @test !has_zero_loop(vs)
+end

@@ -27,7 +27,7 @@ end
 
 makedocs(;
     sitename="KeldyshContraction.jl",
-    authors="Orjan Ameyep",
+    authors="Orjan Ameye",
     modules=KeldyshContraction,
     format=Documenter.HTML(; canonical="https://oameye.github.io/KeldyshContraction.jl"),
     pages=pages,

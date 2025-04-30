@@ -138,6 +138,9 @@ isbulk(p::Average) = all(isbulk.(fields(p)))
 function positions(p::Average)
     return position.(fields(p))
 end
+function positions(p::Vector{QField})
+    return position.(p)
+end
 propagator_type(p::SymbolicUtils.BasicSymbolic{Propagator{T}}) where {T} = T
 
 function position(p::Average)
@@ -151,12 +154,14 @@ function position(p::Average)
         if isequal(idxs...)
             return _positions[1]
         else
-            return minimum(_positions) # TODO what to do if both are bulk?
+            return minimum(_positions)
+            # ^  TODO what to do if both are bulk with different index?
         end
     else
         throw(ArgumentError("Not a valid propagator."))
     end
 end
+
 function same_position(p::Average)
     _positions = positions(p)
     return isequal(_positions...)
