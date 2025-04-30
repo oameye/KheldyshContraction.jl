@@ -33,13 +33,16 @@ function wick_contraction(L::InteractionLagrangian; order=1, simplify=true)
     elseif order == 2
         L1 = L
         L2 = L(2)
-        prefactor = make_real(im^2)/2
+        prefactor = make_real(im^2) / 2
         keldysh =
-            prefactor*wick_contraction(ψ(Out()) * ψ'(In()) * L1.lagrangian * L2.lagrangian)
+            prefactor *
+            wick_contraction(ψ(Out()) * ψ'(In()) * L1.lagrangian * L2.lagrangian)
         retarded =
-            prefactor*wick_contraction(ψ(Out()) * ϕ'(In()) * L1.lagrangian * L2.lagrangian)
+            prefactor *
+            wick_contraction(ψ(Out()) * ϕ'(In()) * L1.lagrangian * L2.lagrangian)
         advanced =
-            prefactor*wick_contraction(ϕ(Out()) * ψ'(In()) * L1.lagrangian * L2.lagrangian)
+            prefactor *
+            wick_contraction(ϕ(Out()) * ψ'(In()) * L1.lagrangian * L2.lagrangian)
     else
         error("higher order then two not implemented")
     end
@@ -87,7 +90,11 @@ function wick_contraction(a::QMul; regularise=true)
 end
 
 """
-We split up the fields into two groups, `destroys` and `creates`. We can can combute all possible pairs by permutating the create vector. To avoid pairing up the In() and Out() fields, we have made sure that the destroy and create vectors are ordered with the in and out fields first. Computing the permutatins in lexicographic order, we can skip the first (n-1)! permutations.
+We split up the fields into two groups, `destroys` and `creates`. We can can combute all
+possible pairs by permutating the create vector. To avoid pairing up the In() and Out()
+fields, we have made sure that the destroy and create vectors are ordered with the in and
+out fields first. Computing the permutatins in lexicographic order, we can skip the first
+(n-1)! permutations.
 """
 function wick_contraction(args_nc::Vector{<:QField})::Vector{Vector{Vector{QField}}}
     # _partitions = Combinatorics.partitions(args_nc, length(args_nc) ÷ 2)
@@ -120,6 +127,8 @@ function wick_contraction(args_nc::Vector{<:QField})::Vector{Vector{Vector{QFiel
         end
         if fail
             continue
+        elseif has_zero_loop(contraction)
+            continue
         else
             push!(wick_contractions, contraction)
         end
@@ -151,3 +160,49 @@ end
 
 make_mul(v::Vector{SNuN}) = isempty(v) ? 0 : prod(v)
 make_term(vp::Vector{Vector{SNuN}}) = isempty(vp) ? 0 : sum(make_mul, vp)
+
+"""
+Filter the zero loops from the list of contractions
+
+Gᴿ(1,2) Gᴿ(2,1) = 0
+Gᴬ(1,2) Gᴬ(2,1) = 0
+Gᴿ(1,2) Gᴬ(1,2) = 0
+"""
+function has_zero_loop(vs::Vector{Vector{QField}}) # TODO: change to Vector{Vector{QSym}}
+    ps = positions.(vs)
+    sorted_ps = sort.(ps)
+    loops = find_equal_pairs(sorted_ps)
+    for loop in loops
+        T1 = propagator_type(vs[loop[1]]...)
+        T2 = propagator_type(vs[loop[2]]...)
+        if all(is_retarded, (T1, T2)) && is_reversed(ps[loop[1]], ps[loop[2]])
+            return true
+        elseif all(is_advanced, (T1, T2)) && is_reversed(ps[loop[1]], ps[loop[2]])
+            return true
+        elseif isequal(ps[loop[1]], ps[loop[2]]) && retarded_and_advanced_pair(T1, T2)
+            return true
+        end
+    end
+    return false
+end
+
+function is_reversed(p1, p2)
+    return isequal(p1[1], p2[2]) && isequal(p1[2], p2[1])
+end
+function retarded_and_advanced_pair(T1, T2)
+    (is_retarded(T1) && is_advanced(T2)) || (is_advanced(T1) && is_retarded(T2))
+end
+function find_equal_pairs(vec)
+    n = length(vec)
+    pairs = Tuple{Int,Int}[]
+
+    for i in 1:n
+        for j in (i + 1):n
+            if isequal(vec[i], vec[j])
+                push!(pairs, (i, j))
+            end
+        end
+    end
+
+    return pairs
+end
