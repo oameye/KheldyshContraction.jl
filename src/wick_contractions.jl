@@ -14,57 +14,6 @@ function is_physical_propagator(a::Vector{<:QField})
     return len && in_out && physical
 end
 
-######################
-#     regularise
-######################
-
-"""
-    regular(p::Average)
-
-Checks if the propagator `p` is regular.
-A regular propagator is one that is:
-- not in the bulk
-- or `p` is not of [`PropagatorType`](@ref) `Retarded` while also having a negative [`Regularisation`](@ref)
-- or `p` is not of [`PropagatorType`](@ref) `Advanced` while also having a positive [`Regularisation`](@ref)
-"""
-function regular(p::Average)
-    _isbulk = isbulk(p)
-    _reg = regularisations(p)
-    T = propagator_type(p)
-    if !_isbulk || subtraction(_reg) == 0
-        return true
-    elseif subtraction(_reg) < 0 && T == Retarded
-        return false
-    elseif subtraction(_reg) > 0 && T == Advanced
-        return false
-    else
-        return true
-    end
-end
-regular(p) = true
-regular(x::CSym) = regular(get_propagator(x))
-
-regular(v::Vector{SNuN}) = all(regular.(v))
-regular(v::Vector{Average}) = all(regular.(v))
-
-_regularise(vp::Vector{Vector{SNuN}}) = filter(regular, vp)
-
-function set_reg_to_zero!(p::Average)
-    p.arguments .= set_reg_to_zero.(arguments(p))
-    return p
-end
-function set_reg_to_zero!(vp::Union{Vector{SNuN},Vector{Vector{SNuN}}})
-    for p in vp
-        set_reg_to_zero!(p)
-    end
-    return vp
-end
-function set_reg_to_zero!(p::CSym)
-    p_idx = get_propagator_idx(p)
-    return set_reg_to_zero!(p.arguments[p_idx])
-end
-set_reg_to_zero!(p::Number) = nothing
-
 #################################
 #       Contraction
 #################################
@@ -137,13 +86,18 @@ function wick_contraction(a::QMul; regularise=true)
     return a.arg_c * make_term(propagators)
 end
 
+"""
+We split up the fields into two groups, `destroys` and `creates`. We can can combute all possible pairs by permutating the create vector. To avoid pairing up the In() and Out() fields, we have made sure that the destroy and create vectors are ordered with the in and out fields first. Computing the permutatins in lexicographic order, we can skip the first (n-1)! permutations.
+"""
 function wick_contraction(args_nc::Vector{<:QField})::Vector{Vector{Vector{QField}}}
     # _partitions = Combinatorics.partitions(args_nc, length(args_nc) ÷ 2)
     _length = length(args_nc)
     @assert _length % 2 == 0 "Number of fields must be even"
+
     n_destroy = _length ÷ 2
     destroys = args_nc[1:n_destroy]
     creates = reverse(args_nc[(n_destroy + 1):end])
+
     number_of_combinations = factorial(n_destroy)
     to_skip = factorial(n_destroy - 1) # due in-out contraction constraint
 

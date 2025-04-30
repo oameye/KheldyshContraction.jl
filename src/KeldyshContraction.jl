@@ -27,6 +27,7 @@ include("InteractionLagrangian.jl")
 include("propagator.jl")
 include("dressed_propagator.jl")
 include("symbolic_utils.jl")
+include("reguralisation.jl")
 include("wick_contractions.jl")
 include("self_energy.jl")
 

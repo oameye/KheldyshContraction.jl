@@ -76,10 +76,9 @@ GF = wick_contraction(L_int)
 # However, from above calculation we find that ``i Σ^K(x, p) = 0`` and ``Σ^R(x, p)=Σ^A(x, p)``,
 # such that the collision integral has not contribution at first order.
 
-
 ## Second order
 
 GF = wick_contraction(L_int; order=2)
 
 using SymbolicUtils
-SymbolicUtils.expand(GF.keldysh) |> arguments
+arguments(SymbolicUtils.expand(GF.keldysh))
