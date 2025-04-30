@@ -79,6 +79,3 @@ GF = wick_contraction(L_int)
 ## Second order
 
 GF = wick_contraction(L_int; order=2)
-
-using SymbolicUtils
-arguments(SymbolicUtils.expand(GF.keldysh))
