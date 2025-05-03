@@ -10,6 +10,9 @@ using SymbolicUtils: SymbolicUtils, arguments, operation, @syms
 using Combinatorics: Combinatorics
 using OrderedCollections: OrderedCollections
 
+using Graphs: Graphs
+using MetaGraphsNext: MetaGraphsNext, MetaGraph
+
 using Latexify
 using MacroTools: MacroTools
 using LaTeXStrings
@@ -25,6 +28,7 @@ include("InteractionLagrangian.jl")
 
 # Propagators
 include("propagator.jl")
+include("MetaGraph.jl")
 include("dressed_propagator.jl")
 include("symbolic_utils.jl")
 include("reguralisation.jl")

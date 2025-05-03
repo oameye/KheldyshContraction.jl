@@ -36,7 +36,7 @@ Gᴿ(1,2) Gᴬ(1,2) = 0
 """
 function has_zero_loop(vs::Vector{Vector{QField}}) # TODO: change to Vector{Vector{QSym}}
     ps = positions.(vs)
-    sorted_ps = sort.(ps)
+    sorted_ps = sort.(collect.(ps)) # TODO https://juliahub.com/ui/Packages/General/TupleSorting
     loops = find_equal_pairs(sorted_ps)
     for loop in loops
         T1 = propagator_type(vs[loop[1]]...)
