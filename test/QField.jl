@@ -4,6 +4,16 @@ import KeldyshContraction as KC
 
 @qfields ϕ::Destroy(Classical) ψ::Destroy(Quantum)
 
+@testset "typestable QSym" begin
+    @inferred Destroy Destroy(:ψ, Classical)
+    @inferred Create Create(:ψ, Classical)
+
+    # @qfields c::Destroy(Classical) q::Destroy(Quantum)
+    # @inferred 0.5 * (c^2 + q^2) * c' * q'
+    # example = 0.5 * (c^2 + q^2) * c' * q'
+    # @inferred InteractionLagrangian(example)
+end
+
 @testset "SymbolicUtils interface" begin
     using TermInterface, SymbolicUtils
 

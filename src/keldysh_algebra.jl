@@ -171,15 +171,18 @@ isbulk(x::AbstractPosition) = x isa Bulk
 
 Bosonic field representing the quantum field annihilation operator.
 """
-struct Destroy{contour,position,regularisation} <: QSym
+struct Destroy{C,P,R} <: QSym
     name::Symbol
+    contour::C
+    position::P
+    regularisation::R
     function Destroy(
         name::Symbol,
         contour::KeldyshContour,
         reg::Regularisation=Zero,
         pos::AbstractPosition=Bulk(),
     )
-        return new{contour,pos,reg}(name)
+        return new{typeof(contour),typeof(pos),typeof(reg)}(name, contour, pos, reg)
     end
 end
 
@@ -188,15 +191,18 @@ end
 
 Bosonic field representing the quantum field creation operator.
 """
-struct Create{contour,position,regularisation} <: QSym
+struct Create{C,P,R} <: QSym
     name::Symbol
+    contour::C
+    position::P
+    regularisation::R
     function Create(
         name::Symbol,
         contour::KeldyshContour,
         reg::Regularisation=Zero,
         pos::AbstractPosition=Bulk();
     )
-        return new{contour,pos,reg}(name)
+        return new{typeof(contour),typeof(pos),typeof(reg)}(name, contour, pos, reg)
     end
 end
 
@@ -216,9 +222,9 @@ for f in [:Destroy, :Create]
         return $(f)(name(ff), contour(ff), reg, position(ff))
     end
 
-    @eval regularisation(ϕ::$(f){C,P,R}) where {C,P,R} = R
-    @eval contour(ϕ::$(f){C}) where {C} = C
-    @eval position(ϕ::$(f){C,P}) where {C,P} = P
+    @eval regularisation(ϕ::$(f)) = ϕ.regularisation
+    @eval contour(ϕ::$(f)) = ϕ.contour
+    @eval position(ϕ::$(f)) = ϕ.position
     @eval isbulk(ϕ::$(f)) = position(ϕ) isa Bulk
 
     @eval set_reg_to_zero(ϕ::$(f)) = $(f)(name(ϕ), contour(ϕ), Zero, position(ϕ))

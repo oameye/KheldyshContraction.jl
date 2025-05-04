@@ -1,6 +1,6 @@
 Base.show(io::IO, x::QSym) = write(io, name(x))
-function Base.show(io::IO, x::Create{C,P,R}) where {C,P,R}
-    reg = Int(R)
+function Base.show(io::IO, x::Create)
+    reg = Int(regularisation(x))
     if iszero(reg)
         s = string("̄", name(x))
     elseif reg == 1
@@ -10,8 +10,8 @@ function Base.show(io::IO, x::Create{C,P,R}) where {C,P,R}
     end
     return write(io, s)
 end
-function Base.show(io::IO, x::Destroy{C,P,R}) where {C,P,R}
-    reg = Int(R)
+function Base.show(io::IO, x::Destroy)
+    reg = Int(regularisation(x))
     if iszero(reg)
         s = string(name(x))
     elseif reg == 1
