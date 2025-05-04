@@ -14,7 +14,6 @@ using Latexify
 using MacroTools: MacroTools
 using LaTeXStrings
 
-
 # Fields
 include("keldysh_algebra.jl")
 include("QTerm.jl")
