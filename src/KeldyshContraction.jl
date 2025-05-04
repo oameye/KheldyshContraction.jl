@@ -6,7 +6,7 @@ module KeldyshContraction
 using DocStringExtensions
 
 using TermInterface: TermInterface, metadata
-using SymbolicUtils: SymbolicUtils, arguments, operation, @syms
+using SymbolicUtils: SymbolicUtils, arguments, @syms
 using Combinatorics: Combinatorics
 using OrderedCollections: OrderedCollections
 
@@ -24,28 +24,27 @@ include("hashing.jl")
 include("InteractionLagrangian.jl")
 
 # Propagators
-include("propagator.jl")
-include("dressed_propagator.jl")
-include("symbolic_utils.jl")
-include("reguralisation.jl")
-include("filters.jl")
-include("wick_contractions.jl")
-include("self_energy.jl")
+# include("propagator.jl")
+# include("dressed_propagator.jl")
+# include("symbolic_utils.jl")
+# include("reguralisation.jl")
+# include("filters.jl")
+# include("wick_contractions.jl")
+# include("self_energy.jl")
 
 # show methods
-include("latexify_recipes.jl")
-include("printing.jl")
+# include("latexify_recipes.jl")
+# include("printing.jl")
 
 export @qfields,
     Destroy,
     Create,
-    wick_contraction,
     Quantum,
     Classical,
-    DressedPropagator,
-    SelfEnergy,
     InteractionLagrangian,
     @syms,
     arguments
-
+    # wick_contraction,
+    # DressedPropagator,
+    # SelfEnergy,
 end
