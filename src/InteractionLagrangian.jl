@@ -35,7 +35,7 @@ struct InteractionLagrangian{T}
     "The position of the interaction Lagrangian"
     position::Bulk
     function InteractionLagrangian(expr::QTerm)
-        fields = _extract_unqiue_fields(expr)
+        fields = _extract_unique_fields(expr)
         contours = contour_integers(fields)
 
         _assert_lagrangian(expr, fields, contours)
@@ -47,7 +47,7 @@ struct InteractionLagrangian{T}
         )
     end
 end # Does not have to be type stable, as it is called only once
-function _extract_unqiue_fields(expr)
+function _extract_unique_fields(expr)
     fields = allfields(expr)
     set_reg_to_zero!(fields)
     unique_fields = unique(fields)
