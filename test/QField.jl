@@ -13,6 +13,7 @@ end
 
 @testset "Type stable QMul" begin
     @qfields c::Destroy(Classical) q::Destroy(Quantum)
+
     @syms g::Real
     @inferred KC.QMul(1, [c, c])
     @inferred c*c
@@ -26,7 +27,8 @@ end
     @inferred mul*mul
 
     @inferred 0.5 * q^2 * c' * q'
-
+    example = 0.5 * q * c * c' * q'
+    # @inferred arguments(example)
     # example = 0.5 * q*c * c' * q'
     # @code_warntype InteractionLagrangian(example)
     # ^ Does not have to be type stable, as it is called only once
@@ -36,19 +38,22 @@ end
     @qfields c::Destroy(Classical) q::Destroy(Quantum)
 
     @syms g::Real
-    @inferred KC.QMul(1, [c, c])
-    @inferred c*c
-    @inferred KC.QMul(1, [c, c])*KC.QMul(1.0, [c, c])
-    @inferred c^2
-    @inferred 1.0*c
-    @inferred g*c
 
-    mul = c*c
-    @inferred c*mul
-    @inferred mul*mul
+    @inferred KC.QAdd([c, c])
+    @inferred c + c
+    @inferred - c
+    @inferred g + c
+    @inferred g + 2.0*c*c
+    @inferred c + g
+    @inferred c*c + 0
 
-    # example = 0.5 * (c^2 + q^2) * c' * q'
-    # @inferred InteractionLagrangian(example)
+    add = c + c
+    @inferred add + g
+    @inferred add + 5.0
+    @inferred add + 0.0
+
+    @inferred 0.5 * (c^2 + q^2) * c' * q'
+    @inferred 0.5 * (c^2 + q^2) * c' * q' + 0.5 * c * q * ((c')^2 + (q')^2)
 end
 
 @testset "SymbolicUtils interface" begin
@@ -162,7 +167,7 @@ end
     @test isequal(-(ϕ, 1), ϕ - 1)
     @test isequal(-(1, ϕ), 1 - ϕ)
 
-    @test isequal(ϕ + 0, ϕ)
+    @test isequal(ϕ, ϕ + 0)
     @test isequal(0 + ϕ, ϕ)
 
     mul = ϕ * ϕ
@@ -198,7 +203,7 @@ end
 @testset "QMul" begin
     using KeldyshContraction: QMul
 
-    @test isequal(QMul(1, [ϕ]), ϕ) broken = true
-    @test isequal(QMul(0, [ϕ]), 0) broken = true
+    @test isequal(ϕ, QMul(1, [ϕ]))
+    @test isequal(QMul(0, [ϕ]), 0)
     @test iszero(QMul(0, [ϕ]))
 end

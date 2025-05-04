@@ -58,12 +58,12 @@ Base.:-(a::QField, b::SNuN) = a + (-b)
 Base.:-(a::QField, b::QField) = a + (-b)
 
 function Base.:+(a::QField, b::SNuN)
-    SymbolicUtils._iszero(b) && return a
+    SymbolicUtils._iszero(b) && return QAdd([a])
     return QAdd([a, b])
 end
 Base.:+(a::SNuN, b::QField) = +(b, a)
 function Base.:+(a::QAdd, b::SNuN)
-    SymbolicUtils._iszero(b) && return a
+    SymbolicUtils._iszero(b) && return QAdd([a])
     args = vcat(arguments(a), b)
     return QAdd(args)
 end
@@ -89,21 +89,20 @@ end
 function Base.:*(a::QAdd, b::SNuN)
     args = QSymbol[a_ * b for a_ in arguments(a)]
     flatten_adds!(args)
-    isempty(args) && return 0
-    q = QAdd(args)
-    return q
+    isempty(args) && return QAdd([0])
+    return QAdd(args)
 end
 function Base.:*(a::QField, b::QAdd)
     args = QSymbol[a * b_ for b_ in arguments(b)]
     flatten_adds!(args)
-    isempty(args) && return 0
+    isempty(args) && return QAdd([0])
     q = QAdd(args)
     return q
 end
 function Base.:*(b::QAdd, a::QField)
     args = QSymbol[b_ * a for b_ in arguments(b)]
     flatten_adds!(args)
-    isempty(args) && return 0
+    isempty(args) && return QAdd([0])
     q = QAdd(args)
     return q
 end
@@ -114,7 +113,7 @@ function Base.:*(a::QAdd, b::QAdd)
         push!(args, a_ * b_)
     end
     flatten_adds!(args)
-    isempty(args) && return 0
+    isempty(args) && return QAdd([0])
     q = QAdd(args)
     return q
 end

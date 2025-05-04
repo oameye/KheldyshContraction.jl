@@ -23,10 +23,6 @@ struct QMul{T<:SNuN} <: QTerm
     end
 end
 
-# function QMul(arg_c::T, args_nc::Vector{QSym}) where {T}
-#     return QMul{T}(arg_c, args_nc)
-# end
-
 SymbolicUtils.operation(::QMul) = (*)
 """
     arguments(a::QMul)
@@ -73,6 +69,41 @@ Checks if a term is in the bulk. A term is bulk if it has no `In` or `Out` posit
 isbulk(q::QMul) = all(isbulk.(q.args_nc))
 allfields(q::QMul) = q.args_nc
 
+function Base.isequal(a::QMul, b::Int)
+    args = a.args_nc
+    if isempty(args)
+        return isequal(a.arg_c, b)
+    end
+    if iszero(QMul) && iszero(b)
+        return true
+    end
+    return false
+end
+function Base.isequal(b::Int, a::QMul)
+    args = a.args_nc
+    if isempty(args)
+        return isequal(a.arg_c, b)
+    end
+    if iszero(QMul) && iszero(b)
+        return true
+    end
+    return false
+end
+function Base.isequal(a::QMul, b::QSym)
+    args = a.args_nc
+    if length(args) == 1 && isone(a.arg_c)
+        return isequal(args[1], b)
+    end
+    return false
+end
+function Base.isequal(b::QSym, a::QMul)
+    args = a.args_nc
+    if length(args) == 1 && isone(a.arg_c)
+        return isequal(args[1], b)
+    end
+    return false
+end
+
 ########################
 #       Addition
 ########################
@@ -106,3 +137,18 @@ end
 Base.adjoint(q::QAdd) = QAdd(map(adjoint, arguments(q)))
 isbulk(q::QAdd) = all(isbulk.(arguments(q)))
 allfields(q::QAdd) = reduce(vcat, allfields.(SymbolicUtils.arguments(q)))
+
+function Base.isequal(a::QAdd, b::QSym)
+    args = arguments(a)
+    if length(args) == 1
+        return isequal(args[1], b)
+    end
+    return false
+end
+function Base.isequal(b::QSym, a::QAdd)
+    args = arguments(a)
+    if length(args) == 1
+        return isequal(args[1], b)
+    end
+    return false
+end
