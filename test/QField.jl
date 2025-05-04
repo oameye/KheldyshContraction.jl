@@ -71,8 +71,8 @@ end
     using KeldyshContraction: is_creation, is_annihilation, is_conserved
 
     @qfields ϕ::Destroy(Classical) ψ::Destroy(Quantum)
-    ϕ′ = Create(KC.name(ϕ), Classical, KC.regularisation(ϕ), KC.position(ϕ); ϕ.metadata)
-    ψ′ = Create(KC.name(ψ), Quantum, KC.regularisation(ψ), KC.position(ψ); ψ.metadata)
+    ϕ′ = Create(KC.name(ϕ), Classical, KC.regularisation(ϕ), KC.position(ϕ))
+    ψ′ = Create(KC.name(ψ), Quantum, KC.regularisation(ψ), KC.position(ψ))
 
     @test is_creation(ϕ′)
     @test !is_creation(ϕ)

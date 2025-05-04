@@ -34,13 +34,12 @@ TermInterface.head(::QField) = :call
 SymbolicUtils.iscall(::QSym) = false
 SymbolicUtils.iscall(::QTerm) = true
 SymbolicUtils.iscall(::Type{T}) where {T<:QTerm} = true
-TermInterface.metadata(x::QSym) = x.metadata
+TermInterface.metadata(x::QSym) = nothing
 
 # Symbolic type promotion
 for f in SymbolicUtils.basic_diadic # [+, -, *, /, //, \, ^]
-    @eval SymbolicUtils.promote_symtype(::$(typeof(f)), Ts::Type{<:QField}...) = promote_type(
-        Ts...
-    )
+    @eval SymbolicUtils.promote_symtype(::$(typeof(f)), Ts::Type{<:QField}...) =
+        promote_type(Ts...)
     @eval SymbolicUtils.promote_symtype(::$(typeof(f)), T::Type{<:QField}, Ts...) = T
     @eval SymbolicUtils.promote_symtype(
         ::$(typeof(f)), T::Type{<:QField}, S::Type{<:Number}
@@ -150,7 +149,7 @@ struct Bulk <: AbstractPosition
     Bulk() = new(1)
     function Bulk(i::Int)
         @assert i > 0 "Bulk index must be positive"
-        new(i)
+        return new(i)
     end
 end
 Base.isless(x::Bulk, y::Bulk) = x.index < y.index
@@ -171,17 +170,15 @@ isbulk(x::AbstractPosition) = x isa Bulk
 
 Bosonic field representing the quantum field annihilation operator.
 """
-struct Destroy{contour,position,regularisation,M} <: QSym
+struct Destroy{contour,position,regularisation} <: QSym
     name::Symbol
-    metadata::M  # M should stay parametric such that symbolics can work with it
     function Destroy(
         name::Symbol,
         contour::KeldyshContour,
         reg::Regularisation=Zero,
-        pos::AbstractPosition=Bulk();
-        metadata::M=NO_METADATA,
-    ) where {M}
-        return new{contour,pos,reg,M}(name, metadata)
+        pos::AbstractPosition=Bulk(),
+    )
+        return new{contour,pos,reg}(name)
     end
 end
 
@@ -190,17 +187,15 @@ end
 
 Bosonic field representing the quantum field creation operator.
 """
-struct Create{contour,position,regularisation,M} <: QSym
+struct Create{contour,position,regularisation} <: QSym
     name::Symbol
-    metadata::M # M should stay parametric such that symbolics can work with it
     function Create(
         name::Symbol,
         contour::KeldyshContour,
         reg::Regularisation=Zero,
         pos::AbstractPosition=Bulk();
-        metadata::M=NO_METADATA,
-    ) where {M}
-        return new{contour,pos,reg,M}(name, metadata)
+    )
+        return new{contour,pos,reg}(name)
     end
 end
 
@@ -214,10 +209,10 @@ end
 
 for f in [:Destroy, :Create]
     @eval function (ff::$f)(pos::AbstractPosition)
-        return $(f)(name(ff), contour(ff), regularisation(ff), pos; ff.metadata)
+        return $(f)(name(ff), contour(ff), regularisation(ff), pos)
     end
     @eval function (ff::$f)(reg::Regularisation)
-        return $(f)(name(ff), contour(ff), reg, position(ff); ff.metadata)
+        return $(f)(name(ff), contour(ff), reg, position(ff))
     end
 
     @eval regularisation(ϕ::$(f){C,P,R}) where {C,P,R} = R
@@ -225,9 +220,7 @@ for f in [:Destroy, :Create]
     @eval position(ϕ::$(f){C,P}) where {C,P} = P
     @eval isbulk(ϕ::$(f)) = position(ϕ) isa Bulk
 
-    @eval set_reg_to_zero(ϕ::$(f)) = $(f)(
-        name(ϕ), contour(ϕ), Zero, position(ϕ); ϕ.metadata
-    )
+    @eval set_reg_to_zero(ϕ::$(f)) = $(f)(name(ϕ), contour(ϕ), Zero, position(ϕ))
 end
 ladder(::Destroy) = 0
 ladder(::Create) = 1
@@ -238,7 +231,7 @@ ladder(::Create) = 1
 Adjoint of the operator [`Destroy`](@ref) annihilation field constructing the corresponding creation field [`Create`](@ref).
 """
 function Base.adjoint(op::Destroy)
-    return Create(name(op), contour(op), regularisation(op), position(op); op.metadata)
+    return Create(name(op), contour(op), regularisation(op), position(op))
 end
 
 """
@@ -247,7 +240,7 @@ end
 Adjoint of the [`Create`](@ref) creation field constructing the corresponding annihilation field [`Destroy`](@ref).
 """
 function Base.adjoint(op::Create)
-    return Destroy(name(op), contour(op), regularisation(op), position(op); op.metadata)
+    return Destroy(name(op), contour(op), regularisation(op), position(op))
 end
 
 # reverse normal ordered
@@ -299,32 +292,37 @@ julia> @qnumbers ψ::Destroy(Classical)
 ```
 """
 macro qfields(qs...)
-    ex = Expr(:block)
-    qnames = []
-    for q in qs
-        @assert q isa Expr && q.head == :(::)
-        q_ = q.args[1]
-        @assert q_ isa Symbol
-        push!(qnames, q_)
-        f = q.args[2]
-        @assert f isa Expr && f.head == :call
-        op = _make_operator(q_, f.args...)
-        ex_ = Expr(:(=), esc(q_), op)
-        push!(ex.args, ex_)
-    end
-    push!(ex.args, Expr(:tuple, map(esc, qnames)...))
-    return ex
-end
+    defs = map(qs) do q
+        nf = _name_field(q)
+        name, field_expr = nf.name, nf.field_expr
 
-function _make_operator(name, T, k, args...)
-    name_ = Expr(:quote, name)
-    # d = source_metadata(:qnumbers, name)
-    return Expr(
-        :call,
-        T,
-        name_,
-        esc(k),
-        args...,
-        # Expr(:kw, :metadata, Expr(:quote, d))
-    )
+        # Extract field type (Create or Destroy) and args
+        field_type = field_expr.args[1]
+        field_args = field_expr.args[2:end]
+
+        # Build the field construction expression
+        field_construction = Expr(
+            :call,
+            esc(field_type),
+            Expr(:quote, name),  # Pass the name as a quoted symbol
+            map(esc, field_args)..., # Escape all other args
+        )
+
+        # Define the field variable
+        :($(esc(name)) = $(field_construction))
+    end
+
+    # Return both the definitions and the tuple of names
+    return Expr(:block, defs..., :(tuple($(map(q -> esc(_name_field(q).name), qs)...))))
+end
+# Helper function to extract name and field constructor from expression
+function _name_field(expr)
+    @assert expr isa Expr && expr.head == :(::) "Expected expression of form name::Field(args...)"
+    name = expr.args[1]
+    @assert name isa Symbol "Left side of :: must be a symbol"
+
+    field_expr = expr.args[2]
+    @assert field_expr isa Expr && field_expr.head == :call "Right side of :: must be a field constructor call"
+
+    return (name=name, field_expr=field_expr)
 end
