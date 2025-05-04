@@ -9,24 +9,23 @@ Represent a multiplication involving quantum fields  of [`QSym`](@ref) types.
 
 $(FIELDS)
 """
-struct QMul{T} <: QTerm
+struct QMul{T<:SNuN} <: QTerm
     "The commutative prefactor."
     arg_c::T
     "A vector containing all [`QSym`](@ref) types."
-    args_nc::Vector{QField}
-    function QMul{T}(arg_c, args_nc) where {T}
-        if SymbolicUtils._isone(arg_c) && length(args_nc) == 1
-            return args_nc[1]
-        elseif (0 in args_nc) || isequal(arg_c, 0)
-            return 0
+    args_nc::Vector{QSym}
+    function QMul(arg_c::T, args_nc::Vector{<:QSym}) where {T}
+        if isequal(arg_c, 0.0)
+            return new{T}(0.0, QSym[])
         else
-            return new(arg_c, args_nc)
+            return new{T}(arg_c, args_nc)
         end
     end
 end
-function QMul(arg_c::T, args_nc) where {T}
-    return QMul{T}(arg_c, args_nc)
-end
+
+# function QMul(arg_c::T, args_nc::Vector{QSym}) where {T}
+#     return QMul{T}(arg_c, args_nc)
+# end
 
 SymbolicUtils.operation(::QMul) = (*)
 """
@@ -40,7 +39,7 @@ function SymbolicUtils.maketerm(::Type{<:QMul}, ::typeof(*), args, metadata)
     args_c = filter(x -> !(x isa QField), args)
     args_nc = filter(x -> x isa QField, args)
     arg_c = isempty(args_c) ? 1 : *(args_c...)
-    isempty(args_nc) && return arg_c
+    # isempty(args_nc) && return arg_c
     return QMul(arg_c, args_nc)
 end
 
@@ -62,6 +61,9 @@ function Base.isequal(a::QMul, b::QMul)
     end
     return true
 end
+
+Base.zero(q::QMul) = QMul(0.0, QSym[])
+Base.iszero(q::QMul) = iszero(q.arg_c)
 
 """
     isbulk(q::QTerm)

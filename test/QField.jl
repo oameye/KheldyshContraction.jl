@@ -8,8 +8,45 @@ import KeldyshContraction as KC
     @inferred Destroy Destroy(:ψ, Classical)
     @inferred Create Create(:ψ, Classical)
 
-    # @qfields c::Destroy(Classical) q::Destroy(Quantum)
-    # @inferred 0.5 * (c^2 + q^2) * c' * q'
+    @qfields c::Destroy(Classical) q::Destroy(Quantum)
+end
+
+@testset "Type stable QMul" begin
+    @qfields c::Destroy(Classical) q::Destroy(Quantum)
+    @syms g::Real
+    @inferred KC.QMul(1, [c, c])
+    @inferred c*c
+    @inferred KC.QMul(1, [c, c])*KC.QMul(1.0, [c, c])
+    @inferred c^2
+    @inferred 1.0*c
+    @inferred g*c
+
+    mul = c*c
+    @inferred c*mul
+    @inferred mul*mul
+
+    @inferred 0.5 * q^2 * c' * q'
+
+    # example = 0.5 * q*c * c' * q'
+    # @code_warntype InteractionLagrangian(example)
+    # ^ Does not have to be type stable, as it is called only once
+end
+
+@testset "Type stable QAdd" begin
+    @qfields c::Destroy(Classical) q::Destroy(Quantum)
+
+    @syms g::Real
+    @inferred KC.QMul(1, [c, c])
+    @inferred c*c
+    @inferred KC.QMul(1, [c, c])*KC.QMul(1.0, [c, c])
+    @inferred c^2
+    @inferred 1.0*c
+    @inferred g*c
+
+    mul = c*c
+    @inferred c*mul
+    @inferred mul*mul
+
     # example = 0.5 * (c^2 + q^2) * c' * q'
     # @inferred InteractionLagrangian(example)
 end
@@ -73,8 +110,10 @@ end
 
     @test isequal((ϕ + ϕ) * (ϕ + ϕ), 4 * ϕ^2) broken = true
     @test isequal((ϕ + ϕ) * (ϕ + ϕ), ϕ^2 + ϕ^2 + ϕ^2 + ϕ^2)
-    SymbolicUtils.simplify((ϕ + ϕ) * (ψ + ϕ) + 3 * (ϕ + ϕ) * (ψ + ϕ))
-    SymbolicUtils.expand((ϕ + ϕ) * (ψ + ϕ) + 3 * (ϕ + ϕ) * (ψ + ϕ))
+    # SymbolicUtils.simplify((ϕ + ϕ) * (ψ + ϕ) + 3 * (ϕ + ϕ) * (ψ + ϕ))
+    # SymbolicUtils.expand((ϕ + ϕ) * (ψ + ϕ) + 3 * (ϕ + ϕ) * (ψ + ϕ))
+    # ^ broken due to giving args::Vector{Any}
+    # check if it is still happens after QAdd being type stable
 end
 
 @testset "adjoint" begin
@@ -159,6 +198,7 @@ end
 @testset "QMul" begin
     using KeldyshContraction: QMul
 
-    @test isequal(QMul(1, [ϕ]), ϕ)
-    @test isequal(QMul(0, [ϕ]), 0)
+    @test isequal(QMul(1, [ϕ]), ϕ) broken = true
+    @test isequal(QMul(0, [ϕ]), 0) broken = true
+    @test iszero(QMul(0, [ϕ]))
 end

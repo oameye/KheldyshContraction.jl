@@ -229,6 +229,15 @@ for f in [:Destroy, :Create]
 
     @eval set_reg_to_zero(ϕ::$(f)) = $(f)(name(ϕ), contour(ϕ), Zero, position(ϕ))
 end
+function set_reg_to_zero!(v::Vector{QSym})
+    for (i, f) in pairs(v)
+        v[i] = set_reg_to_zero(f)
+    end
+end
+function contour_integers(v::Vector{QSym})
+    contours = Base.materialize(Base.broadcasted(contour, v))
+    Base.materialize(Base.broadcasted(Int, contours))
+end
 ladder(::Destroy) = 0
 ladder(::Create) = 1
 
@@ -260,12 +269,6 @@ function Base.:*(a::Create, b::Destroy)
     else
         return QMul(1, [b, a])
     end
-end
-
-function ismergeable(a::Create, b::Destroy)
-    pos_a = position(a)
-    pos_b = position(b)
-    return isequal(pos_a, pos_b)
 end
 
 """

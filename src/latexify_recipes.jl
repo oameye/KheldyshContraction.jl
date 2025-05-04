@@ -76,7 +76,7 @@ _to_expression(t::QAdd) = :(+($(_to_expression.(arguments(t))...)))
 
 function _to_expression(s::SymbolicUtils.Symbolic)
     if SymbolicUtils.iscall(s)
-        f = operation(s)
+        f = SymbolicUtils.operation(s)
         fsym = if f === conj
             :CONJ
         else

@@ -25,29 +25,45 @@ The constructor enforces several constraints on the input expression and throws 
 - Fields must have opposite contours
 
 """
-struct InteractionLagrangian{T,pos}
+struct InteractionLagrangian{T}
     "The Lagrangian expression as a [`QTerm`](@ref)"
     lagrangian::T
     "The quantum field destruction operator"
     qfield::Destroy{KeldyshContour,Bulk,Regularisation}
     "The classical field destruction operator"
     cfield::Destroy{KeldyshContour,Bulk,Regularisation}
+    "The position of the interaction Lagrangian"
+    position::Bulk
     function InteractionLagrangian(expr::QTerm)
-        @assert isbulk(expr) "An interaction Lagrangian only accepts bulk terms"
-        @assert is_conserved(expr) "An interaction Lagrangian only accepts conserved terms"
-        @assert is_physical(expr) "An interaction Lagrangian only accepts physical terms"
-        fields = filter(is_annihilation, unique(set_reg_to_zero.(allfields(expr))))
-        @assert length(fields) <= 2 "An interaction Lagrangian only accepts up to two different fields"
-        contours = Int.(contour.(fields))
-        @assert unique(contours) == contours "An interaction Lagrangian only accepts fields with opposite contours"
+        fields = _extract_unqiue_fields(expr)
+        contours = contour_integers(fields)
+
+        _assert_lagrangian(expr, fields, contours)
+
         q_idx = findfirst(iszero, contours)
         c_idx = findfirst(isone, contours)
-        return new{typeof(expr),position(fields[q_idx])}(expr, fields[q_idx], fields[c_idx])
-    end # TODO what if only quantum or only classical
+        return new{typeof(expr)}(
+            expr, fields[q_idx], fields[c_idx], position(fields[q_idx])
+        )
+    end
+end # Does not have to be type stable, as it is called only once
+function _extract_unqiue_fields(expr)
+    fields = allfields(expr)
+    set_reg_to_zero!(fields)
+    unique_fields = unique(fields)
+    filter(is_annihilation, unique_fields)
 end
+function _assert_lagrangian(expr, fields, contours)
+    @assert isbulk(expr) "An interaction Lagrangian only accepts bulk terms"
+    @assert is_conserved(expr) "An interaction Lagrangian only accepts conserved terms"
+    @assert is_physical(expr) "An interaction Lagrangian only accepts physical terms"
+    @assert length(fields) <= 2 "An interaction Lagrangian only accepts up to two different fields"
+    @assert unique(contours) == contours "An interaction Lagrangian only accepts fields with opposite contours"
+    return nothing
+end  # TODO what if only quantum or only classical
 
 "get position of the interaction lagrangian"
-position(::InteractionLagrangian{T,P}) where {T,P} = P
+position(L::InteractionLagrangian) = L.position
 
 """
     is_conserved(a::QTerm)
