@@ -30,6 +30,7 @@ include("symbolic_utils.jl")
 include("reguralisation.jl")
 include("filters.jl")
 include("wick_contractions.jl")
+include("canonicalize.jl")
 include("self_energy.jl")
 
 # show methods

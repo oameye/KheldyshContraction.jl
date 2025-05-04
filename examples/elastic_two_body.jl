@@ -79,3 +79,21 @@ GF = wick_contraction(L_int)
 ## Second order
 
 GF = wick_contraction(L_int; order=2)
+
+using SymbolicUtils
+import KeldyshContraction as KC
+terms = arguments(expand(GF.keldysh))
+# arguments(expand(simplify(sum(map(KC.canonicalize, terms)))))
+
+self_loops = map(terms) do term
+    props = KC.get_propagators(term)
+    sum()
+end
+topology0 = findall(iszero, self_loops)
+topology1 = findall(isone, self_loops)
+topology2 = findall(i -> i == 2, self_loops)
+length(topology0) + length(topology1) + length(topology2)
+findall(i -> 0 > i || i > 2,  self_loops)
+
+props = KC.get_propagators(terms[5])
+KC.is_self_loop.(props)

@@ -162,6 +162,10 @@ Base.isless(::Out, ::In) = true
 Base.isless(::In, ::Out) = false
 
 isbulk(x::AbstractPosition) = x isa Bulk
+index(p::Bulk) = p.index
+Base.Int(p::Bulk) = index(p) + 2
+Base.Int(p::In) = 2
+Base.Int(p::Out) = 1
 #########################
 # Destroy and Create
 #########################
@@ -223,7 +227,7 @@ for f in [:Destroy, :Create]
     @eval regularisation(ϕ::$(f){C,P,R}) where {C,P,R} = R
     @eval contour(ϕ::$(f){C}) where {C} = C
     @eval position(ϕ::$(f){C,P}) where {C,P} = P
-    @eval isbulk(ϕ::$(f)) = position(ϕ) isa Bulk
+    @eval isbulk(ϕ::$(f)) = isbulk(position(ϕ))
 
     @eval set_reg_to_zero(ϕ::$(f)) = $(f)(
         name(ϕ), contour(ϕ), Zero, position(ϕ); ϕ.metadata

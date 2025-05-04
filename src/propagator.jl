@@ -203,7 +203,6 @@ function get_unique_propagators(v::T) where {T<:SymbolicUtils.Symbolic}
     if v isa Average
         return T[v]
     elseif SymbolicUtils.iscall(v)
-        f = SymbolicUtils.operation(v)
         args = map(get_unique_propagators, SymbolicUtils.arguments(v))
         return unique(collect(Iterators.flatten(args)))
     else
@@ -211,6 +210,27 @@ function get_unique_propagators(v::T) where {T<:SymbolicUtils.Symbolic}
     end
 end
 get_unique_propagators(v) = SymbolicUtils.Symbolic[]
+function get_propagators(v::T) where {T<:SymbolicUtils.Symbolic}
+    out = T[]
+    if v isa Average
+        out = T[v]
+    elseif SymbolicUtils.iscall(v)
+        if SymbolicUtils.ispow(v)
+            base, exp = v.base, v.exp
+            if base isa Average
+                out = fill(base, exp)
+            else
+                args = map(get_propagators, SymbolicUtils.arguments(v))
+                out = collect(Iterators.flatten(args))
+            end
+        else
+            args = map(get_propagators, SymbolicUtils.arguments(v))
+            out = collect(Iterators.flatten(args))
+        end
+    end
+    return out
+end
+get_propagators(v) = SymbolicUtils.Symbolic[]
 
 # find_retarded_idx(ps) = findfirst(is_retarded, propagator_type.(ps))
 function find_advanced_idx_with_equal_coordinate(ps)
@@ -235,4 +255,8 @@ function advanced_to_retarded(x::T) where {T<:SymbolicUtils.Symbolic}
     end
     to_sub = Dict(props[adv_idx] => -1 * _conj(props[adv_idx]))
     return SymbolicUtils.substitute(x, to_sub)
+end
+
+function is_self_loop(p::Average)
+    isequal(positions(p)...)
 end
