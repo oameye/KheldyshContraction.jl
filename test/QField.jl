@@ -170,6 +170,8 @@ end
     @test isequal(ϕ, ϕ + 0)
     @test isequal(0 + ϕ, ϕ)
 
+    # @code_warntype isequal(ϕ, ϕ + 0)
+
     mul = ϕ * ϕ
     add = ϕ + ϕ
     @test isequal(ϕ * mul, ϕ^3)

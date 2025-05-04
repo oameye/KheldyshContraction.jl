@@ -2,8 +2,6 @@
 $(DocStringExtensions.README)
 """
 module KeldyshContraction
-# using DispatchDoctor
-# @stable default_mode="warn" begin
 
 using DocStringExtensions
 
@@ -48,5 +46,4 @@ export @qfields,
     @syms,
     arguments
 
-# end
 end
