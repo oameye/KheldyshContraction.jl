@@ -9,25 +9,23 @@ Represent a multiplication involving quantum fields  of [`QSym`](@ref) types.
 
 $(FIELDS)
 """
-struct QMul{M,T} <: QTerm
+struct QMul{T} <: QTerm
     "The commutative prefactor."
     arg_c::T
     "A vector containing all [`QSym`](@ref) types."
     args_nc::Vector{QField}
-    "The metadata associated with the term. Should default to `nothing`."
-    metadata::M
-    function QMul{M,T}(arg_c, args_nc, metadata) where {M,T}
+    function QMul{T}(arg_c, args_nc) where {T}
         if SymbolicUtils._isone(arg_c) && length(args_nc) == 1
             return args_nc[1]
         elseif (0 in args_nc) || isequal(arg_c, 0)
             return 0
         else
-            return new(arg_c, args_nc, metadata)
+            return new(arg_c, args_nc)
         end
     end
 end
-function QMul(arg_c::T, args_nc; metadata::M=NO_METADATA) where {M,T}
-    return QMul{M,T}(arg_c, args_nc, metadata)
+function QMul(arg_c::T, args_nc) where {T}
+    return QMul{T}(arg_c, args_nc)
 end
 
 SymbolicUtils.operation(::QMul) = (*)
@@ -43,17 +41,17 @@ function SymbolicUtils.maketerm(::Type{<:QMul}, ::typeof(*), args, metadata)
     args_nc = filter(x -> x isa QField, args)
     arg_c = isempty(args_c) ? 1 : *(args_c...)
     isempty(args_nc) && return arg_c
-    return QMul(arg_c, args_nc; metadata)
+    return QMul(arg_c, args_nc)
 end
 
-SymbolicUtils.metadata(a::QMul) = a.metadata
+SymbolicUtils.metadata(a::QMul) = nothing
 
 function Base.adjoint(q::QMul)
     args_nc = map(adjoint, q.args_nc)
     reverse!(args_nc) # TODO fields switch under adjoint right?
     sort!(args_nc; by=position)
     sort!(args_nc; by=ladder)
-    return QMul(conj(q.arg_c), args_nc; q.metadata)
+    return QMul(conj(q.arg_c), args_nc)
 end
 
 function Base.isequal(a::QMul, b::QMul)
@@ -93,6 +91,7 @@ Return the vector of the arguments of [`QAdd`](@ref).
 """
 SymbolicUtils.arguments(a::QAdd) = a.arguments
 SymbolicUtils.maketerm(::Type{<:QAdd}, ::typeof(+), args, metadata) = QAdd(args)
+SymbolicUtils.metadata(a::QAdd) = nothing
 
 function Base.isequal(a::QAdd, b::QAdd)
     length(arguments(a)) == length(arguments(b)) || return false

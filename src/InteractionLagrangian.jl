@@ -29,9 +29,9 @@ struct InteractionLagrangian{T,pos}
     "The Lagrangian expression as a [`QTerm`](@ref)"
     lagrangian::T
     "The quantum field destruction operator"
-    qfield::Destroy{Quantum,pos,Zero,Nothing}
+    qfield::Destroy{Quantum,pos,Zero}
     "The classical field destruction operator"
-    cfield::Destroy{Classical,pos,Zero,Nothing}
+    cfield::Destroy{Classical,pos,Zero}
     function InteractionLagrangian(expr::QTerm)
         @assert isbulk(expr) "An interaction Lagrangian only accepts bulk terms"
         @assert is_conserved(expr) "An interaction Lagrangian only accepts conserved terms"

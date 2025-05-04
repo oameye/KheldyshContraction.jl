@@ -5,7 +5,7 @@ module KeldyshContraction
 
 using DocStringExtensions
 
-using TermInterface: TermInterface, metadata
+using TermInterface: TermInterface
 using SymbolicUtils: SymbolicUtils, arguments, operation, @syms
 using Combinatorics: Combinatorics
 using OrderedCollections: OrderedCollections
@@ -13,8 +13,6 @@ using OrderedCollections: OrderedCollections
 using Latexify
 using MacroTools: MacroTools
 using LaTeXStrings
-
-const NO_METADATA = SymbolicUtils.NO_METADATA
 
 # Fields
 include("keldysh_algebra.jl")
