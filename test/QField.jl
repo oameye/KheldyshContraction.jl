@@ -204,6 +204,9 @@ end
     using KeldyshContraction: QMul
 
     @test isequal(ϕ, QMul(1, [ϕ]))
+    @test isequal(QMul(1, [ϕ]), ϕ)
     @test isequal(QMul(0, [ϕ]), 0)
+    @test isequal(0, QMul(0, [ϕ]))
     @test iszero(QMul(0, [ϕ]))
+    @test iszero(zero(ϕ*ϕ))
 end
