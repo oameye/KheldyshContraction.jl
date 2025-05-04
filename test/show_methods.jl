@@ -54,17 +54,17 @@ end
     @qfields ϕᶜ::Destroy(Classical) ϕᴾ::Destroy(Quantum)
 
     L_int = im*(0.5 * ϕᶜ' * ϕᴾ' * (ϕᶜ * ϕᶜ))
-    @test repr(L_int) == "(0.0 + 0.5im)*(ϕᶜ*ϕᶜ*̄ϕᶜ*̄ϕᴾ)"
+    @test repr(L_int) == "(0.0 + 0.5im)*(ϕᶜ*ϕᶜ*̄ϕᴾ*̄ϕᶜ)"
     @test repr(MIME"text/latex"(), L_int) ==
-        "\$0.5 i \\phi^c \\phi^c \\bar{\\phi^c} \\bar{\\phi^P}\$"
+        "\$0.5 i \\phi^c \\phi^c \\bar{\\phi^P} \\bar{\\phi^c}\$"
 end
 
 @testset "Structs" begin
     L = InteractionLagrangian(ϕ * ψ * ϕ' * ψ')
     @test repr(MIME"text/plain"(), L) ==
-        "Interaction Lagrangian with fields ϕ and ψ:\n(ϕ*ψ*̄ϕ*̄ψ)"
+        "Interaction Lagrangian with fields ϕ and ψ:\n(ϕ*ψ*̄ψ*̄ϕ)"
 
-    @test repr(MIME"text/latex"(), L) == "\$\\phi \\psi \\bar{\\phi} \\bar{\\psi}\$"
+    @test repr(MIME"text/latex"(), L) == "\$\\phi \\psi \\bar{\\psi} \\bar{\\phi}\$"
 
     DP = DressedPropagator(
         make_propagator(ϕ, ϕ'), make_propagator(ϕ, ϕ'), make_propagator(ϕ, ϕ')

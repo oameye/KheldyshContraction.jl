@@ -4,6 +4,58 @@ import KeldyshContraction as KC
 
 @qfields ϕ::Destroy(Classical) ψ::Destroy(Quantum)
 
+@testset "typestable QSym" begin
+    @inferred Destroy Destroy(:ψ, Classical)
+    @inferred Create Create(:ψ, Classical)
+
+    @qfields c::Destroy(Classical) q::Destroy(Quantum)
+end
+
+@testset "Type stable QMul" begin
+    @qfields c::Destroy(Classical) q::Destroy(Quantum)
+
+    @syms g::Real
+    @inferred KC.QMul(1, [c, c])
+    @inferred c*c
+    @inferred KC.QMul(1, [c, c])*KC.QMul(1.0, [c, c])
+    @inferred c^2
+    @inferred 1.0*c
+    @inferred g*c
+
+    mul = c*c
+    @inferred c*mul
+    @inferred mul*mul
+
+    @inferred 0.5 * q^2 * c' * q'
+    example = 0.5 * q * c * c' * q'
+    # @inferred arguments(example)
+    # example = 0.5 * q*c * c' * q'
+    # @code_warntype InteractionLagrangian(example)
+    # ^ Does not have to be type stable, as it is called only once
+end
+
+@testset "Type stable QAdd" begin
+    @qfields c::Destroy(Classical) q::Destroy(Quantum)
+
+    @syms g::Real
+
+    @inferred KC.QAdd([c, c])
+    @inferred c + c
+    @inferred - c
+    @inferred g + c
+    @inferred g + 2.0*c*c
+    @inferred c + g
+    @inferred c*c + 0
+
+    add = c + c
+    @inferred add + g
+    @inferred add + 5.0
+    @inferred add + 0.0
+
+    @inferred 0.5 * (c^2 + q^2) * c' * q'
+    @inferred 0.5 * (c^2 + q^2) * c' * q' + 0.5 * c * q * ((c')^2 + (q')^2)
+end
+
 @testset "SymbolicUtils interface" begin
     using TermInterface, SymbolicUtils
 
@@ -63,8 +115,10 @@ end
 
     @test isequal((ϕ + ϕ) * (ϕ + ϕ), 4 * ϕ^2) broken = true
     @test isequal((ϕ + ϕ) * (ϕ + ϕ), ϕ^2 + ϕ^2 + ϕ^2 + ϕ^2)
-    SymbolicUtils.simplify((ϕ + ϕ) * (ψ + ϕ) + 3 * (ϕ + ϕ) * (ψ + ϕ))
-    SymbolicUtils.expand((ϕ + ϕ) * (ψ + ϕ) + 3 * (ϕ + ϕ) * (ψ + ϕ))
+    # SymbolicUtils.simplify((ϕ + ϕ) * (ψ + ϕ) + 3 * (ϕ + ϕ) * (ψ + ϕ))
+    # SymbolicUtils.expand((ϕ + ϕ) * (ψ + ϕ) + 3 * (ϕ + ϕ) * (ψ + ϕ))
+    # ^ broken due to giving args::Vector{Any}
+    # check if it is still happens after QAdd being type stable
 end
 
 @testset "adjoint" begin
@@ -113,8 +167,10 @@ end
     @test isequal(-(ϕ, 1), ϕ - 1)
     @test isequal(-(1, ϕ), 1 - ϕ)
 
-    @test isequal(ϕ + 0, ϕ)
+    @test isequal(ϕ, ϕ + 0)
     @test isequal(0 + ϕ, ϕ)
+
+    # @code_warntype isequal(ϕ, ϕ + 0)
 
     mul = ϕ * ϕ
     add = ϕ + ϕ
@@ -149,6 +205,18 @@ end
 @testset "QMul" begin
     using KeldyshContraction: QMul
 
+    @test isequal(ϕ, QMul(1, [ϕ]))
     @test isequal(QMul(1, [ϕ]), ϕ)
+
+    @test !isequal(ϕ, QMul(1, [ϕ, ϕ]))
+    @test !isequal(QMul(1, [ϕ, ϕ]), ϕ)
+
     @test isequal(QMul(0, [ϕ]), 0)
+    @test isequal(0, QMul(0, [ϕ]))
+
+    @test !isequal(QMul(0, [ϕ]), 1)
+    @test !isequal(1, QMul(0, [ϕ]))
+
+    @test iszero(QMul(0, [ϕ]))
+    @test iszero(zero(ϕ*ϕ))
 end

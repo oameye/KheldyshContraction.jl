@@ -6,7 +6,7 @@ module KeldyshContraction
 using DocStringExtensions
 
 using TermInterface: TermInterface
-using SymbolicUtils: SymbolicUtils, arguments, operation, @syms
+using SymbolicUtils: SymbolicUtils, @syms, arguments
 using Combinatorics: Combinatorics
 using OrderedCollections: OrderedCollections
 
