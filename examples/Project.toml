@@ -2,9 +2,11 @@ name = "LossyTransport"
 
 [deps]
 FeynmanDiagram = "e424a512-dbd9-41ff-9883-094748823e72"
+Graphs = "86223c79-3864-5bf0-83f7-82e725a168b6"
 KeldyshContraction = "da6be1f2-7f61-475e-9253-2fea1ca4beca"
 Latexify = "23fbe1c1-3f47-55db-b15f-69d7ec21a316"
 Literate = "98b081ad-f1c9-55d3-8b20-4c87d4299306"
+MetaGraphsNext = "fa8bd995-216d-47f1-8a91-f3b68fbeb377"
 SymbolicUtils = "d1185830-fcd6-423d-90d6-eec64667417b"
 
 [compat]

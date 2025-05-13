@@ -135,11 +135,16 @@ function regularisations(p::Average)
 end
 contours(p::Average) = contour.(fields(p))
 isbulk(p::Average) = all(isbulk.(fields(p)))
-function positions(p::Average)
-    return position.(fields(p))
+function positions(p::Average)::NTuple{2, AbstractPosition}
+    pos = position.(fields(p))
+    return ntuple(i->pos[i], 2)
 end
-function positions(p::Vector{QField})
-    return position.(p)
+function positions(p::Vector{QField})::NTuple{2, AbstractPosition}
+    pos = position.(p)
+    return ntuple(i->pos[i], 2)
+end
+function integer_positions(p::Average)::NTuple{2, Int}
+    return Int.(positions(p))
 end
 propagator_type(p::SymbolicUtils.BasicSymbolic{Propagator{T}}) where {T} = T
 
@@ -156,6 +161,7 @@ function position(p::Average)
         else
             return minimum(_positions)
             # ^  TODO what to do if both are bulk with different index?
+            # This function should not exist
         end
     else
         throw(ArgumentError("Not a valid propagator."))
@@ -203,7 +209,6 @@ function get_unique_propagators(v::T) where {T<:SymbolicUtils.Symbolic}
     if v isa Average
         return T[v]
     elseif SymbolicUtils.iscall(v)
-        f = SymbolicUtils.operation(v)
         args = map(get_unique_propagators, SymbolicUtils.arguments(v))
         return unique(collect(Iterators.flatten(args)))
     else
@@ -211,6 +216,23 @@ function get_unique_propagators(v::T) where {T<:SymbolicUtils.Symbolic}
     end
 end
 get_unique_propagators(v) = SymbolicUtils.Symbolic[]
+function get_propagators(v::T) where {T<:SymbolicUtils.Symbolic}
+    out = T[]
+    if v isa Average
+        out = T[v]
+    elseif SymbolicUtils.iscall(v)
+        if SymbolicUtils.ispow(v)
+            base, exp = v.base, v.exp
+            args = fill(map(get_propagators, base), exp)
+            out = collect(Iterators.flatten(args))
+        else
+            args = map(get_propagators, SymbolicUtils.arguments(v))
+            out = collect(Iterators.flatten(args))
+        end
+    end
+    return out
+end
+get_propagators(v) = SymbolicUtils.Symbolic[]
 
 # find_retarded_idx(ps) = findfirst(is_retarded, propagator_type.(ps))
 function find_advanced_idx_with_equal_coordinate(ps)
