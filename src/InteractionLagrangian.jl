@@ -72,7 +72,16 @@ Checks if an expression [`QTerm`])(@ref) is conserved. A conserved expression is
 
 See also: [`is_physical`](@ref)
 """
-function is_conserved(args_nc_::Vector{<:QField})
+function is_conserved(args_nc_::Tuple{<:QSym,<:QSym})
+    n_destroy = isa.(args_nc_, Destroy)
+    if length(args_nc_) == 0 || iszero(sum(n_destroy))
+        return false
+    else
+        length(args_nc_) == 1
+        return length(args_nc_) ÷ sum(n_destroy) == 2
+    end
+end
+function is_conserved(args_nc_::Vector{QSym})
     n_destroy = isa.(args_nc_, Destroy)
     if length(args_nc_) == 0 || iszero(sum(n_destroy))
         return false
