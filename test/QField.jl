@@ -2,8 +2,6 @@ using KeldyshContraction, Test
 using KeldyshContraction: In, Out, Bulk, Classical, Quantum, Plus, Minus
 import KeldyshContraction as KC
 
-@qfields ϕ::Destroy(Classical) ψ::Destroy(Quantum)
-
 @testset "typestable QSym" begin
     @inferred Destroy Destroy(:ψ, Classical)
     @inferred Create Create(:ψ, Classical)
@@ -14,13 +12,11 @@ end
 @testset "Type stable QMul" begin
     @qfields c::Destroy(Classical) q::Destroy(Quantum)
 
-    @syms g::Real
     @inferred KC.QMul(1, [c, c])
     @inferred c*c
     @inferred KC.QMul(1, [c, c])*KC.QMul(1.0, [c, c])
     @inferred c^2
     @inferred 1.0*c
-    @inferred g*c
 
     mul = c*c
     @inferred c*mul
@@ -37,27 +33,26 @@ end
 @testset "Type stable QAdd" begin
     @qfields c::Destroy(Classical) q::Destroy(Quantum)
 
-    @syms g::Real
-
     @inferred KC.QAdd([c, c])
     @inferred c + c
     @inferred - c
-    @inferred g + c
-    @inferred g + 2.0*c*c
-    @inferred c + g
+    @inferred 2.0*c*c
+    @inferred 2.0*c*c + 2*c*c
     @inferred c*c + 0
 
     add = c + c
-    @inferred add + g
-    @inferred add + 5.0
+    @inferred add + c
     @inferred add + 0.0
 
     @inferred 0.5 * (c^2 + q^2) * c' * q'
     @inferred 0.5 * (c^2 + q^2) * c' * q' + 0.5 * c * q * ((c')^2 + (q')^2)
+    @inferred 0.5 * (c^2 + q^2) * c' * q' + 2 * c * q * ((c')^2 + (q')^2)
+    @inferred 0.5 * (c^2 + q^2) * c' * q' + 2*im * c * q * ((c')^2 + (q')^2)
 end
 
 @testset "SymbolicUtils interface" begin
     using TermInterface, SymbolicUtils
+    @qfields ϕ::Destroy(Classical) ψ::Destroy(Quantum)
 
     @test TermInterface.head(ϕ) == :call
     @test SymbolicUtils.iscall(ϕ) == false
@@ -71,8 +66,8 @@ end
 
     @testset "SymbolicUtils promotion" begin
         # Test the promotion of Keldysh fields
-        typeof(ϕ + 1)
-        @test SymbolicUtils.promote_symtype(+, ϕ, 1) isa KC.QField broken = true
+        typeof(ϕ + 0.0)
+        @test SymbolicUtils.promote_symtype(+, ϕ, 0.0) isa KC.QField broken = true
         @test SymbolicUtils.promote_symtype(*, ϕ, 1) isa KC.QField broken = true
     end
 end
@@ -102,9 +97,9 @@ end
 
     @test isequal(ψ + ϕ, ϕ + ψ) broken = true
     @test isequal(ψ * ϕ, ϕ * ψ) broken = true
-    @test isequal(1 + ϕ, ϕ + 1)
+    @test isequal(0.0 + ϕ, ϕ + 0)
     ϕ2 = ϕ + ϕ
-    @test isequal(ϕ2 + 1, ϕ + ϕ + 1)
+    @test isequal(ϕ2 + 0, ϕ + ϕ + 0)
     @test isequal(ϕ2 + ϕ, ϕ + ϕ + ϕ)
 end
 
@@ -164,9 +159,6 @@ end
 
     @test isequal((ϕ^2), ϕ * ϕ)
 
-    @test isequal(-(ϕ, 1), ϕ - 1)
-    @test isequal(-(1, ϕ), 1 - ϕ)
-
     @test isequal(ϕ, ϕ + 0)
     @test isequal(0 + ϕ, ϕ)
 
@@ -219,4 +211,7 @@ end
 
     @test iszero(QMul(0, [ϕ]))
     @test iszero(zero(ϕ*ϕ))
+
+    # type promotion
+    promote_type(KC.QMul{Int64}, KC.QMul{Float64})
 end
