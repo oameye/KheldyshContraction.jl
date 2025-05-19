@@ -14,12 +14,16 @@ using KeldyshContraction, Test
     all_concrete(KeldyshContraction.SelfEnergy)
 end
 
-# if VERSION < v"1.12.0-beta"
-#     @testset "Code linting" begin
-#         using JET
-#         JET.test_package(KeldyshContraction; target_defined_modules=true)
-#     end
-# end
+if isempty(VERSION.prerelease)
+    @testset "Code linting" begin
+        using JET
+        # JET.test_package(KeldyshContraction; target_defined_modules=true)
+        rep = report_package("KeldyshContraction")
+        @show rep
+        @test length(JET.get_reports(rep)) <= 52
+        @test_broken length(JET.get_reports(rep)) == 0
+    end
+end
 
 @testset "ExplicitImports" begin
     using ExplicitImports
