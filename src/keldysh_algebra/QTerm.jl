@@ -23,8 +23,8 @@ struct QMul{T<:Number} <: QTerm
     end
     QMul(args_nc::Vector{<:QSym}) = new{Float64}(1.0, args_nc)
     QMul(s) = new{Float64}(1.0, [s])
-    QMul() = QMul{Float64}(0.0, QSym[])
-    QMul{T}() where {T} = QMul{T}(T(0.0), QSym[])
+    QMul() = new{Float64}(0.0, QSym[])
+    QMul{T}() where {T} = new{T}(T(0.0), QSym[])
     QMul(x::QMul) = x
 end
 Base.promote_rule(::Type{QMul{S}}, ::Type{QMul{T}}) where {S,T} = QMul{promote_rule(S, T)}

@@ -7,14 +7,14 @@ function Base.:*(a::QSym, b::QSym)
     return QMul(1.0, args)
 end
 
-function Base.:*(a::QSym, b::SNuN)
+function Base.:*(a::QSym, b::Number)
     # SymbolicUtils._iszero(b) && return b
     # SymbolicUtils._isone(b) && return a
     return QMul(b, QSym[a])
 end
-Base.:*(b::SNuN, a::QField) = a * b
+Base.:*(b::Number, a::QField) = a * b
 
-function Base.:*(a::QMul, b::SNuN)
+function Base.:*(a::QMul, b::Number)
     # SymbolicUtils._iszero(b) && return b
     # SymbolicUtils._isone(b) && return a
     arg_c = a.arg_c * b
@@ -37,7 +37,7 @@ function Base.:*(a::QMul, b::QMul)
     return QMul(arg_c, args_nc)
 end
 
-Base.:/(a::QField, b::SNuN) = (1 / b) * a
+Base.:/(a::QField, b::Number) = (1 / b) * a
 
 ## Powers
 function Base.:^(a::QField, n::Integer)
@@ -53,16 +53,16 @@ end
 ## Addition
 
 Base.:-(a::QField) = -1 * a
-Base.:-(a::SNuN, b::QField) = a + (-b)
-Base.:-(a::QField, b::SNuN) = a + (-b)
+Base.:-(a::Number, b::QField) = a + (-b)
+Base.:-(a::QField, b::Number) = a + (-b)
 Base.:-(a::QField, b::QField) = a + (-b)
 
-function Base.:+(a::QField, b::SNuN)
+function Base.:+(a::QField, b::Number)
     SymbolicUtils._iszero(b) && return QAdd([a])
     return QAdd([a, b])
 end
-Base.:+(a::SNuN, b::QField) = +(b, a)
-function Base.:+(a::QAdd, b::SNuN)
+Base.:+(a::Number, b::QField) = +(b, a)
+function Base.:+(a::QAdd, b::Number)
     SymbolicUtils._iszero(b) && return a
     args = vcat(arguments(a), b)
     return QAdd(args)
