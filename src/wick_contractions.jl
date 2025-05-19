@@ -65,7 +65,7 @@ function wick_contraction(a::QMul; regularise=true)
     @assert is_conserved(a)
     @assert is_physical(a)
 
-    contraction = wick_contraction(a.args_nc)
+    contraction = wick_contraction(a.args_nc; regularise)
     propagators = make_propagators(contraction)
     if regularise
         propagators = _regularise(propagators)
@@ -81,7 +81,9 @@ fields, we have made sure that the destroy and create vectors are ordered with t
 out fields first. Computing the permutatins in lexicographic order, we can skip the first
 (n-1)! permutations.
 """
-function wick_contraction(args_nc::Vector{<:QField})::Vector{Vector{Vector{QField}}}
+function wick_contraction(
+    args_nc::Vector{<:QField}; regularise=true
+)::Vector{Vector{Vector{QField}}}
     # _partitions = Combinatorics.partitions(args_nc, length(args_nc) ÷ 2)
     _length = length(args_nc)
     @assert _length % 2 == 0 "Number of fields must be even"
