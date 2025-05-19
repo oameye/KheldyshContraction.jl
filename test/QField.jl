@@ -13,14 +13,14 @@ end
     @qfields c::Destroy(Classical) q::Destroy(Quantum)
 
     @inferred KC.QMul(1, [c, c])
-    @inferred c*c
-    @inferred KC.QMul(1, [c, c])*KC.QMul(1.0, [c, c])
+    @inferred c * c
+    @inferred KC.QMul(1, [c, c]) * KC.QMul(1.0, [c, c])
     @inferred c^2
-    @inferred 1.0*c
+    @inferred 1.0 * c
 
-    mul = c*c
-    @inferred c*mul
-    @inferred mul*mul
+    mul = c * c
+    @inferred c * mul
+    @inferred mul * mul
 
     @inferred 0.5 * q^2 * c' * q'
     example = 0.5 * q * c * c' * q'
@@ -35,10 +35,10 @@ end
 
     @inferred KC.QAdd([c, c])
     @inferred c + c
-    @inferred - c
-    @inferred 2.0*c*c
-    @inferred 2.0*c*c + 2*c*c
-    @inferred c*c + 0
+    @inferred -c
+    @inferred 2.0 * c * c
+    @inferred 2.0 * c * c + 2 * c * c
+    @inferred c * c + 0
 
     add = c + c
     @inferred add + c
@@ -153,9 +153,11 @@ end
 end
 
 @testset "more math" begin
+    @qfields ϕ::Destroy(Classical) ψ::Destroy(Quantum)
+
     # Test the math operations
     @test isequal(ϕ / 2, 0.5 * ϕ)
-    @test isequal(ϕ//2, 0.5 * ϕ) skip = true
+    @test isequal(ϕ // 2, 0.5 * ϕ) skip = true
 
     @test isequal((ϕ^2), ϕ * ϕ)
 
@@ -167,7 +169,13 @@ end
     mul = ϕ * ϕ
     add = ϕ + ϕ
     @test isequal(ϕ * mul, ϕ^3)
+    @test isequal(mul * ϕ, ϕ^3)
     @test isequal(ϕ + add, ϕ + ϕ + ϕ)
+    @test isequal(add + ϕ, ϕ + ϕ + ϕ)
+    @test isequal(mul * add, ϕ^3 + ϕ^3)
+    @test isequal(add * mul, ϕ^3 + ϕ^3)
+    @test isequal(add + mul, ϕ + ϕ + ϕ^2)
+    @test isequal(mul + add, ϕ + ϕ + ϕ^2)
 end
 
 @testset "quantum-classical" begin
@@ -210,7 +218,7 @@ end
     @test !isequal(1, QMul(0, [ϕ]))
 
     @test iszero(QMul(0, [ϕ]))
-    @test iszero(zero(ϕ*ϕ))
+    @test iszero(zero(ϕ * ϕ))
 
     # type promotion
     promote_type(KC.QMul{Int64}, KC.QMul{Float64})

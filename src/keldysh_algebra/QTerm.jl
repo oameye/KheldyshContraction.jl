@@ -23,6 +23,7 @@ struct QMul{T<:Number} <: QTerm
     end
     QMul(args_nc::Vector{<:QSym}) = new{Float64}(1.0, args_nc)
     QMul(s) = new{Float64}(1.0, [s])
+    QMul{T}(s) where {T} = new{T}(T(1.0), [s])
     QMul() = new{Float64}(0.0, QSym[])
     QMul{T}() where {T} = new{T}(T(0.0), QSym[])
     QMul(x::QMul) = x

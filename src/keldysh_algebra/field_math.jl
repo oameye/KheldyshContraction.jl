@@ -77,6 +77,14 @@ function Base.:+(a::QMul{T}, b::QMul{S}) where {T,S}
     args = QMul{TT}[a, b]
     return QAdd(args)
 end
+function Base.:+(a::QMul{T}, b::QSym) where {T}
+    args = QMul{T}[a, QMul{T}(b)]
+    return QAdd(args)
+end
+function Base.:+(b::QSym, a::QMul{T}) where {T}
+    args = QMul{T}[a, QMul{T}(b)]
+    return QAdd(args)
+end
 
 function Base.:+(a::QMul{T}, b::QAdd{S}) where {T,S}
     TT = promote_type(T, S)
