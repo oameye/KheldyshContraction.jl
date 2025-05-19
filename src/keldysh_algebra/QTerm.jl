@@ -26,10 +26,8 @@ struct QMul{T<:Number} <: QTerm
     QMul{T}(s) where {T} = new{T}(T(1.0), [s])
     QMul() = new{Float64}(0.0, QSym[])
     QMul{T}() where {T} = new{T}(T(0.0), QSym[])
-    function QMul(x)
-        thow(MethodError("QMul constructor does not accept $(typeof(x))"))
-    end
 end
+# QMul(x::T) where {T} = @error "QMul constructor does not accept $T"
 Base.promote_rule(::Type{QMul{S}}, ::Type{QMul{T}}) where {S,T} = QMul{promote_rule(S, T)}
 function Base.convert(::Type{QMul{T}}, x::QMul{S}) where {T<:Number,S<:Number}
     return QMul(convert(T, x.arg_c), x.args_nc)
@@ -138,10 +136,8 @@ struct QAdd{T<:Number} <: QTerm
         new{Float64}([QMul(s) for s in args])
     end
     QAdd{T}() where {T} = new{T}([QMul{T}()])
-    function QAdd(x)
-        thow(MethodError("QAdd constructor does not accept $(typeof(x))"))
-    end
 end
+# QAdd(x::T) where {T} = @error "QAdd constructor does not accept $T"
 
 SymbolicUtils.operation(::QAdd) = (+)
 """
