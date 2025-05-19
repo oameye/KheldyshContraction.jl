@@ -68,7 +68,7 @@ function wick_contraction(a::QMul; regularise=true)
     contraction = wick_contraction(a.args_nc; regularise)
     propagators = make_propagators(contraction)
     if regularise
-        propagators = _regularise(propagators)
+        # propagators = _regularise(propagators)
         set_reg_to_zero!(propagators)
     end
     return a.arg_c * make_term(propagators)
@@ -108,10 +108,10 @@ function wick_contraction(
                 fail = true
                 break
             end
-            # if regularise && !regular(potential_contraction)
-            #     fail = true
-            #     break
-            # end
+            if regularise && !regular(potential_contraction)
+                fail = true
+                break
+            end
             push!(contraction, potential_contraction)
         end
         if fail

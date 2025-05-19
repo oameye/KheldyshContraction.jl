@@ -29,7 +29,7 @@ end
 function regular(qs::Vector{QSym})
     _isbulk = isbulk(qs)
     _reg = regularisations(qs)
-    T = propagator_type(propagator(qs...))
+    T = propagator_type(qs...)
     if !_isbulk || subtraction(_reg) == 0
         return true
     elseif subtraction(_reg) < 0 && T == Retarded
