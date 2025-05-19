@@ -104,13 +104,15 @@ function wick_contraction(
         for (k, l) in pairs(perm)
             potential_contraction = QSym[destroys[k], creates[l]]
             # ^ TODO make a Tuple
-            if contraction_filter(potential_contraction)
-                # ^ TODO put regularisation here too
-                push!(contraction, potential_contraction)
-            else
+            if !contraction_filter(potential_contraction)
                 fail = true
                 break
             end
+            # if regularise && !regular(potential_contraction)
+            #     fail = true
+            #     break
+            # end
+            push!(contraction, potential_contraction)
         end
         if fail
             continue
