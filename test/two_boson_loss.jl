@@ -24,7 +24,7 @@ end
         @test is_conserved(expr)
         @test is_physical(expr)
 
-        wick_contractions = wick_contraction(expr.arguments[1].args_nc)
+        wick_contractions = wick_contraction(expr.arguments[1].args_nc; regularise=false)
         @test length(wick_contractions) == 4
 
         propagators = make_propagators(wick_contractions)

@@ -26,6 +26,20 @@ function regular(p::Average)
         return true
     end
 end
+function regular(qs::Vector{QSym})
+    _isbulk = isbulk(qs)
+    _reg = regularisations(qs)
+    T = propagator_type(qs...)
+    if !_isbulk || subtraction(_reg) == 0
+        return true
+    elseif subtraction(_reg) < 0 && T == Retarded
+        return false
+    elseif subtraction(_reg) > 0 && T == Advanced
+        return false
+    else
+        return true
+    end
+end
 regular(p) = true
 regular(x::CSym) = regular(get_propagator(x))
 
