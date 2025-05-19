@@ -31,8 +31,8 @@ include("wick_contractions.jl")
 include("self_energy.jl")
 
 # show methods
-include("latexify_recipes.jl")
-include("printing.jl")
+include("show_methods/latexify_recipes.jl")
+include("show_methods/printing.jl")
 
 export @qfields,
     Destroy,
