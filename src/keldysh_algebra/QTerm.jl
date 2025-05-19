@@ -9,18 +9,28 @@ Represent a multiplication involving quantum fields  of [`QSym`](@ref) types.
 
 $(FIELDS)
 """
-struct QMul{T<:SNuN} <: QTerm
+struct QMul{T<:Number} <: QTerm
     "The commutative prefactor."
     arg_c::T
     "A vector containing all [`QSym`](@ref) types."
     args_nc::Vector{QSym}
-    function QMul(arg_c::T, args_nc::Vector{<:QSym}) where {T}
+    function QMul(arg_c::T, args_nc::Vector{<:QSym}) where {T<:Number}
         if isequal(arg_c, 0.0)
             return new{T}(0.0, QSym[])
         else
             return new{T}(arg_c, args_nc)
         end
     end
+    QMul(args_nc::Vector{<:QSym}) = new{Float64}(1.0, args_nc)
+    QMul(s) = new{Float64}(1.0, [s])
+    QMul{T}(s) where {T} = new{T}(T(1.0), [s])
+    QMul() = new{Float64}(0.0, QSym[])
+    QMul{T}() where {T} = new{T}(T(0.0), QSym[])
+end
+# QMul(x::T) where {T} = @error "QMul constructor does not accept $T"
+Base.promote_rule(::Type{QMul{S}}, ::Type{QMul{T}}) where {S,T} = QMul{promote_rule(S, T)}
+function Base.convert(::Type{QMul{T}}, x::QMul{S}) where {T<:Number,S<:Number}
+    return QMul(convert(T, x.arg_c), x.args_nc)
 end
 
 SymbolicUtils.operation(::QMul) = (*)
@@ -113,9 +123,22 @@ end
 
 Represent an addition involving [`QField`](@ref) and other types.
 """
-struct QAdd <: QTerm
-    arguments::Vector{QSymbol}
+struct QAdd{T<:Number} <: QTerm
+    arguments::Vector{QMul{T}}
+    function QAdd(args::Vector{<:QMul})
+        vs = promote(args...)
+        new{typeof(first(vs)).parameters[1]}(collect(vs))
+    end
+    function QAdd(args::Vector{QMul{T}}) where {T<:Number}
+        new{T}(args)
+    end
+    function QAdd(args::Vector{<:QSym})
+        new{Float64}([QMul(s) for s in args])
+    end
+    QAdd{T}() where {T} = new{T}([QMul{T}()])
 end
+# QAdd(x::T) where {T} = @error "QAdd constructor does not accept $T"
+
 SymbolicUtils.operation(::QAdd) = (+)
 """
     arguments(a::QAdd)

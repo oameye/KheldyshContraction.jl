@@ -3,6 +3,7 @@ using KeldyshContraction: In, Out, Classical, Quantum, Plus, Minus
 using KeldyshContraction:
     isbulk,
     regularisations,
+    make_propagator,
     make_propagators,
     propagator_type,
     regular,
