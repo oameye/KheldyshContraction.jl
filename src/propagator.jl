@@ -133,8 +133,12 @@ fields(p::Average) = SymbolicUtils.arguments(p)
 function regularisations(p::Average)
     return regularisation.(fields(p))
 end
+function regularisations(qs::Vector{QSym})
+    return regularisation.(qs)
+end
 contours(p::Average) = contour.(fields(p))
 isbulk(p::Average) = all(isbulk.(fields(p)))
+isbulk(qs::Vector{QSym}) = all(isbulk.(qs))
 function positions(p::Average)
     return position.(fields(p))
 end
