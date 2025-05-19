@@ -2,10 +2,10 @@
 #       Consistency checks
 #################################
 
-is_qq_contraction(v::Vector{T}) where {T<:QField} = iszero(sum(Int.(contour.(v))))
+is_qq_contraction(v::Tuple{<:QSym,<:QSym}) = iszero(sum(Int.(contour.(v))))
 # has_qq_contraction(vv::Vector{Vector{<:QField}}) = any(is_qq_contraction.(vv))
 
-function is_physical_propagator(a::Vector{<:QField})
+function is_physical_propagator(a::Tuple{<:QSym,<:QSym})
     len = length(a) == 2 # propagator has length 2
     positions = position.(a)
     # ∨ Can't make a propagator with In and Out coordinate
@@ -34,9 +34,9 @@ Gᴿ(1,2) Gᴿ(2,1) = 0
 Gᴬ(1,2) Gᴬ(2,1) = 0
 Gᴿ(1,2) Gᴬ(1,2) = 0
 """
-function has_zero_loop(vs::Vector{Vector{QField}}) # TODO: change to Vector{Vector{QSym}}
+function has_zero_loop(vs::Vector{Tuple{<:QSym,<:QSym}})
     ps = positions.(vs)
-    sorted_ps = sort.(ps)
+    sorted_ps = sort_tuple.(ps)
     loops = find_equal_pairs(sorted_ps)
     for loop in loops
         T1 = propagator_type(vs[loop[1]]...)
@@ -72,3 +72,5 @@ function find_equal_pairs(vec)
 
     return pairs
 end
+
+sort_tuple(t) = t[1] < t[2] ? t : (t[2], t[1])

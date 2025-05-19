@@ -83,7 +83,7 @@ out fields first. Computing the permutatins in lexicographic order, we can skip 
 """
 function wick_contraction(
     args_nc::Vector{<:QField}; regularise=true
-)::Vector{Vector{Vector{QField}}}
+)::Vector{Vector{Tuple{<:QSym,<:QSym}}}
     # _partitions = Combinatorics.partitions(args_nc, length(args_nc) ÷ 2)
     _length = length(args_nc)
     @assert _length % 2 == 0 "Number of fields must be even"
@@ -95,15 +95,14 @@ function wick_contraction(
     number_of_combinations = factorial(n_destroy)
     to_skip = factorial(n_destroy - 1) # due in-out contraction constraint
 
-    wick_contractions = Vector{Vector{QField}}[]
+    wick_contractions = Vector{Tuple{<:QSym,<:QSym}}[]
     iter = 1:n_destroy
     for i in (to_skip + 1):number_of_combinations
         perm = Combinatorics.nthperm(iter, i)
-        contraction = Vector{QField}[]
+        contraction = Tuple{<:QSym,<:QSym}[]
         fail = false
         for (k, l) in pairs(perm)
-            potential_contraction = QSym[destroys[k], creates[l]]
-            # ^ TODO make a Tuple
+            potential_contraction = (destroys[k], creates[l])
             if !contraction_filter(potential_contraction)
                 fail = true
                 break
@@ -125,7 +124,9 @@ function wick_contraction(
     return wick_contractions
 end
 
-function make_propagators(contraction::Vector{Vector{Vector{QField}}})::Vector{Vector{SNuN}}
+function make_propagators(
+    contraction::Vector{Vector{Tuple{<:QSym,<:QSym}}}
+)::Vector{Vector{SNuN}}
     propagators = map(contraction) do factor
         to_prop = x -> propagator(x...)
         _propagators = to_prop.(factor)

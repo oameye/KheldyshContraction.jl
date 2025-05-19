@@ -18,7 +18,7 @@ end
 function propagator_checks(out::QSym, in::QSym)::Nothing
     @assert isa(in, Create) "The `in` field must be a Create operator"
     @assert isa(out, Destroy) "The `out` field must be a Destroy operator"
-    v = [out, in]
+    v = (out, in)
 
     positions = position.(v)
     @assert !(first(positions) isa In) "The outgoing field can't be the In<:Position` coordinate"
@@ -133,16 +133,16 @@ fields(p::Average) = SymbolicUtils.arguments(p)
 function regularisations(p::Average)
     return regularisation.(fields(p))
 end
-function regularisations(qs::Vector{QSym})
+function regularisations(qs::Tuple{<:QSym,<:QSym})
     return regularisation.(qs)
 end
 contours(p::Average) = contour.(fields(p))
 isbulk(p::Average) = all(isbulk.(fields(p)))
-isbulk(qs::Vector{QSym}) = all(isbulk.(qs))
+isbulk(qs::Tuple{<:QSym,<:QSym}) = all(isbulk.(qs))
 function positions(p::Average)
     return position.(fields(p))
 end
-function positions(p::Vector{QField})
+function positions(p::Tuple{<:QSym,<:QSym})
     return position.(p)
 end
 propagator_type(p::SymbolicUtils.BasicSymbolic{Propagator{T}}) where {T} = T

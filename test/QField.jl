@@ -198,8 +198,8 @@ end
 @testset "is_conserved" begin
     using KeldyshContraction: is_conserved
 
-    @test !is_conserved(KeldyshContraction.QField[])
-    @test !is_conserved(KeldyshContraction.QField[ϕ])
+    @test !is_conserved(KeldyshContraction.QSym[])
+    @test !is_conserved(KeldyshContraction.QSym[ϕ])
 end
 
 @testset "QMul" begin
