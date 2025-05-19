@@ -47,7 +47,7 @@ end
     @inferred 0.5 * (c^2 + q^2) * c' * q'
     @inferred 0.5 * (c^2 + q^2) * c' * q' + 0.5 * c * q * ((c')^2 + (q')^2)
     @inferred 0.5 * (c^2 + q^2) * c' * q' + 2 * c * q * ((c')^2 + (q')^2)
-    @inferred 0.5 * (c^2 + q^2) * c' * q' + 2*im * c * q * ((c')^2 + (q')^2)
+    @inferred 0.5 * (c^2 + q^2) * c' * q' + 2 * im * c * q * ((c')^2 + (q')^2)
 end
 
 @testset "SymbolicUtils interface" begin

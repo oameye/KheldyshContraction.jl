@@ -28,7 +28,7 @@ struct QMul{T<:Number} <: QTerm
     QMul(x::QMul) = x
 end
 Base.promote_rule(::Type{QMul{S}}, ::Type{QMul{T}}) where {S,T} = QMul{promote_rule(S, T)}
-function Base.convert(::Type{QMul{T}}, x::QMul{S}) where {T<:Number, S<:Number}
+function Base.convert(::Type{QMul{T}}, x::QMul{S}) where {T<:Number,S<:Number}
     return QMul(convert(T, x.arg_c), x.args_nc)
 end
 
@@ -137,7 +137,7 @@ struct QAdd{T<:Number} <: QTerm
     QAdd() = new{Float64}([QMul()])
     QAdd{T}() where {T} = new{T}([QMul{T}()])
 end
-empty_element(q::Vector{QMul{T}})  where {T} = QAdd{T}()
+empty_element(q::Vector{QMul{T}}) where {T} = QAdd{T}()
 SymbolicUtils.operation(::QAdd) = (+)
 """
     arguments(a::QAdd)

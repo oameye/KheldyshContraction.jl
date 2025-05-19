@@ -72,18 +72,18 @@ function Base.:+(a::QSym, b::QSym)
     args = [a, b]
     return QAdd(args)
 end
-function Base.:+(a::QMul{T}, b::QMul{S}) where {T, S}
+function Base.:+(a::QMul{T}, b::QMul{S}) where {T,S}
     TT = promote_type(T, S)
     args = QMul{TT}[a, b]
     return QAdd(args)
 end
 
-function Base.:+(a::QMul{T}, b::QAdd{S}) where {T, S}
+function Base.:+(a::QMul{T}, b::QAdd{S}) where {T,S}
     TT = promote_type(T, S)
     args = QMul{TT}[_b for _b in arguments(b)]
     return QAdd(push!(args, a))
 end
-function Base.:+( b::QAdd{S}, a::QMul{T}) where {T, S}
+function Base.:+(b::QAdd{S}, a::QMul{T}) where {T,S}
     TT = promote_type(T, S)
     args = QMul{TT}[_b for _b in arguments(b)]
     return QAdd(push!(args, a))
@@ -102,7 +102,7 @@ function Base.:+(a::QAdd, b::QAdd)
     return QAdd(args)
 end
 
-function Base.:*(a::QAdd{T}, b::S) where {T, S<:Number}
+function Base.:*(a::QAdd{T}, b::S) where {T,S<:Number}
     TT = promote_type(T, S)
     args = QMul{TT}[a_ * b for a_ in arguments(a)]
     flatten_adds!(args)
@@ -110,14 +110,14 @@ function Base.:*(a::QAdd{T}, b::S) where {T, S<:Number}
     return QAdd(args)
 end
 
-function Base.:*(a::QMul{S},b::QAdd{T}) where {T, S}
+function Base.:*(a::QMul{S}, b::QAdd{T}) where {T,S}
     TT = promote_type(T, S)
     args = QMul{TT}[b_ * a for b_ in arguments(b)]
     flatten_adds!(args)
     isempty(args) && return QAdd{TT}()
     return QAdd(args)
 end
-function Base.:*(b::QAdd{T}, a::QMul{S}) where {T, S}
+function Base.:*(b::QAdd{T}, a::QMul{S}) where {T,S}
     TT = promote_type(T, S)
     args = QMul{TT}[b_ * a for b_ in arguments(b)]
     flatten_adds!(args)
@@ -125,20 +125,20 @@ function Base.:*(b::QAdd{T}, a::QMul{S}) where {T, S}
     return QAdd(args)
 end
 
-function Base.:*(a::QSym,b::QAdd{T}) where {T}
+function Base.:*(a::QSym, b::QAdd{T}) where {T}
     args = QMul{T}[b_ * a for b_ in arguments(b)]
     flatten_adds!(args)
     isempty(args) && return QAdd{T}()
     return QAdd(args)
 end
-function Base.:*(b::QAdd{T},a::QSym) where {T}
+function Base.:*(b::QAdd{T}, a::QSym) where {T}
     args = QMul{T}[b_ * a for b_ in arguments(b)]
     flatten_adds!(args)
     isempty(args) && return QAdd{T}()
     return QAdd(args)
 end
 
-function Base.:*(a::QAdd{S},b::QAdd{T}) where {T, S}
+function Base.:*(a::QAdd{S}, b::QAdd{T}) where {T,S}
     TT = promote_type(T, S)
     args = QMul{TT}[]
     for a_ in arguments(a), b_ in arguments(b)
