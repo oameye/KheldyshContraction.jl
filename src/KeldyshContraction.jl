@@ -15,10 +15,10 @@ using MacroTools: MacroTools
 using LaTeXStrings
 
 # Fields
-include("keldysh_algebra.jl")
-include("QTerm.jl")
-include("field_math.jl")
-include("hashing.jl")
+include("keldysh_algebra/keldysh_algebra.jl")
+include("keldysh_algebra/QTerm.jl")
+include("keldysh_algebra/field_math.jl")
+include("keldysh_algebra/hashing.jl")
 include("InteractionLagrangian.jl")
 
 # Propagators
