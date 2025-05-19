@@ -66,7 +66,7 @@ end
     include("two_boson_loss.jl")
 end
 
-@testset "two boson loss" begin
+@testset "self interaction" begin
     include("self_interaction.jl")
 end
 
