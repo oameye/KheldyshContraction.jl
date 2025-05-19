@@ -79,3 +79,43 @@ GF = wick_contraction(L_int)
 ## Second order
 
 GF = wick_contraction(L_int; order=2)
+
+using SymbolicUtils
+terms = expand(GF.keldysh) |> arguments
+
+import KeldyshContraction as KC
+props = KC.get_propagators(terms[1])
+
+using Graphs, MetaGraphsNext
+graph = KC.MetaGraph(Vector{KC.Average}(props))
+all_neighbors(graph, 1)
+graph.graph |> propertynames
+graph.graph.fadjlist
+
+
+"""
+    permute!(g, p)
+Permute the vertices of graph `g` in-place, according to permutation `p`. No checking is done to verify that p is a permutation.
+"""
+function permute!(g::AbstractSimpleGraph, p::AbstractVector)
+    permute_adjlist!(g.fadjlist, p)
+    is_directed(g) && permute_adjlist!(g.badjlist, p)
+    return g
+end
+
+
+"""
+    permute_adjlist!(adjlist::Vector{Vector{<:Integer}}, p::AbstractVector)
+Internal utility function to permute adjacency lists. No checking is done to verify that p is a permutation.
+"""
+function permute_adjlist!(adjlist::Vector{<:Vector{<:Integer}}, p::AbstractVector)
+    pinv = invperm(p)
+    relabel(i) = pinv[i]
+
+    for adj in adjlist
+        adj .= relabel.(adj)
+        sort!(adj)
+    end
+    permute!(adjlist, p)
+    return nothing
+end
