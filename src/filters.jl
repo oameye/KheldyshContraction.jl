@@ -76,17 +76,6 @@ function find_equal_pairs(vec)
     return pairs
 end
 
-function is_connected(vs::Vector{Contraction})
-    g = graph(vs)
-    connected = Graphs.is_connected(g)
-    if connected
-        return true
-    else
-        @info "Contraction is not connected:" integer_positions.(vs)
-        return false
-    end
-end # TODO: circumvent the graph library
-
 ######################
 #     regularise
 ######################

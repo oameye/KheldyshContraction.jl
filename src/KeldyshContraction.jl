@@ -10,8 +10,6 @@ using SymbolicUtils: SymbolicUtils, @syms, arguments
 using Combinatorics: Combinatorics
 using OrderedCollections: OrderedCollections
 
-using Graphs: Graphs
-
 using Latexify
 using MacroTools: MacroTools
 using LaTeXStrings
