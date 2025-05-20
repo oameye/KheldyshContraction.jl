@@ -139,39 +139,9 @@ function regularisations(qs::Contraction)
     return regularisation.(qs)
 end
 contours(p::Average) = contour.(fields(p))
-isbulk(p::Average) = all(isbulk.(fields(p)))
-isbulk(qs::Contraction) = all(isbulk.(qs))
-function positions(p::Average)
-    return position.(fields(p))
-end
-function positions(p::Contraction)
-    return position.(p)
-end
+
 propagator_type(p::SymbolicUtils.BasicSymbolic{Propagator{T}}) where {T} = T
 
-function position(p::Average)
-    _positions = positions(p)
-    if length(findall(x -> x isa In, _positions)) == 1
-        return In()
-    elseif length(findall(x -> x isa Out, _positions)) == 1
-        return Out()
-    elseif all(isbulk, _positions)
-        idxs = getproperty.(_positions, :index)
-        if isequal(idxs...)
-            return _positions[1]
-        else
-            return minimum(_positions)
-            # ^  TODO what to do if both are bulk with different index?
-        end
-    else
-        throw(ArgumentError("Not a valid propagator."))
-    end
-end
-
-function same_position(p::Average)
-    _positions = positions(p)
-    return isequal(_positions...)
-end
 function get_propagator_idx(x::CSym)::Int
     args = KeldyshContraction.arguments(x)
     return get_propagator_idx(args)
@@ -241,4 +211,45 @@ function advanced_to_retarded(x::T) where {T<:SymbolicUtils.Symbolic}
     end
     to_sub = Dict(props[adv_idx] => -1 * _conj(props[adv_idx]))
     return SymbolicUtils.substitute(x, to_sub)
+end
+
+#########################
+#       Position
+#########################
+
+isbulk(p::Average) = all(isbulk.(fields(p)))
+isbulk(qs::Contraction) = all(isbulk.(qs))
+function positions(p::Average)
+    return position.(fields(p))
+end
+function positions(p::Contraction)
+    return position.(p)
+end
+
+function position(p::Average)
+    _positions = positions(p)
+    if length(findall(x -> x isa In, _positions)) == 1
+        return In()
+    elseif length(findall(x -> x isa Out, _positions)) == 1
+        return Out()
+    elseif all(isbulk, _positions)
+        idxs = getproperty.(_positions, :index)
+        if isequal(idxs...)
+            return _positions[1]
+        else
+            return minimum(_positions)
+            # ^  TODO what to do if both are bulk with different index?
+        end
+    else
+        throw(ArgumentError("Not a valid propagator."))
+    end
+end
+
+function integer_positions(p::Contraction)::NTuple{2,Int}
+    return Int.(positions(p))
+end
+
+function same_position(p::Average)
+    _positions = positions(p)
+    return isequal(_positions...)
 end
