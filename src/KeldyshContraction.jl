@@ -9,7 +9,7 @@ using TermInterface: TermInterface
 using SymbolicUtils: SymbolicUtils, @syms, arguments
 using Combinatorics: Combinatorics
 using OrderedCollections: OrderedCollections
-using SmallCollections: SmallCollections
+using SmallCollections: SmallCollections, SmallVector, SmallSet
 
 using Latexify
 using MacroTools: MacroTools

@@ -1,3 +1,36 @@
+mutable struct Diagram{V,E}
+    contractions::Vector{Contraction}
+    edges::SmallVector{E,Tuple{Int,Int}}
+    Vertices::SmallSet{V,Int}
+    prefactor::Number
+end
+
+struct Diagrams{N,V,E}
+    collection::Dict{SmallVector{N,Int},Diagram{V,E}}
+    function Diagrams(fields::Vector{QSym}) # number of fields
+        positions = positions.(fields)
+        unique_positions = unique(positions)
+        E = length(fields) ÷ 2
+        V = length(unique(positions))
+        N = max_bulk_edges(length(filter(isbulk, unique_positions)))
+
+        collection = Dict{SmallVector{N,Int},Diagram{V,E}}()
+        return new{N,V,E}(collection)
+    end
+end
+
+function add_diagram!(d::Diagrams, diagram::Vector{Contraction})
+    # Check if the diagram already exists in the collection
+    bulk_multiplicity = bulk_multiplicity(diagram)
+    sort!(bulk_multiplicity)
+    if haskey(d.collection, bulk_multiplicity)
+        d.collection[bulk_multiplicity].prefactor *= 2
+    end
+    # Add the diagram to the collection
+    d.collection[diagram.edges] = diagram
+    return true
+end
+
 function is_connected(vs::Vector{Contraction})
     ps = integer_positions.(vs)
     in_or_out = findfirst(p -> 1 ∈ p || 2 ∈ p, ps) # in case it a vacuum diagram
@@ -78,7 +111,7 @@ function bulk_multiplicity(edges::Vector{Tuple{Int,Int}})
     map!(edge -> edge .- 2, edges, edges)
 
     vert = vertices(edges)
-    m = max_edges(length(vert))
+    m = max_bulk_edges(length(vert))
     mult = SmallCollections.MutableSmallVector{m,Int}(0 for i in 1:m)
     for edge in edges
         idx = edge_to_index(edge[1], edge[2], length(vert))
@@ -88,7 +121,8 @@ function bulk_multiplicity(edges::Vector{Tuple{Int,Int}})
 end
 bulk_multiplicity(vs::Vector{Contraction}) = bulk_multiplicity(integer_positions.(vs))
 
-max_edges(n::Int)::Int = n * (n - 1) ÷ 2
+"Max edges given the internal vertices"
+max_bulk_edges(n::Int)::Int = n * (n - 1) ÷ 2
 
 """
 maps edge (i,j) to a unique integer in range 1:max_edges(n).
