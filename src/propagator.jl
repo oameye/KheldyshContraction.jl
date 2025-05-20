@@ -1,3 +1,5 @@
+const Contraction = Tuple{<:QSym,<:QSym}
+
 """
     PropagatorType `Keldysh`, `Advanced`, `Retarded`
 
@@ -133,16 +135,16 @@ fields(p::Average) = SymbolicUtils.arguments(p)
 function regularisations(p::Average)
     return regularisation.(fields(p))
 end
-function regularisations(qs::Tuple{<:QSym,<:QSym})
+function regularisations(qs::Contraction)
     return regularisation.(qs)
 end
 contours(p::Average) = contour.(fields(p))
 isbulk(p::Average) = all(isbulk.(fields(p)))
-isbulk(qs::Tuple{<:QSym,<:QSym}) = all(isbulk.(qs))
+isbulk(qs::Contraction) = all(isbulk.(qs))
 function positions(p::Average)
     return position.(fields(p))
 end
-function positions(p::Tuple{<:QSym,<:QSym})
+function positions(p::Contraction)
     return position.(p)
 end
 propagator_type(p::SymbolicUtils.BasicSymbolic{Propagator{T}}) where {T} = T
