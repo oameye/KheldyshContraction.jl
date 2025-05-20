@@ -1,27 +1,3 @@
-
-# function graph(vs::Vector{Contraction})
-#     ps = integer_positions.(vs)
-#     in_or_out = findfirst(p -> 1 ∈ p || 2 ∈ p, ps)
-#     if isnothing(in_or_out) # in case it a vacuum diagram
-#         ps′ = map(p -> p .- 2, ps)
-#         graph = Graphs.SimpleGraphFromIterator(Graphs.Edge.(ps′))
-#     else
-#         graph = Graphs.SimpleGraphFromIterator(Graphs.Edge.(ps))
-#     end
-#     return graph
-# end
-
-# function is_connected(vs::Vector{Contraction})
-#     g = graph(vs)
-#     connected = Graphs.is_connected(g)
-#     if connected
-#         return true
-#     else
-#         @info "Contraction is not connected:" integer_positions.(vs)
-#         return false
-#     end
-# end # TODO: circumvent the graph library
-
 function is_connected(vs::Vector{Contraction})
     ps = integer_positions.(vs)
     in_or_out = findfirst(p -> 1 ∈ p || 2 ∈ p, ps) # in case it a vacuum diagram
