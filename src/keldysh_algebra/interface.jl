@@ -162,3 +162,8 @@ Base.isless(::Out, ::In) = true
 Base.isless(::In, ::Out) = false
 
 isbulk(x::AbstractPosition) = x isa Bulk
+
+index(p::Bulk) = p.index
+Base.Int(p::Bulk) = index(p) + 2
+Base.Int(p::In) = 2
+Base.Int(p::Out) = 1

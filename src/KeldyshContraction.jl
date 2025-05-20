@@ -10,6 +10,8 @@ using SymbolicUtils: SymbolicUtils, @syms, arguments
 using Combinatorics: Combinatorics
 using OrderedCollections: OrderedCollections
 
+using Graphs: Graphs
+
 using Latexify
 using MacroTools: MacroTools
 using LaTeXStrings
@@ -29,6 +31,7 @@ include("InteractionLagrangian.jl")
 include("propagator.jl")
 include("dressed_propagator.jl")
 include("symbolic_utils.jl")
+include("graphs.jl")
 
 include("wick_contractions.jl")
 include("filters.jl")

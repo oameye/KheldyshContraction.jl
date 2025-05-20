@@ -73,6 +73,11 @@ function find_equal_pairs(vec)
     return pairs
 end
 
+function is_connected(vs::Vector{Contraction})
+    g = graph(vs)
+    return Graphs.is_connected(g)
+end # TODO: circumvent the graph library
+
 ######################
 #     regularise
 ######################
