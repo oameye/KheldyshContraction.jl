@@ -96,7 +96,7 @@ function wick_contraction(
         perm = Combinatorics.nthperm(iter, i)
         contraction, fail = _wick_contract(destroys, creates, perm; regularise)
 
-        if fail || has_zero_loop(contraction)
+        if fail || !is_connected(contraction) || has_zero_loop(contraction)
             continue
         else
             push!(wick_contractions, contraction)
