@@ -56,3 +56,14 @@ end
     vs = Tuple{<:QSym,<:QSym}[(ϕᶜ(Bulk(1)), ϕᴾ'(Bulk(2))), (ϕᶜ(Bulk(1)), ϕᴾ'(Bulk(2)))]
     @test !has_zero_loop(vs)
 end
+
+@testset "canonicalize" begin
+    using KeldyshContraction: canonicalize, QSym, is_canonical, Out, In
+    vs = Tuple{<:QSym,<:QSym}[(ϕᶜ(Out()), ϕᴾ'(Bulk(2))), (ϕᶜ(Bulk(2)), ϕᴾ'(Bulk(1)))]
+    @test !is_canonical(vs)
+
+    vs′ = Tuple{<:QSym,<:QSym}[(ϕᶜ(Out()), ϕᴾ'(Bulk(1))), (ϕᶜ(Bulk(1)), ϕᴾ'(Bulk(2)))]
+    @test is_canonical(vs′)
+
+    @test canonicalize(vs) == vs′
+end

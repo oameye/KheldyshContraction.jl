@@ -34,6 +34,7 @@ include("diagram.jl")
 
 include("wick_contractions.jl")
 include("filters.jl")
+include("canonicalize.jl")
 include("self_energy.jl")
 
 # show methods
