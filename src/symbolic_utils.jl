@@ -22,6 +22,7 @@ function make_real(v::T) where {T<:SymbolicUtils.Symbolic}
 end
 make_real(x::Average) = x
 make_real(x::Number) = SymbolicUtils._isreal(x) ? real(x) : x
+
 # Base.isreal(::SymbolicUtils.BasicSymbolic{Real}) = true
 # Base.isreal(::SymbolicUtils.BasicSymbolic{Number}) = false
 
@@ -40,3 +41,6 @@ make_real(x::Number) = SymbolicUtils._isreal(x) ? real(x) : x
 #     _conj(x) = SymbolicUtils.simplify(conj(x); rewriter=rule, expand=true)
 
 # end
+# TODO check if you can rewrite sin(~x) to sin(x) with above
+# https://github.com/JuliaSymbolics/Symbolics.jl/issues/826
+# https://github.com/JuliaSymbolics/SymbolicUtils.jl/pull/158
