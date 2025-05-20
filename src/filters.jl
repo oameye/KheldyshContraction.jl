@@ -2,10 +2,10 @@
 #       Consistency checks
 #################################
 
-is_qq_contraction(v::Tuple{<:QSym,<:QSym}) = iszero(sum(Int.(contour.(v))))
+is_qq_contraction(v::Contraction) = iszero(sum(Int.(contour.(v))))
 # has_qq_contraction(vv::Vector{Vector{<:QField}}) = any(is_qq_contraction.(vv))
 
-function is_physical_propagator(a::Tuple{<:QSym,<:QSym})
+function is_physical_propagator(a::Contraction)
     len = length(a) == 2 # propagator has length 2
     positions = position.(a)
     # ∨ Can't make a propagator with In and Out coordinate
@@ -34,7 +34,7 @@ Gᴿ(1,2) Gᴿ(2,1) = 0
 Gᴬ(1,2) Gᴬ(2,1) = 0
 Gᴿ(1,2) Gᴬ(1,2) = 0
 """
-function has_zero_loop(vs::Vector{Tuple{<:QSym,<:QSym}})
+function has_zero_loop(vs::Vector{Contraction})
     ps = positions.(vs)
     sorted_ps = sort_tuple.(ps)
     loops = find_equal_pairs(sorted_ps)

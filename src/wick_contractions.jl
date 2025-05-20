@@ -83,39 +83,20 @@ out fields first. Computing the permutatins in lexicographic order, we can skip 
 """
 function wick_contraction(
     args_nc::Vector{<:QField}; regularise=true
-)::Vector{Vector{Tuple{<:QSym,<:QSym}}}
-    # _partitions = Combinatorics.partitions(args_nc, length(args_nc) ÷ 2)
-    _length = length(args_nc)
-    @assert _length % 2 == 0 "Number of fields must be even"
-
-    n_destroy = _length ÷ 2
-    destroys = args_nc[1:n_destroy]
-    creates = reverse(args_nc[(n_destroy + 1):end])
+)::Vector{Vector{Contraction}}
+    destroys, creates, n_destroy = prepare_args(args_nc)
 
     number_of_combinations = factorial(n_destroy)
     to_skip = factorial(n_destroy - 1) # due in-out contraction constraint
 
-    wick_contractions = Vector{Tuple{<:QSym,<:QSym}}[]
+    wick_contractions = Vector{Contraction}[]
     iter = 1:n_destroy
+
     for i in (to_skip + 1):number_of_combinations
         perm = Combinatorics.nthperm(iter, i)
-        contraction = Tuple{<:QSym,<:QSym}[]
-        fail = false
-        for (k, l) in pairs(perm)
-            potential_contraction = (destroys[k], creates[l])
-            if !contraction_filter(potential_contraction)
-                fail = true
-                break
-            end
-            if regularise && !regular(potential_contraction)
-                fail = true
-                break
-            end
-            push!(contraction, potential_contraction)
-        end
-        if fail
-            continue
-        elseif has_zero_loop(contraction)
+        contraction, fail = _wick_contract(destroys, creates, perm; regularise)
+
+        if fail || has_zero_loop(contraction)
             continue
         else
             push!(wick_contractions, contraction)
@@ -123,10 +104,35 @@ function wick_contraction(
     end
     return wick_contractions
 end
+function _wick_contract(destroys, creates, perm; regularise=true)
+    contraction = Contraction[]
+    fail = false
+    for (k, l) in pairs(perm)
+        potential_contraction = (destroys[k], creates[l])
+        if !contraction_filter(potential_contraction)
+            fail = true
+            break
+        end
+        if regularise && !regular(potential_contraction)
+            fail = true
+            break
+        end
+        push!(contraction, potential_contraction)
+    end
+    return contraction, fail
+end
+function prepare_args(args_nc::Vector{<:QField})
+    _length = length(args_nc)
+    @assert _length % 2 == 0 "Number of fields must be even"
 
-function make_propagators(
-    contraction::Vector{Vector{Tuple{<:QSym,<:QSym}}}
-)::Vector{Vector{SNuN}}
+    n_destroy = _length ÷ 2
+    # TODO: ∨ should be sorted?
+    destroys = args_nc[1:n_destroy]
+    creates = reverse(args_nc[(n_destroy + 1):end])
+    return destroys, creates, n_destroy
+end
+
+function make_propagators(contraction::Vector{Vector{Contraction}})::Vector{Vector{SNuN}}
     propagators = map(contraction) do factor
         to_prop = x -> propagator(x...)
         _propagators = to_prop.(factor)

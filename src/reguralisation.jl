@@ -26,7 +26,7 @@ function regular(p::Average)
         return true
     end
 end
-function regular(qs::Tuple{<:QSym,<:QSym})
+function regular(qs::Contraction)
     _isbulk = isbulk(qs)
     _reg = regularisations(qs)
     T = propagator_type(qs...)
