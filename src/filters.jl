@@ -42,10 +42,13 @@ function has_zero_loop(vs::Vector{Contraction})
         T1 = propagator_type(vs[loop[1]]...)
         T2 = propagator_type(vs[loop[2]]...)
         if all(is_retarded, (T1, T2)) && is_reversed(ps[loop[1]], ps[loop[2]])
+            @info "Has zero loop"
             return true
         elseif all(is_advanced, (T1, T2)) && is_reversed(ps[loop[1]], ps[loop[2]])
+            @info "Has zero loop"
             return true
         elseif isequal(ps[loop[1]], ps[loop[2]]) && retarded_and_advanced_pair(T1, T2)
+            @info "Has zero loop"
             return true
         end
     end

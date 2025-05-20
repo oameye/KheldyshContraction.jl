@@ -58,6 +58,10 @@ end
     include("reguralise.jl")
 end
 
+@testset "diagram" begin
+    include("diagram.jl")
+end
+
 @testset "self-energy" begin
     include("self_energy.jl")
 end
