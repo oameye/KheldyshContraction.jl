@@ -65,25 +65,10 @@ function wick_contraction(a::QMul; regularise=true)
     @assert is_conserved(a)
     @assert is_physical(a)
 
-    # diagrams = Diagrams(a.args_nc)
-
-    # wick_contraction!(diagrams, a.args_nc; regularise)
     contraction = wick_contraction(a.args_nc; regularise)
     propagators = make_propagators(contraction)
     return a.arg_c * make_term(propagators)
 end
-# function wick_contraction!(diagrams::Diagrams, a::QMul; regularise=true)
-#     @assert is_conserved(a)
-#     @assert is_physical(a)
-
-#     contraction = wick_contraction(a.args_nc; regularise)
-#     propagators = make_propagators(contraction)
-#     if regularise
-#         # propagators = _regularise(propagators)
-#         set_reg_to_zero!(propagators)
-#     end
-#     return a.arg_c * make_term(propagators)
-# end
 
 """
 We split up the fields into two groups, `destroys` and `creates`. We can can combute all
