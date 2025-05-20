@@ -72,7 +72,7 @@ function connected_components(vertices, edges)
     return components
 end
 
-function bulk_multiplicity(edges::Vector{Tuple{Int, Int}})
+function bulk_multiplicity(edges::Vector{Tuple{Int,Int}})
     ff = edge -> !(1 ∈ edge) && !(2 ∈ edge) && !isequal(edge[1], edge[2])
     filter!(ff, edges)
     map!(edge -> edge .- 2, edges, edges)
