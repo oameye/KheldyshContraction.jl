@@ -29,6 +29,22 @@ using KeldyshContraction: Bulk, In, Out
     @test !KeldyshContraction.is_connected(vs3)
 end
 
+@testset "bulk multiplicity" begin
+    @qfields c::Destroy(Classical) q::Destroy(Quantum)
+
+    vs = [(1, 3), (3, 3), (3, 2)]
+    @test KeldyshContraction.bulk_multiplicity(vs) == Int[]
+
+    vs2 = [(1, 3), (3, 3), (3, 4), (4, 4), (4, 2)]
+    @test KeldyshContraction.bulk_multiplicity(vs2) == Int[1]
+
+    vs3 = [(1, 3), (3, 4), (4, 3), (4, 4), (3, 2)]
+    @test KeldyshContraction.bulk_multiplicity(vs3) == Int[2]
+
+    vs4 = [(1, 3), (3, 4), (4, 3), (4, 4), (3, 5), (5, 5), (5, 2)]
+    @test KeldyshContraction.bulk_multiplicity(vs4) == Int[2, 1, 0]
+end
+
 @testset "vertices" begin
     # Empty edge list
     edges1 = Tuple{Int,Int}[]

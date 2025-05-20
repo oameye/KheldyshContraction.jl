@@ -71,3 +71,34 @@ function connected_components(vertices, edges)
     end
     return components
 end
+
+function bulk_multiplicity(edges::Vector{Tuple{Int,Int}})
+    ff = edge -> !(1 ∈ edge) && !(2 ∈ edge) && !isequal(edge[1], edge[2])
+    filter!(ff, edges)
+    map!(edge -> edge .- 2, edges, edges)
+
+    vert = vertices(edges)
+    m = max_edges(length(vert))
+    mult = SmallCollections.MutableSmallVector{m,Int}(0 for i in 1:m)
+    for edge in edges
+        idx = edge_to_index(edge[1], edge[2], length(vert))
+        mult[idx] += 1
+    end
+    return mult
+end
+bulk_multiplicity(vs::Vector{Contraction}) = bulk_multiplicity(integer_positions.(vs))
+
+max_edges(n::Int)::Int = n * (n - 1) ÷ 2
+
+"""
+maps edge (i,j) to a unique integer in range 1:max_edges(n).
+It assumes that i ≠ j
+"""
+function edge_to_index(i::Int, j::Int, n::Int)
+    # Ensure i < j
+    i, j = minmax(i, j)
+
+    # Calculate unique index
+    # This maps edge (i,j) to a unique integer in range 1:max_edges(n)
+    return (i-1)*(n-i÷2) + (j-i)
+end
