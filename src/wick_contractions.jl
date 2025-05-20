@@ -121,15 +121,23 @@ function _wick_contract(destroys, creates, perm; regularise=true)
     end
     return contraction, fail
 end
-function prepare_args(args_nc::Vector{<:QField})
-    _length = length(args_nc)
+function prepare_args(args::Vector{<:QField})
+    _length = length(args)
     @assert _length % 2 == 0 "Number of fields must be even"
 
     n_destroy = _length ÷ 2
-    # TODO: ∨ should be sorted?
-    destroys = args_nc[1:n_destroy]
-    creates = reverse(args_nc[(n_destroy + 1):end])
+
+    # make sure that the fields are ordered position && ladder
+    check_sorted(args) # TODO should remove in future
+
+    destroys = args[1:n_destroy]
+    creates = reverse(args[(n_destroy + 1):end])
     return destroys, creates, n_destroy
+end
+function check_sorted(args)
+    args′ = sort(args; by=position)
+    args′′ = sort(args′; by=ladder)
+    @assert isequal(args, args′′) "Arguments are not sorted"
 end
 
 function make_propagators(contraction::Vector{Vector{Contraction}})::Vector{Vector{SNuN}}

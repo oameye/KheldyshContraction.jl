@@ -105,16 +105,6 @@ is_physical(a::QAdd) = all(is_physical.(arguments(a)))
 is_physical(a::Destroy) = !isa(position(a), In)
 is_physical(a::Create) = !isa(position(a), Out)
 
-set_position(a::QSym, p::AbstractPosition) = a(p)
-function set_position(a::QMul, p::AbstractPosition)
-    _args_nc = map(arg -> set_position(arg, p), a.args_nc)
-    return QMul(a.arg_c, _args_nc)
-end
-function set_position(a::QAdd, p::AbstractPosition)
-    args = map(arg -> set_position(arg, p), arguments(a))
-    return QAdd(args)
-end
-
 function (L::InteractionLagrangian)(i::Int)
     new_lagrangian = set_position(L.lagrangian, Bulk(i))
     return InteractionLagrangian(new_lagrangian)

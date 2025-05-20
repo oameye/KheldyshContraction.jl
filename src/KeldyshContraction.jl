@@ -15,6 +15,7 @@ using MacroTools: MacroTools
 using LaTeXStrings
 
 # Fields
+include("keldysh_algebra/interface.jl")
 include("keldysh_algebra/keldysh_algebra.jl")
 include("keldysh_algebra/QTerm.jl")
 include("keldysh_algebra/field_math.jl")
