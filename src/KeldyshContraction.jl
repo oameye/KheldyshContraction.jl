@@ -27,7 +27,6 @@ include("propagator.jl")
 include("dressed_propagator.jl")
 include("symbolic_utils.jl")
 include("wick_contractions.jl")
-include("reguralisation.jl")
 include("filters.jl")
 include("self_energy.jl")
 
