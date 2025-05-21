@@ -87,6 +87,7 @@ function bulk_multiplicity(edges::Vector{Tuple{Int,Int}})
     return mult
 end
 bulk_multiplicity(vs::Vector{Contraction}) = bulk_multiplicity(integer_positions.(vs))
+bulk_multiplicity(vs::Vector) = bulk_multiplicity(integer_positions(vs))
 
 max_edges(n::Int)::Int = n * (n - 1) ÷ 2
 

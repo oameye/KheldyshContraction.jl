@@ -31,23 +31,30 @@ end
 
 "Construct the self-energy from `expr` and save in LittleDict `self_energy`."
 function construct_self_energy!(
-    self_energy::OrderedCollections.LittleDict, expr::SymbolicUtils.Symbolic
+    self_energy::OrderedCollections.LittleDict, expr::SymbolicUtils.Symbolic; order::Int=1
 )
+    if order > 2
+        error("Higher then second order in self-energy is not supported.")
+    end
     terms = SymbolicUtils.arguments(expr)
     for term in terms
         args = SymbolicUtils.arguments(term)
-        idxs_c = findall(x -> !(x isa Average), args)
-        idxs_p = setdiff(eachindex(args), idxs_c)
-        args_p = args[idxs_p]
+        arg_c = get_prefactor(term)
+        args_p = get_propagators(term) # type-unstable
+
+        mult = bulk_multiplicity(args_p)
+        if !isempty(mult) && first(mult) < order
+            continue
+        end
 
         positions = KeldyshContraction.position.(args_p)
         types_p = propagator_type.(args_p)
-        bulk_propagator = args_p[findfirst(isbulk, positions)]
         dict = OrderedCollections.freeze(
             OrderedCollections.OrderedDict(zip(positions, types_p))
         )
 
-        to_add = isempty(idxs_c) ? bulk_propagator : *(args[idxs_c]...) * bulk_propagator
+        bulk_propagator = args_p[findall(isbulk, positions)]
+        to_add = arg_c * prod(bulk_propagator)
         self_energy[self_energy_type(dict)] += to_add
     end
     return self_energy
@@ -78,11 +85,11 @@ struct SelfEnergy{Tk,Tr,Ta}
     retarded::Tr
     "The advanced component of the self-energy."
     advanced::Ta
-    function SelfEnergy(G::DressedPropagator)
+    function SelfEnergy(G::DressedPropagator; order=1)
         self_energy = OrderedCollections.LittleDict{PropagatorType,SNuN}((
             Advanced => 0, Retarded => 0, Keldysh => 0
         ))
-        construct_self_energy!(self_energy, G.keldysh)
+        construct_self_energy!(self_energy, G.keldysh; order)
         # ^ keldysh GF should contain everything
         # construct_self_energy!(self_energy, G.advanced)
         # construct_self_energy!(self_energy, G.retarded)

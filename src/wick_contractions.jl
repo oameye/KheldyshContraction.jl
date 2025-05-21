@@ -32,7 +32,9 @@ function wick_contraction(L::InteractionLagrangian; order=1, simplify=true)
         error("higher order then two not implemented")
     end
     if simplify
-        keldysh, retarded, advanced = advanced_to_retarded.((keldysh, retarded, advanced))
+        keldysh, retarded, advanced = SymbolicUtils.expand.(
+            advanced_to_retarded.(SymbolicUtils.expand.((keldysh, retarded, advanced)))
+        )
     end
     return DressedPropagator(keldysh, retarded, advanced)
 end
