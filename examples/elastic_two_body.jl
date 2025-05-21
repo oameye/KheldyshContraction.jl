@@ -85,7 +85,7 @@ GF = wick_contraction(L_int; order=2)
 
 # However, not all of them contribute to the second order self-energy. Indeed, many terms
 # (diagrams) involve only first order self-energy corrections and are thus reducible.
-# Instead, we need to seperate the reducible and irreducible diagrams. We can seperate them
+# Instead, we need to separate the reducible and irreducible diagrams. We can separate them
 # by looking at the multiplicity of the edges in the diagrams.
 
 using SymbolicUtils
