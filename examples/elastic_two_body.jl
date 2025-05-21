@@ -79,3 +79,32 @@ GF = wick_contraction(L_int)
 ## Second order
 
 GF = wick_contraction(L_int; order=2)
+
+# using SymbolicUtils
+# import KeldyshContraction as KC
+# terms = arguments(expand(GF.keldysh))
+
+# bulk_multiplicity = map(terms) do term
+#     props = KC.get_propagators(term)
+#     vs = map(props) do p
+#         ff = KC.fields(p)
+#         KC.integer_positions((ff[1],ff[2]))
+#     end
+#     KC.bulk_multiplicity(vs)
+# end
+
+# topology1 = findall(i -> i == [1], bulk_multiplicity)
+# topology2 = findall(i -> i == [2], bulk_multiplicity)
+# topology3 = findall(i -> i == [3], bulk_multiplicity)
+# length(topology1) + length(topology2) + length(topology3)
+# @show simplify.(terms[topology2])
+
+# order = map(terms[topology3]) do term
+#     props = KC.get_propagators(term)
+#     sort!(props, by=KC.position)
+#     p_type = KC.propagator_type.(props)
+#     Int.(p_type)
+# end
+# nonuniques = map(order) do v
+#     findall(x -> isequal(x, v), order)
+# end

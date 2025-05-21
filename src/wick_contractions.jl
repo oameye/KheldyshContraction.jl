@@ -95,8 +95,9 @@ function wick_contraction(
         if fail || !is_connected(contraction) || has_zero_loop(contraction)
             continue
         else
-            push!(wick_contractions, contraction)
+            push!(wick_contractions, canonicalize(contraction))
         end
+        check_to_many_bulk(contraction, args_nc) # TODO: remove in future
     end
     return wick_contractions
 end
@@ -138,6 +139,15 @@ function check_sorted(args)
     args′ = sort(args; by=position)
     args′′ = sort(args′; by=ladder)
     @assert isequal(args, args′′) "Arguments are not sorted"
+end
+function check_to_many_bulk(contraction, args_nc)
+    pos = Int.(map(position, Iterators.flatten(contraction)))
+    for i in unique(pos)
+        if count(x -> x == i, pos) > 4
+            @show args_nc
+            error("Contraction is not unique")
+        end
+    end
 end
 
 function make_propagators(contraction::Vector{Vector{Contraction}})::Vector{Vector{SNuN}}
