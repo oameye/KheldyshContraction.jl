@@ -212,6 +212,7 @@ function advanced_to_retarded(x::T) where {T<:SymbolicUtils.Symbolic}
     to_sub = Dict(props[adv_idx] => -1 * _conj(props[adv_idx]))
     return SymbolicUtils.substitute(x, to_sub)
 end
+advanced_to_retarded(x) = x
 
 function get_propagators(v::T) where {T<:SymbolicUtils.Symbolic}
     out = T[]
