@@ -115,7 +115,11 @@ end
 
         @test isequal(KeldyshContraction._conj(Σ.advanced), Σ.retarded)
         @test isequal(KeldyshContraction._conj(Σ.keldysh), -1 * Σ.keldysh)
+
+        @test iszero(matrix(SelfEnergy(L; simplify=false)) .- matrix(Σ))
     end
+
+
 
     @testset "Keldysh GF is enough" begin
         expr_K = ϕᶜ(Out()) * ϕᶜ'(In()) * L_int

@@ -89,13 +89,34 @@ struct SelfEnergy{Tk,Tr,Ta}
 
         # quantum-quantum is the keldysh term in the self-energy
         # classical-classical is zero
-        qq, cq, qc = SymbolicUtils.expand.((
-            self_energy[Keldysh], self_energy[Retarded], self_energy[Advanced]
-        ))
+        qq, cq, qc =
+            SymbolicUtils.expand.((
+                self_energy[Keldysh], self_energy[Retarded], self_energy[Advanced]
+            ))
         # G_R(1) = G₀_R Σ_R G₀_R
         # G_A(1) = G₀_A Σ_A G₀_A
         # G_K(1) = G₀_K(x1) Σ_A(y) G₀_A(x2) + G_A(x2) Σ_A(y) G_R(x1) + G_R(x1) Σ_R(y) G_K(x2)
         # G₀_K Σ_K G₀_K = 0
+
+        return new{typeof(qq),typeof(cq),typeof(qc)}(qq, cq, qc)
+    end
+    function SelfEnergy(L::InteractionLagrangian; simplify=true)
+        ϕ = L.qfield
+        ψ = L.cfield
+        keldysh = wick_contraction(ψ(Out()) * ψ'(In()) * L.lagrangian)
+        if simplify
+            keldysh = advanced_to_retarded(keldysh)
+        end
+
+        self_energy = OrderedCollections.LittleDict{PropagatorType,SNuN}((
+            Advanced => 0, Retarded => 0, Keldysh => 0
+        ))
+        construct_self_energy!(self_energy, keldysh)
+
+        qq, cq, qc =
+            SymbolicUtils.expand.((
+                self_energy[Keldysh], self_energy[Retarded], self_energy[Advanced]
+            ))
 
         return new{typeof(qq),typeof(cq),typeof(qc)}(qq, cq, qc)
     end
