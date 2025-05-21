@@ -95,28 +95,30 @@ end
     matrix(Σ)
 
     @testset "correctness check" begin
-        advanced_test = isequal(
-            Σ.advanced, -1 * make_propagator(ϕᶜ, ϕᶜ') + make_propagator(ϕᶜ, ϕᴾ')
-        )
-        retarded_test = isequal(
-            Σ.retarded, make_propagator(ϕᶜ, ϕᶜ') + make_propagator(ϕᴾ, ϕᶜ')
-        )
-        keldysh_test = isequal(
-            Σ.keldysh,
-            2 * make_propagator(ϕᶜ, ϕᶜ') - make_propagator(ϕᶜ, ϕᴾ') +
-            make_propagator(ϕᴾ, ϕᶜ'),
-        )
-        @test advanced_test
-        @test retarded_test
-        @test keldysh_test
-        # ^ pretty sure Gerbino et al https://arxiv.org/pdf/2406.20028
-        # is wrong and switshes retarded and advanced
-        # and we compute the correct with a overall minus sign
+        @testset "first order" begin
+            advanced_test = isequal(
+                Σ.advanced, -1 * make_propagator(ϕᶜ, ϕᶜ') + make_propagator(ϕᶜ, ϕᴾ')
+            )
+            retarded_test = isequal(
+                Σ.retarded, make_propagator(ϕᶜ, ϕᶜ') + make_propagator(ϕᴾ, ϕᶜ')
+            )
+            keldysh_test = isequal(
+                Σ.keldysh,
+                2 * make_propagator(ϕᶜ, ϕᶜ') - make_propagator(ϕᶜ, ϕᴾ') +
+                make_propagator(ϕᴾ, ϕᶜ'),
+            )
+            @test advanced_test
+            @test retarded_test
+            @test keldysh_test
+            # ^ pretty sure Gerbino et al https://arxiv.org/pdf/2406.20028
+            # is wrong and switshes retarded and advanced
+            # and we compute the correct with a overall minus sign
 
-        @test isequal(KeldyshContraction._conj(Σ.advanced), Σ.retarded)
-        @test isequal(KeldyshContraction._conj(Σ.keldysh), -1 * Σ.keldysh)
+            @test isequal(KeldyshContraction._conj(Σ.advanced), Σ.retarded)
+            @test isequal(KeldyshContraction._conj(Σ.keldysh), -1 * Σ.keldysh)
 
-        @test iszero(matrix(SelfEnergy(L; simplify=false)) .- matrix(Σ))
+            @test iszero(matrix(SelfEnergy(L; simplify=false)) .- matrix(Σ))
+        end
     end
 
     @testset "Keldysh GF is enough" begin

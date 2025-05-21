@@ -240,7 +240,6 @@ function get_prefactor(term::T) where {T<:SymbolicUtils.Symbolic}
     return SymbolicUtils.substitute(term, Dict(zip(props, ones(length(props)))))
 end
 
-
 #########################
 #       Position
 #########################
@@ -279,10 +278,9 @@ end
 function integer_positions(props::Vector)
     map(props) do p
         ff = fields(p)
-        integer_positions((ff[1],ff[2]))
+        integer_positions((ff[1], ff[2]))
     end
 end
-
 
 function same_position(p::Average)
     _positions = positions(p)

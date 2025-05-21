@@ -53,8 +53,8 @@ function construct_self_energy!(
             OrderedCollections.OrderedDict(zip(positions, types_p))
         )
 
-        bulk_propagator = args_p[findfirst(isbulk, positions)]
-        to_add = arg_c * bulk_propagator
+        bulk_propagator = args_p[findall(isbulk, positions)]
+        to_add = arg_c * prod(bulk_propagator)
         self_energy[self_energy_type(dict)] += to_add
     end
     return self_energy
@@ -89,17 +89,16 @@ struct SelfEnergy{Tk,Tr,Ta}
         self_energy = OrderedCollections.LittleDict{PropagatorType,SNuN}((
             Advanced => 0, Retarded => 0, Keldysh => 0
         ))
-        construct_self_energy!(self_energy, G.keldysh; order=1)
+        construct_self_energy!(self_energy, G.keldysh; order)
         # ^ keldysh GF should contain everything
         # construct_self_energy!(self_energy, G.advanced)
         # construct_self_energy!(self_energy, G.retarded)
 
         # quantum-quantum is the keldysh term in the self-energy
         # classical-classical is zero
-        qq, cq, qc =
-            SymbolicUtils.expand.((
-                self_energy[Keldysh], self_energy[Retarded], self_energy[Advanced]
-            ))
+        qq, cq, qc = SymbolicUtils.expand.((
+            self_energy[Keldysh], self_energy[Retarded], self_energy[Advanced]
+        ))
         # G_R(1) = G₀_R Σ_R G₀_R
         # G_A(1) = G₀_A Σ_A G₀_A
         # G_K(1) = G₀_K(x1) Σ_A(y) G₀_A(x2) + G_A(x2) Σ_A(y) G_R(x1) + G_R(x1) Σ_R(y) G_K(x2)
@@ -131,10 +130,9 @@ struct SelfEnergy{Tk,Tr,Ta}
         ))
         construct_self_energy!(self_energy, keldysh)
 
-        qq, cq, qc =
-            SymbolicUtils.expand.((
-                self_energy[Keldysh], self_energy[Retarded], self_energy[Advanced]
-            ))
+        qq, cq, qc = SymbolicUtils.expand.((
+            self_energy[Keldysh], self_energy[Retarded], self_energy[Advanced]
+        ))
 
         return new{typeof(qq),typeof(cq),typeof(qc)}(qq, cq, qc)
     end
