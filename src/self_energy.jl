@@ -39,9 +39,8 @@ function construct_self_energy!(
     terms = SymbolicUtils.arguments(expr)
     for term in terms
         args = SymbolicUtils.arguments(term)
-        idxs_c = findall(x -> !(x isa Average), args)
-        idxs_p = setdiff(eachindex(args), idxs_c)
-        args_p = args[idxs_p]
+        arg_c = get_prefactor(term)
+        args_p = get_propagators(term) # type-unstable
 
         mult = bulk_multiplicity(args_p)
         if !isempty(mult) && first(mult) < order
@@ -55,11 +54,7 @@ function construct_self_energy!(
         )
 
         bulk_propagator = args_p[findall(isbulk, positions)]
-        to_add = if isempty(idxs_c)
-            prod(bulk_propagator)
-        else
-            *(args[idxs_c]...) * prod(bulk_propagator)
-        end
+        to_add = arg_c * prod(bulk_propagator)
         self_energy[self_energy_type(dict)] += to_add
     end
     return self_energy

@@ -80,7 +80,7 @@ GF = wick_contraction(L_int)
 
 GF = wick_contraction(L_int; order=2)
 
-using SymbolicUtils
+using KeldyshContraction.SymbolicUtils
 import KeldyshContraction as KC
 terms = arguments(expand(GF.keldysh))
 
