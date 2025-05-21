@@ -61,7 +61,9 @@ for f in [:Destroy, :Create]
     @eval regularisation(ϕ::$(f)) = ϕ.regularisation
     @eval contour(ϕ::$(f)) = ϕ.contour
     @eval position(ϕ::$(f)) = ϕ.position
-    @eval isbulk(ϕ::$(f)) = position(ϕ) isa Bulk
+    @eval isbulk(ϕ::$(f)) = isbulk(position(ϕ))
+    @eval is_in(ϕ::$(f)) = is_in(position(ϕ))
+    @eval is_out(ϕ::$(f)) = is_out(position(ϕ))
 
     @eval set_reg_to_zero(ϕ::$(f)) = $(f)(name(ϕ), contour(ϕ), Zero, position(ϕ))
 end

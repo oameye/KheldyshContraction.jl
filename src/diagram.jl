@@ -1,3 +1,32 @@
+struct Edge{P2,P1}
+    out::Destroy{KeldyshContour,P2,Regularisation}
+    in::Create{KeldyshContour,P1,Regularisation}
+    edgetype::PropagatorType
+    function Edge(tt::Contraction)
+        _out, _in = tt[1], tt[2]
+        propagator_checks(_out, _in)
+
+        type = propagator_type(_out, _in)
+        P2 = position(_out)
+        P1 = position(_in)
+        return new{typeof(P2), typeof(P1)}(_out, _in, type)
+    end
+    Edge(out::QSym, in::QSym) = Edge((out, in))
+end
+
+struct Diagram{E}
+    contractions::SVector{E, Edge}
+    prefactor::Number
+    function Diagram(contractions::Vector{Contraction}, prefactor::Number=1.0)
+        @assert length(contractions) > 0 "Contraction vector must not be empty"
+        E = length(contractions)
+        sort!(contractions, by = sort_contraction)
+        edges = StaticArrays.sacollect(SVector{length(contractions), Edge}, Edge(c) for c in contractions)
+        return new{E}(edges, prefactor)
+    end
+end
+
+
 function is_connected(vs::Vector{Contraction})
     ps = integer_positions.(vs)
     in_or_out = findfirst(p -> 1 ∈ p || 2 ∈ p, ps) # in case it a vacuum diagram

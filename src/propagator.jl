@@ -1,4 +1,4 @@
-const Contraction = Tuple{<:QSym,<:QSym}
+const Contraction = Tuple{<:QSym,<:QSym} # TODO should be Tuple{Destroy, Create}
 
 """
     PropagatorType `Keldysh`, `Advanced`, `Retarded`
@@ -247,6 +247,9 @@ end
 
 isbulk(p::Average) = all(isbulk.(fields(p)))
 isbulk(qs::Contraction) = all(isbulk.(qs))
+is_in(qs::Contraction) = any(is_in.(qs))
+is_out(qs::Contraction) = any(is_out.(qs))
+
 function positions(p::Average)
     return position.(fields(p))
 end
@@ -286,4 +289,15 @@ end
 function same_position(p::Average)
     _positions = positions(p)
     return isequal(_positions...)
+end
+
+function sort_contraction(p::Contraction)::Float64
+    if is_out(p)
+        return -Inf
+    elseif is_in(p)
+        return Inf
+    else
+        i, j = integer_positions(p)
+        return float(pairing(i, j))
+    end
 end
