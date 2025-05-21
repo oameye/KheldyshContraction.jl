@@ -16,16 +16,54 @@ end
 
 struct Diagram{E}
     contractions::SVector{E, Edge}
-    prefactor::Number
-    function Diagram(contractions::Vector{Contraction}, prefactor::Number=1.0)
+    function Diagram(contractions::Vector{Contraction})
         @assert length(contractions) > 0 "Contraction vector must not be empty"
         E = length(contractions)
         sort!(contractions, by = sort_contraction)
         edges = StaticArrays.sacollect(SVector{length(contractions), Edge}, Edge(c) for c in contractions)
-        return new{E}(edges, prefactor)
+        return new{E}(edges)
+    end
+end
+Base.isequal(d1::Diagram, d2::Diagram) = isequal(d1.contractions, d2.contractions)
+Base.hash(d::Diagram, h::UInt) = hash(d.contractions, h)
+
+struct Diagrams
+    diagrams::Dict{Diagram,Number}
+    Diagrams() = new(Dict{Diagram,Number}())
+    function Diagrams(diagrams::Vector{Diagram}, prefactor)
+        dict = Dict{Diagram,Number}(d => prefactor for d in diagrams)
+        new(dict)
     end
 end
 
+# Add a single diagram, summing prefactors if it already exists
+function Base.push!(collection::Diagrams, diagram::Diagram, prefactor::Number=1)
+    if haskey(collection.diagrams, diagram)
+        collection.diagrams[diagram] += prefactor
+    else
+        collection.diagrams[diagram] = prefactor
+    end
+    return collection
+end
+
+# Add multiple diagrams (with optional prefactor)
+function Base.push!(collection::Diagrams, diagrams::Diagram...)
+    for diagram in diagrams
+        push!(collection, diagram)
+    end
+    return collection
+end
+
+# Convert to vector of diagrams (ignoring prefactors)
+function Base.collect(collection::Diagrams)
+    return collect(keys(collection.diagrams))
+end
+
+# Make the collection iterable (iterate over pairs)
+Base.iterate(collection::Diagrams) = iterate(collection.diagrams)
+Base.iterate(collection::Diagrams, state) = iterate(collection.diagrams, state)
+Base.length(collection::Diagrams) = length(collection.diagrams)
+Base.eltype(::Type{Diagrams}) = Pair{Diagram,Number}
 
 function is_connected(vs::Vector{Contraction})
     ps = integer_positions.(vs)
