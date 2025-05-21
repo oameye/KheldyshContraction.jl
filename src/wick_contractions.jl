@@ -8,7 +8,7 @@
 
 All the same coordinate advanced propagators are converted to retarded propagators.
 """
-function wick_contraction(L::InteractionLagrangian; order=1, simplify=true)
+function DressedPropagator(L::InteractionLagrangian; order=1)
     ϕ = L.qfield
     ψ = L.cfield
     if order == 1
@@ -19,22 +19,18 @@ function wick_contraction(L::InteractionLagrangian; order=1, simplify=true)
         L1 = L
         L2 = L(2)
         prefactor = make_real(im^2) / 2
-        keldysh =
-            prefactor *
-            wick_contraction(ψ(Out()) * ψ'(In()) * L1.lagrangian * L2.lagrangian)
-        retarded =
-            prefactor *
-            wick_contraction(ψ(Out()) * ϕ'(In()) * L1.lagrangian * L2.lagrangian)
-        advanced =
-            prefactor *
-            wick_contraction(ϕ(Out()) * ψ'(In()) * L1.lagrangian * L2.lagrangian)
+        keldysh = multuply!(
+            wick_contraction(ψ(Out()) * ψ'(In()) * L1.lagrangian * L2.lagrangian), prefactor
+        )
+
+        retarded = multuply!(
+            wick_contraction(ψ(Out()) * ϕ'(In()) * L1.lagrangian * L2.lagrangian), prefactor
+        )
+        advanced = multuply!(
+            wick_contraction(ϕ(Out()) * ψ'(In()) * L1.lagrangian * L2.lagrangian), prefactor
+        )
     else
         error("higher order then two not implemented")
-    end
-    if simplify
-        keldysh, retarded, advanced = SymbolicUtils.expand.(
-            advanced_to_retarded.(SymbolicUtils.expand.((keldysh, retarded, advanced)))
-        )
     end
     return DressedPropagator(keldysh, retarded, advanced)
 end
@@ -59,17 +55,38 @@ The function returns a new expression of propagators of type `SymbolicUtils.Symb
 
 """
 function wick_contraction(a::QAdd; regularise=true)
-    wick_contractions = wick_contraction.(SymbolicUtils.arguments(a); regularise)
-    wick_contractions = sum(wick_contractions)
-    return make_real(SymbolicUtils.expand(wick_contractions))
+    diagrams = Diagrams()
+    foreach(SymbolicUtils.arguments(a)) do arg
+        wick_contraction(diagrams, arg; regularise)
+    end
+    return diagrams
 end
 function wick_contraction(a::QMul; regularise=true)
     @assert is_conserved(a)
     @assert is_physical(a)
 
-    contraction = wick_contraction(a.args_nc; regularise)
-    propagators = make_propagators(contraction)
-    return a.arg_c * make_term(propagators)
+    contractions = wick_contraction(a.args_nc; regularise)
+    imag_factor = im^(first(length(contractions))) # Contraction becomes propagator
+    dict = Dict{Diagram,ComplexF64}(
+        make_diagram_pair(c, a.args_c, imag_factor) for c in contractions
+    )
+    return Diagrams(dict)
+end
+function wick_contraction!(diagrams::Diagrams, a::QMul; regularise=true)
+    @assert is_conserved(a)
+    @assert is_physical(a)
+
+    contractions = wick_contraction(a.args_nc; regularise)
+    imag_factor = im^(first(length(contractions))) # Contraction becomes propagator
+    foreach(contractions) do c
+        c′, prefactor = advanced_to_retarded(c, a.args_c)
+        push!(diagrams, Diagram(c′), imag_factor * prefactor)
+    end
+    return nothing
+end
+function make_diagram_pair(c, args_c, imag_factor)
+    c′, prefactor = advanced_to_retarded(c, a.args_c)
+    return diagram(c) => imag_factor * prefactor
 end
 
 """
@@ -94,6 +111,7 @@ function wick_contraction(
         perm = Combinatorics.nthperm(iter, i)
         contraction, fail = _wick_contract(destroys, creates, perm; regularise)
 
+        # TODO ∨ You can probably cache this
         if fail || !is_connected(contraction) || has_zero_loop(contraction)
             continue
         else
@@ -159,7 +177,7 @@ function make_propagators(contraction::Vector{Vector{Contraction}})::Vector{Vect
         sort!(_propagators; by=position)
     end
     return propagators
-end
+end # TODO: remove in future
 
-make_mul(v::Vector{SNuN}) = isempty(v) ? 0 : prod(v)
-make_term(vp::Vector{Vector{SNuN}}) = isempty(vp) ? 0 : sum(make_mul, vp)
+make_mul(v::Vector{SNuN}) = isempty(v) ? 0 : prod(v) # TODO: remove in future
+make_term(vp::Vector{Vector{SNuN}}) = isempty(vp) ? 0 : sum(make_mul, vp) # TODO: remove in future

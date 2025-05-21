@@ -1,27 +1,27 @@
-function _conj(v::T) where {T<:SymbolicUtils.Symbolic}
-    if SymbolicUtils.iscall(v)
-        f = SymbolicUtils.operation(v)
-        args = map(_conj, SymbolicUtils.arguments(v))
-        return SymbolicUtils.maketerm(T, f, args, TermInterface.metadata(v))
-    else
-        return conj(v)
-    end
-end
-_conj(q::Average) = conj(q)
-_conj(x::Number) = Base.conj(x)
+# function _conj(v::T) where {T<:SymbolicUtils.Symbolic}
+#     if SymbolicUtils.iscall(v)
+#         f = SymbolicUtils.operation(v)
+#         args = map(_conj, SymbolicUtils.arguments(v))
+#         return SymbolicUtils.maketerm(T, f, args, TermInterface.metadata(v))
+#     else
+#         return conj(v)
+#     end
+# end
+# _conj(q::Average) = conj(q)
+# _conj(x::Number) = Base.conj(x)
 # _adjoint(s::SymbolicUtils.Symbolic{<:Number}) = _conj(s)
 
-function make_real(v::T) where {T<:SymbolicUtils.Symbolic}
-    if SymbolicUtils.iscall(v)
-        f = SymbolicUtils.operation(v)
-        args = map(make_real, SymbolicUtils.arguments(v))
-        return SymbolicUtils.maketerm(T, f, args, TermInterface.metadata(v))
-    else
-        return SymbolicUtils._isreal(v) ? real(v) : v
-    end
-end
-make_real(x::Average) = x
-make_real(x::Number) = SymbolicUtils._isreal(x) ? real(x) : x
+# function make_real(v::T) where {T<:SymbolicUtils.Symbolic}
+#     if SymbolicUtils.iscall(v)
+#         f = SymbolicUtils.operation(v)
+#         args = map(make_real, SymbolicUtils.arguments(v))
+#         return SymbolicUtils.maketerm(T, f, args, TermInterface.metadata(v))
+#     else
+#         return SymbolicUtils._isreal(v) ? real(v) : v
+#     end
+# end
+# make_real(x::Average) = x
+
 
 # Base.isreal(::SymbolicUtils.BasicSymbolic{Real}) = true
 # Base.isreal(::SymbolicUtils.BasicSymbolic{Number}) = false

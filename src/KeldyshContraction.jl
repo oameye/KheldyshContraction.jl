@@ -29,18 +29,19 @@ include("InteractionLagrangian.jl")
 
 # Propagators
 include("propagator.jl")
-include("dressed_propagator.jl")
-include("symbolic_utils.jl")
 include("diagram.jl")
+include("dressed_propagator.jl")
+# include("symbolic_utils.jl")
+
 
 include("wick_contractions.jl")
 include("filters.jl")
 include("canonicalize.jl")
-include("self_energy.jl")
+# include("self_energy.jl")
 
 # show methods
-include("show_methods/latexify_recipes.jl")
-include("show_methods/printing.jl")
+# include("show_methods/latexify_recipes.jl")
+# include("show_methods/printing.jl")
 
 export @qfields,
     Destroy,
@@ -49,7 +50,7 @@ export @qfields,
     Quantum,
     Classical,
     DressedPropagator,
-    SelfEnergy,
+    # SelfEnergy,
     InteractionLagrangian,
     @syms,
     arguments

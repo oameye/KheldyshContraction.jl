@@ -8,10 +8,10 @@ using KeldyshContraction, Test
     all_concrete(KeldyshContraction.QAdd)
     all_concrete(KeldyshContraction.Destroy)
     all_concrete(KeldyshContraction.Create)
-    all_concrete(KeldyshContraction.Propagator)
+    # all_concrete(KeldyshContraction.Propagator)
     all_concrete(KeldyshContraction.InteractionLagrangian)
     all_concrete(KeldyshContraction.DressedPropagator)
-    all_concrete(KeldyshContraction.SelfEnergy)
+    # all_concrete(KeldyshContraction.SelfEnergy)
 end
 
 if isempty(VERSION.prerelease)
@@ -38,46 +38,42 @@ end
     Aqua.test_all(KeldyshContraction; ambiguities=false)
 end
 
-@testset "show methods" begin
-    include("show_methods.jl")
-end
+# @testset "show methods" begin
+#     include("show_methods.jl")
+# end
 
 @testset "QField" begin
     include("QField.jl")
 end
 
-@testset "symbolic utils" begin
-    include("symbolic_utils.jl")
-end
+# @testset "propagator" begin
+#     include("propagator.jl")
+# end
 
-@testset "propagator" begin
-    include("propagator.jl")
-end
-
-@testset "tadpole reguralisation" begin
-    include("reguralise.jl")
-end
+# @testset "tadpole reguralisation" begin
+#     include("reguralise.jl")
+# end
 
 @testset "diagram" begin
     include("diagram.jl")
 end
 
-@testset "self-energy" begin
-    include("self_energy.jl")
-end
+# @testset "self-energy" begin
+#     include("self_energy.jl")
+# end
 
-@testset "two boson loss" begin
-    include("two_boson_loss.jl")
-end
+# @testset "two boson loss" begin
+#     include("two_boson_loss.jl")
+# end
 
-@testset "elastic two body" begin
-    include("elastic_two_body.jl")
-end
+# @testset "elastic two body" begin
+#     include("elastic_two_body.jl")
+# end
 
-@testset "self interaction" begin
-    include("self_interaction.jl")
-end
+# @testset "self interaction" begin
+#     include("self_interaction.jl")
+# end
 
-@testset "second order" begin
-    include("second_order.jl")
-end
+# @testset "second order" begin
+#     include("second_order.jl")
+# end

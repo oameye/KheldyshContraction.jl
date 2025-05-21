@@ -16,6 +16,22 @@ The Quantum-Quantum propagator should always be zero.
     Retarded
 end
 
+struct Edge{P2,P1}
+    out::Destroy{KeldyshContour,P2,Regularisation}
+    in::Create{KeldyshContour,P1,Regularisation}
+    edgetype::PropagatorType
+    function Edge(tt::Contraction)
+        _out, _in = tt[1], tt[2]
+        propagator_checks(_out, _in)
+
+        type = propagator_type(_out, _in)
+        P2 = position(_out)
+        P1 = position(_in)
+        return new{typeof(P2),typeof(P1)}(_out, _in, type)
+    end
+    Edge(out::QSym, in::QSym) = Edge((out, in))
+end
+
 "Collect and checks the rules for a physical propagator"
 function propagator_checks(out::QSym, in::QSym)::Nothing
     @assert isa(in, Create) "The `in` field must be a Create operator"
@@ -30,42 +46,6 @@ function propagator_checks(out::QSym, in::QSym)::Nothing
     contours = Int.(contour.(v))
     @assert !is_qq_contraction(v) "The quantum-quantum progator is zero"
     return nothing
-end
-
-"""
-$(TYPEDEF)
-
-Symbolic number representing the Propagator of two fields ϕ and ψ.
-By convention apropagator is shown as G(ϕ, ψ) with ψ the incoming [`Create`](@ref) field
- and ϕ the outgoing [`Destroy`](@ref) field.
-
-See also: [`propagator`](@ref)
-"""
-struct Propagator{T} <: Number end
-
-"BasicSymbolic type for propagators. What will be used in the symbolic expressions"
-const Average = SymbolicUtils.BasicSymbolic{<:Propagator}
-
-"The type expressing the propagator as a function over two QSym"
-function sym_average(T::PropagatorType) # Symbolic function for averages
-    Tf = SymbolicUtils.FnType{Tuple{QSym,QSym},Propagator{T}}
-    return SymbolicUtils.Sym{Tf}(:avg)
-end
-
-# Type promotion -- average(::QField)::Number
-"A propagator of two fields is a number is of type `Propagator`"
-function SymbolicUtils.promote_symtype(
-    ::SymbolicUtils.BasicSymbolic{SymbolicUtils.FnType{Tuple{QSym,QSym},Propagator{T}}},
-    ::Type{<:QSym},
-    ::Type{<:QSym},
-) where {T}
-    return Propagator{T}
-end
-
-# needs a specific symtype overload, otherwise we build the wrong expressions with maketerm
-# and `SymbolicUtils.expand` and `SymbolicUtils.simplify` will not work
-function SymbolicUtils.symtype(::SymbolicUtils.BasicSymbolic{Propagator{T}}) where {T}
-    return Propagator{T}
 end
 
 """
@@ -84,114 +64,25 @@ function propagator_type(out::QSym, in::QSym)::PropagatorType
         return Advanced
     end
 end
+propagator_type(e::Edge) = e.edgetype
 is_advanced(x::PropagatorType) = Int(x) == Int(Advanced)
 is_retarded(x::PropagatorType) = Int(x) == Int(Retarded)
 is_keldysh(x::PropagatorType) = Int(x) == Int(Keldysh)
-is_advanced(x::Average) = Int(propagator_type(x)) == Int(Advanced)
-is_retarded(x::Average) = Int(propagator_type(x)) == Int(Retarded)
-is_keldysh(x::Average) = Int(propagator_type(x)) == Int(Keldysh)
+is_advanced(x::Edge) = is_advanced(propagator_type(x))
+is_retarded(x::Edge) = is_retarded(propagator_type(x))
+is_keldysh(x::Edge) = is_keldysh(propagator_type(x))
 
-"""
-$(TYPEDSIGNATURES)
-
-Create the Keldysh two-point green's functions over two field `ψ` and `ϕ`:
-```math
-G(x_1,x_2) = -i \\langle \\phi(x_1) \\overline{\\psi}(x_2) \\rangle.
-```
-
-Here `ψ` is the incoming [`Create`](@ref) field at coordinate ``x_2=(\\vec{x}_1, t_1)``
-and `ψ` the outgoing [`Destroy`](@ref) field at coordinate ``x_2=(\\vec{x}_2, t_2)``.
-The created propagator will be a symbolic function of `SymbolicUtils.FnType` which maps
-Tuple `Tuple{QSym,QSym}` to `SymbolicUtils.BasicSymbolic{Propagator{T}}` where `T` is
-the type [`PropagatorType`](@ref).
-
-The name of the symbolic function is `:avg` and is reserved as it is used internally for printing.
-"""
-function propagator(x::QSym, y::QSym)
-    propagator_checks(x, y)
-    return im * make_propagator(x, y)
-end
-"Make propagator without the prefactor, i.e., the imaginary unit"
-function make_propagator(x::QSym, y::QSym)
-    T = propagator_type(x, y)
-    return SymbolicUtils.Term{Propagator{T}}(sym_average(T), [x, y])
-end
-
-# ensure that BasicSymbolic{<:Propagator} are only single averages
-function Base.:*(a::Average, b::Average)
-    if isequal(a, b)
-        return SymbolicUtils.Mul(Number, 1, Dict(a => 2))
-    end
-    return SymbolicUtils.Mul(Number, 1, Dict(a => 1, b => 1))
-end
-function Base.:+(a::Average, b::Average)
-    if isequal(a, b)
-        return SymbolicUtils.Add(Number, 0, Dict(a => 2))
-    end
-    return SymbolicUtils.Add(Number, 0, Dict(a => 1, b => 1))
-end
-
-fields(p::Average) = SymbolicUtils.arguments(p)
-function regularisations(p::Average)
+fields(e::Edge) = (e.out, e.in)
+function regularisations(p::Edge)
     return regularisation.(fields(p))
 end
-function regularisations(qs::Contraction)
-    return regularisation.(qs)
-end
-contours(p::Average) = contour.(fields(p))
+contours(p::Edge) = contour.(fields(p))
 
-propagator_type(p::SymbolicUtils.BasicSymbolic{Propagator{T}}) where {T} = T
+# function get_propagator_idx(x::CSym)::Int
+#     args = KeldyshContraction.arguments(x)
+#     return get_propagator_idx(args)
+# end
 
-function get_propagator_idx(x::CSym)::Int
-    args = KeldyshContraction.arguments(x)
-    return get_propagator_idx(args)
-end
-function get_propagator_idx(args::SymbolicUtils.SmallVec{Any,Vector{Any}})
-    p_idxs = isa.(args, KeldyshContraction.Average)
-    @assert isone(sum(p_idxs)) "Only one propagator allowed"
-    p_idx = findfirst(p_idxs)
-    @assert p_idx !== nothing "No propagator found"
-    return p_idx
-end
-function get_propagator(x::CSym)::Average
-    args = KeldyshContraction.arguments(x)
-    p_idx = get_propagator_idx(x)
-    return args[p_idx]
-end
-for ff in [:regularisations, :contours, :isbulk, :positions, :position, :propagator_type]
-    @eval begin
-        $(ff)(x::CSym) = $(ff)(get_propagator(x))
-    end
-end
-
-function Base.conj(q::Average)
-    T = propagator_type(q)
-    if is_keldysh(T)
-        return -1 * q
-    else # retarded || advanced
-        x, y = fields(q)
-        return make_propagator(y(position(x))', x(position(y))')
-    end
-end
-Base.adjoint(q::Average) = conj(q)
-
-function get_unique_propagators(v::T) where {T<:SymbolicUtils.Symbolic}
-    if v isa Average
-        return T[v]
-    elseif SymbolicUtils.iscall(v)
-        f = SymbolicUtils.operation(v)
-        args = map(get_unique_propagators, SymbolicUtils.arguments(v))
-        return unique(collect(Iterators.flatten(args)))
-    else
-        return T[]
-    end
-end
-get_unique_propagators(v) = SymbolicUtils.Symbolic[]
-
-# find_retarded_idx(ps) = findfirst(is_retarded, propagator_type.(ps))
-function find_advanced_idx_with_equal_coordinate(ps)
-    return findfirst(x -> is_advanced(x) && same_position(x), ps)
-end
 
 """
     advanced_to_retarded(x::T) where {T<:SymbolicUtils.Symbolic}
@@ -203,90 +94,41 @@ Apply the transformation to change the advanced propagator to retarded:
 with ``y =(\\vec{y},t)``.
 Note the expression is only valid for equal space-time coordinates.
 """
-function advanced_to_retarded(x::T) where {T<:SymbolicUtils.Symbolic}
-    props = get_unique_propagators(x)
-    adv_idx = find_advanced_idx_with_equal_coordinate(props)
-    if isnothing(adv_idx)
+function advanced_to_retarded(x::Vector{Contraction}, prefactor)
+    adv_idx = findall(x -> is_advanced(x) && same_position(x), x)
+    if isempty(adv_idx)
         return x
     end
-    to_sub = Dict(props[adv_idx] => -1 * _conj(props[adv_idx]))
-    return SymbolicUtils.substitute(x, to_sub)
-end
-advanced_to_retarded(x) = x
-
-function get_propagators(v::T) where {T<:SymbolicUtils.Symbolic}
-    out = T[]
-    if v isa Average
-        out = T[v]
-    elseif SymbolicUtils.iscall(v)
-        if SymbolicUtils.ispow(v)
-            base, exp = v.base, v.exp
-            if base isa Average
-                out = fill(base, exp)
-            else
-                args = map(get_propagators, SymbolicUtils.arguments(v))
-                out = collect(Iterators.flatten(args))
-            end
-        else
-            args = map(get_propagators, SymbolicUtils.arguments(v))
-            out = collect(Iterators.flatten(args))
-        end
+    x′ = deepcopy(x)
+    for i in adv_idx
+        prefactor *= -1
+        x′[i] = adjoint(x[i])
     end
-    return out
+    return x′, prefactor
 end
-get_propagators(v) = SymbolicUtils.Symbolic[]
 
-function get_prefactor(term::T) where {T<:SymbolicUtils.Symbolic}
-    props = get_propagators(term)
-    return SymbolicUtils.substitute(term, Dict(zip(props, ones(length(props)))))
-end
+Base.adjoint(c::Contraction) = adjoint.(c[2], c[1])
 
 #########################
 #       Position
 #########################
 
-isbulk(p::Average) = all(isbulk.(fields(p)))
+isbulk(p::Edge) = all(isbulk.(fields(p)))
 isbulk(qs::Contraction) = all(isbulk.(qs))
 is_in(qs::Contraction) = any(is_in.(qs))
 is_out(qs::Contraction) = any(is_out.(qs))
 
-function positions(p::Average)
+function positions(p::Edge)
     return position.(fields(p))
 end
 function positions(p::Contraction)
     return position.(p)
 end
 
-function position(p::Average)
-    _positions = positions(p)
-    if length(findall(x -> x isa In, _positions)) == 1
-        return In()
-    elseif length(findall(x -> x isa Out, _positions)) == 1
-        return Out()
-    elseif all(isbulk, _positions)
-        idxs = getproperty.(_positions, :index)
-        if isequal(idxs...)
-            return _positions[1]
-        else
-            return minimum(_positions)
-            # ^  TODO what to do if both are bulk with different index?
-        end
-    else
-        throw(ArgumentError("Not a valid propagator."))
-    end
-end
-
 function integer_positions(p::Contraction)::NTuple{2,Int}
     return Int.(positions(p))
 end
-function integer_positions(props::Vector)
-    map(props) do p
-        ff = fields(p)
-        integer_positions((ff[1], ff[2]))
-    end
-end
-
-function same_position(p::Average)
+function same_position(p::Contraction)
     _positions = positions(p)
     return isequal(_positions...)
 end
@@ -301,3 +143,171 @@ function sort_contraction(p::Contraction)::Float64
         return float(pairing(i, j))
     end
 end
+
+# function position(p::Average)
+#     _positions = positions(p)
+#     if length(findall(x -> x isa In, _positions)) == 1
+#         return In()
+#     elseif length(findall(x -> x isa Out, _positions)) == 1
+#         return Out()
+#     elseif all(isbulk, _positions)
+#         idxs = getproperty.(_positions, :index)
+#         if isequal(idxs...)
+#             return _positions[1]
+#         else
+#             return minimum(_positions)
+#             # ^  TODO what to do if both are bulk with different index?
+#         end
+#     else
+#         throw(ArgumentError("Not a valid propagator."))
+#     end
+# end
+
+# function integer_positions(props::Vector)
+#     map(props) do p
+#         ff = fields(p)
+#         integer_positions((ff[1], ff[2]))
+#     end
+# end
+
+# """
+# $(TYPEDEF)
+
+# Symbolic number representing the Propagator of two fields ϕ and ψ.
+# By convention apropagator is shown as G(ϕ, ψ) with ψ the incoming [`Create`](@ref) field
+#  and ϕ the outgoing [`Destroy`](@ref) field.
+
+# See also: [`propagator`](@ref)
+# """
+# struct Propagator{T} <: Number end
+
+# "BasicSymbolic type for propagators. What will be used in the symbolic expressions"
+# const Average = SymbolicUtils.BasicSymbolic{<:Propagator}
+
+# "The type expressing the propagator as a function over two QSym"
+# function sym_average(T::PropagatorType) # Symbolic function for averages
+#     Tf = SymbolicUtils.FnType{Tuple{QSym,QSym},Propagator{T}}
+#     return SymbolicUtils.Sym{Tf}(:avg)
+# end
+
+# # Type promotion -- average(::QField)::Number
+# "A propagator of two fields is a number is of type `Propagator`"
+# function SymbolicUtils.promote_symtype(
+#     ::SymbolicUtils.BasicSymbolic{SymbolicUtils.FnType{Tuple{QSym,QSym},Propagator{T}}},
+#     ::Type{<:QSym},
+#     ::Type{<:QSym},
+# ) where {T}
+#     return Propagator{T}
+# end
+
+# # needs a specific symtype overload, otherwise we build the wrong expressions with maketerm
+# # and `SymbolicUtils.expand` and `SymbolicUtils.simplify` will not work
+# function SymbolicUtils.symtype(::SymbolicUtils.BasicSymbolic{Propagator{T}}) where {T}
+#     return Propagator{T}
+# end
+
+# """
+# $(TYPEDSIGNATURES)
+
+# Create the Keldysh two-point green's functions over two field `ψ` and `ϕ`:
+# ```math
+# G(x_1,x_2) = -i \\langle \\phi(x_1) \\overline{\\psi}(x_2) \\rangle.
+# ```
+
+# Here `ψ` is the incoming [`Create`](@ref) field at coordinate ``x_2=(\\vec{x}_1, t_1)``
+# and `ψ` the outgoing [`Destroy`](@ref) field at coordinate ``x_2=(\\vec{x}_2, t_2)``.
+# The created propagator will be a symbolic function of `SymbolicUtils.FnType` which maps
+# Tuple `Tuple{QSym,QSym}` to `SymbolicUtils.BasicSymbolic{Propagator{T}}` where `T` is
+# the type [`PropagatorType`](@ref).
+
+# The name of the symbolic function is `:avg` and is reserved as it is used internally for printing.
+# """
+# function propagator(x::QSym, y::QSym)
+#     propagator_checks(x, y)
+#     return im * make_propagator(x, y)
+# end
+
+# ensure that BasicSymbolic{<:Propagator} are only single averages
+# function Base.:*(a::Average, b::Average)
+#     if isequal(a, b)
+#         return SymbolicUtils.Mul(Number, 1, Dict(a => 2))
+#     end
+#     return SymbolicUtils.Mul(Number, 1, Dict(a => 1, b => 1))
+# end
+# function Base.:+(a::Average, b::Average)
+#     if isequal(a, b)
+#         return SymbolicUtils.Add(Number, 0, Dict(a => 2))
+#     end
+#     return SymbolicUtils.Add(Number, 0, Dict(a => 1, b => 1))
+# end
+
+# function get_propagator_idx(args::SymbolicUtils.SmallVec{Any,Vector{Any}})
+#     p_idxs = isa.(args, KeldyshContraction.Average)
+#     @assert isone(sum(p_idxs)) "Only one propagator allowed"
+#     p_idx = findfirst(p_idxs)
+#     @assert p_idx !== nothing "No propagator found"
+#     return p_idx
+# end
+# function get_propagator(x::CSym)::Average
+#     args = KeldyshContraction.arguments(x)
+#     p_idx = get_propagator_idx(x)
+#     return args[p_idx]
+# end
+# for ff in [:regularisations, :contours, :isbulk, :positions, :position, :propagator_type]
+#     @eval begin
+#         $(ff)(x::CSym) = $(ff)(get_propagator(x))
+#     end
+# end
+
+# function Base.conj(q::Average)
+#     T = propagator_type(q)
+#     if is_keldysh(T)
+#         return -1 * q
+#     else # retarded || advanced
+#         x, y = fields(q)
+#         return make_propagator(y(position(x))', x(position(y))')
+#     end
+# end
+# Base.adjoint(q::Average) = conj(q)
+
+# function get_unique_propagators(v::T) where {T<:SymbolicUtils.Symbolic}
+#     if v isa Average
+#         return T[v]
+#     elseif SymbolicUtils.iscall(v)
+#         f = SymbolicUtils.operation(v)
+#         args = map(get_unique_propagators, SymbolicUtils.arguments(v))
+#         return unique(collect(Iterators.flatten(args)))
+#     else
+#         return T[]
+#     end
+# end
+# get_unique_propagators(v) = SymbolicUtils.Symbolic[]
+
+# find_retarded_idx(ps) = findfirst(is_retarded, propagator_type.(ps))
+
+# function get_propagators(v::T) where {T<:SymbolicUtils.Symbolic}
+#     out = T[]
+#     if v isa Average
+#         out = T[v]
+#     elseif SymbolicUtils.iscall(v)
+#         if SymbolicUtils.ispow(v)
+#             base, exp = v.base, v.exp
+#             if base isa Average
+#                 out = fill(base, exp)
+#             else
+#                 args = map(get_propagators, SymbolicUtils.arguments(v))
+#                 out = collect(Iterators.flatten(args))
+#             end
+#         else
+#             args = map(get_propagators, SymbolicUtils.arguments(v))
+#             out = collect(Iterators.flatten(args))
+#         end
+#     end
+#     return out
+# end
+# get_propagators(v) = SymbolicUtils.Symbolic[]
+
+# function get_prefactor(term::T) where {T<:SymbolicUtils.Symbolic}
+#     props = get_propagators(term)
+#     return SymbolicUtils.substitute(term, Dict(zip(props, ones(length(props)))))
+# end

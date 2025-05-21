@@ -1,19 +1,3 @@
-struct Edge{P2,P1}
-    out::Destroy{KeldyshContour,P2,Regularisation}
-    in::Create{KeldyshContour,P1,Regularisation}
-    edgetype::PropagatorType
-    function Edge(tt::Contraction)
-        _out, _in = tt[1], tt[2]
-        propagator_checks(_out, _in)
-
-        type = propagator_type(_out, _in)
-        P2 = position(_out)
-        P1 = position(_in)
-        return new{typeof(P2),typeof(P1)}(_out, _in, type)
-    end
-    Edge(out::QSym, in::QSym) = Edge((out, in))
-end
-
 struct Diagram{E}
     contractions::SVector{E,Edge}
     function Diagram(contractions::Vector{Contraction})
@@ -30,16 +14,21 @@ Base.isequal(d1::Diagram, d2::Diagram) = isequal(d1.contractions, d2.contraction
 Base.hash(d::Diagram, h::UInt) = hash(d.contractions, h)
 
 struct Diagrams
-    diagrams::Dict{Diagram,Number}
-    Diagrams() = new(Dict{Diagram,Number}())
-    function Diagrams(diagrams::Vector{Diagram}, prefactor)
-        dict = Dict{Diagram,Number}(d => prefactor for d in diagrams)
-        new(dict)
-    end
+    diagrams::Dict{Diagram, ComplexF64} # TODO try SwissDict or RobinDict from DataStructures.jl.
+end
+Diagrams() = Diagrams(Dict{Diagram,Number}())
+function Diagrams(diagrams::Vector{Diagram}, prefactor::Number)
+    dict = Dict{Diagram,Number}(d => prefactor for d in diagrams)
+    Diagrams(dict)
+end
+function Diagrams(contractions::Vector{Vector{Contraction}}, prefactor::Number)
+    imag_factor = im^(first(length(contractions))) # Contraction becomes propagator
+    dict = Dict{Diagram,Number}(Diagram(c) => imag_factor*prefactor for c in contractions)
+    Diagrams(dict)
 end
 
 # Add a single diagram, summing prefactors if it already exists
-function Base.push!(collection::Diagrams, diagram::Diagram, prefactor::Number=1)
+function Base.push!(collection::Diagrams, diagram::Diagram, prefactor::Number)
     if haskey(collection.diagrams, diagram)
         collection.diagrams[diagram] += prefactor
     else
@@ -49,16 +38,22 @@ function Base.push!(collection::Diagrams, diagram::Diagram, prefactor::Number=1)
 end
 
 # Add multiple diagrams (with optional prefactor)
-function Base.push!(collection::Diagrams, diagrams::Diagram...)
-    for diagram in diagrams
-        push!(collection, diagram)
-    end
-    return collection
-end
+# function Base.push!(collection::Diagrams, diagrams::Diagram...)
+#     for diagram in diagrams
+#         push!(collection, diagram)
+#     end
+#     return collection
+# end
 
 # Convert to vector of diagrams (ignoring prefactors)
 function Base.collect(collection::Diagrams)
     return collect(keys(collection.diagrams))
+end
+function multuply!(collection::Diagrams, prefactor::Number)
+    foreach(collection) do (diagram, coeff)
+        collection.diagrams[diagram] *= prefactor
+    end
+    collection
 end
 
 # Make the collection iterable (iterate over pairs)
