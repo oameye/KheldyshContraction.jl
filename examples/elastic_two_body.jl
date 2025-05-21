@@ -107,6 +107,12 @@ topology1 = findall(i -> i == [1], bulk_multiplicity)
 topology2 = findall(i -> i == [2], bulk_multiplicity)
 topology3 = findall(i -> i == [3], bulk_multiplicity)
 
+foreach(terms[topology3]) do term
+    ps = KC.get_propagators(term)
+    sort!(ps, by=KC.position)
+    println(ps)
+end
+
 # The topology involving only one edge is the reducible diagram, which will not contribute to the self-energy in second order. Indeed, internally we only consider the irreducible diagrams.
 
 Σ = SelfEnergy(GF; order=2)
