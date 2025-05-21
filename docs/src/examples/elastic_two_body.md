@@ -89,15 +89,54 @@ the set of irreduciable diagrams. Inside the package we can compute these to an 
 The self-energy can be used to compute derive a kinetic equation for the system.
 In doing this one compute the so-called collision integral, which is given by
 ```math
-I _\mathrm{coll}= i Σ^K(x, p) + 2 F (x, p) \mathrm{Im}[Σ^R(x, p)].
+I _\mathrm{coll}= i Σ^K(x, p) +  F (x, p) (Σ^R(x, p)-Σ^A(x, p)).
 ```
 Here, $F$ is the bosonic distribution function of the system.
-However, from above calculation we find that ``i Σ^K(x, p) = 0`` and:
-```math
- \mathrm{Im}[G^K(x, p)]= \int \frac{d^d q}{(2\pi)^d} \mathrm{Im}G^K = 0.
-```
-where ``q = (\vec{q}, \epsilon)`` with $\epsilon$ the energy of the system.
-Hence, the first order correction in $g$ does not contribute to the collision integral.
+However, from above calculation we find that ``i Σ^K(x, p) = 0`` and ``Σ^R(x, p)=Σ^A(x, p)``,
+such that the collision integral has not contribution at first order.
+
+## Second order
+
+In second order, we have many additional terms for the dressed propagator.
+These involve now 5 propagators:
+
+````@example elastic_two_body
+GF = wick_contraction(L_int; order=2)
+````
+
+However, not all of them contribute to the second order self-energy. Indeed, many terms
+(diagrams) involve only first order self-energy corrections and are thus reducible.
+Instead, we need to separate the reducible and irreducible diagrams. We can separate them
+by looking at the multiplicity of the edges in the diagrams.
+
+````@example elastic_two_body
+using KeldyshContraction.SymbolicUtils
+import KeldyshContraction as KC
+terms = arguments(expand(GF.keldysh))
+
+bulk_multiplicity = map(terms) do term
+    props = KC.get_propagators(term)
+    vs = map(props) do p
+        ff = KC.fields(p)
+        KC.integer_positions((ff[1], ff[2]))
+    end
+    KC.bulk_multiplicity(vs)
+end
+````
+
+This gives us three distinct topologies, which we can identify by the multiplicity of the edges.
+
+````@example elastic_two_body
+topology1 = findall(i -> i == [1], bulk_multiplicity)
+topology2 = findall(i -> i == [2], bulk_multiplicity)
+topology3 = findall(i -> i == [3], bulk_multiplicity)
+````
+
+The topology involving only one edge is the reducible diagram, which will not contribute to the self-energy in second order. Indeed, internally we only consider the irreducible diagrams.
+
+````@example elastic_two_body
+Σ = SelfEnergy(GF; order=2)
+````
 
 ---
 

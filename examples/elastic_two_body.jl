@@ -76,7 +76,7 @@ GF = wick_contraction(L_int)
 # However, from above calculation we find that ``i Σ^K(x, p) = 0`` and ``Σ^R(x, p)=Σ^A(x, p)``,
 # such that the collision integral has not contribution at first order.
 
-## Second order
+# ## Second order
 
 # In second order, we have many additional terms for the dressed propagator.
 # These involve now 5 propagators:
@@ -88,7 +88,7 @@ GF = wick_contraction(L_int; order=2)
 # Instead, we need to separate the reducible and irreducible diagrams. We can separate them
 # by looking at the multiplicity of the edges in the diagrams.
 
-using SymbolicUtils
+using KeldyshContraction.SymbolicUtils
 import KeldyshContraction as KC
 terms = arguments(expand(GF.keldysh))
 
@@ -110,4 +110,3 @@ topology3 = findall(i -> i == [3], bulk_multiplicity)
 # The topology involving only one edge is the reducible diagram, which will not contribute to the self-energy in second order. Indeed, internally we only consider the irreducible diagrams.
 
 Σ = SelfEnergy(GF; order=2)
-Σ = SelfEnergy(L_int; order=2)
