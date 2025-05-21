@@ -7,8 +7,7 @@ const PositionPropagatorType = OrderedCollections.LittleDict{
 
 "compute the self-energy type from positions save in `dict`."
 function self_energy_type(dict::OrderedCollections.LittleDict)
-    # TODO only correct for first order with Keldysh
-    # G1K =  GA[y1,x2] GK[x1,y1] ΣA[y1,y1]+GA[y1,x2] GR[x1,y1] Σ+GK[y1,x2] GR[x1,y1]ΣR[y1,y1]
+    # G1K = GA[y1,x2] GK[x1,y1] ΣA[y1,y1]+GA[y1,x2] GR[x1,y1] Σ+GK[y1,x2] GR[x1,y1]ΣR[y1,y1]
     if is_keldysh(dict[Out()]) && is_advanced(dict[In()])
         return Advanced
     elseif is_retarded(dict[Out()]) && is_keldysh(dict[In()])
@@ -31,23 +30,31 @@ end
 
 "Construct the self-energy from `expr` and save in LittleDict `self_energy`."
 function construct_self_energy!(
-    self_energy::OrderedCollections.LittleDict, expr::SymbolicUtils.Symbolic
+    self_energy::OrderedCollections.LittleDict, expr::SymbolicUtils.Symbolic; order::Int=1
 )
-    terms = SymbolicUtils.arguments(expr)
+    if order > 2
+        error("Higher then second order in self-energy is not supported.")
+    end
+    terms = SymbolicUtils.arguments(SymbolicUtils.expand(expr))
+
     for term in terms
         args = SymbolicUtils.arguments(term)
-        idxs_c = findall(x -> !(x isa Average), args)
-        idxs_p = setdiff(eachindex(args), idxs_c)
-        args_p = args[idxs_p]
+        arg_c = get_prefactor(term)
+        args_p = get_propagators(term) # type-unstable
+
+        mult = bulk_multiplicity(args_p)
+        if !isempty(mult) && first(mult) < order
+            continue
+        end
 
         positions = KeldyshContraction.position.(args_p)
         types_p = propagator_type.(args_p)
-        bulk_propagator = args_p[findfirst(isbulk, positions)]
         dict = OrderedCollections.freeze(
             OrderedCollections.OrderedDict(zip(positions, types_p))
         )
 
-        to_add = isempty(idxs_c) ? bulk_propagator : *(args[idxs_c]...) * bulk_propagator
+        bulk_propagator = args_p[findfirst(isbulk, positions)]
+        to_add = arg_c * bulk_propagator
         self_energy[self_energy_type(dict)] += to_add
     end
     return self_energy
@@ -78,11 +85,11 @@ struct SelfEnergy{Tk,Tr,Ta}
     retarded::Tr
     "The advanced component of the self-energy."
     advanced::Ta
-    function SelfEnergy(G::DressedPropagator)
+    function SelfEnergy(G::DressedPropagator; order=1)
         self_energy = OrderedCollections.LittleDict{PropagatorType,SNuN}((
             Advanced => 0, Retarded => 0, Keldysh => 0
         ))
-        construct_self_energy!(self_energy, G.keldysh)
+        construct_self_energy!(self_energy, G.keldysh; order=1)
         # ^ keldysh GF should contain everything
         # construct_self_energy!(self_energy, G.advanced)
         # construct_self_energy!(self_energy, G.retarded)
@@ -100,12 +107,23 @@ struct SelfEnergy{Tk,Tr,Ta}
 
         return new{typeof(qq),typeof(cq),typeof(qc)}(qq, cq, qc)
     end
-    function SelfEnergy(L::InteractionLagrangian; simplify=true)
+    function SelfEnergy(L::InteractionLagrangian; order=1, simplify=true)
         ϕ = L.qfield
         ψ = L.cfield
-        keldysh = wick_contraction(ψ(Out()) * ψ'(In()) * L.lagrangian)
+        if order == 1
+            keldysh = wick_contraction(ψ(Out()) * ψ'(In()) * L.lagrangian)
+        elseif order == 2
+            L1 = L
+            L2 = L(2)
+            prefactor = make_real(im^2) / 2
+            keldysh =
+                prefactor *
+                wick_contraction(ψ(Out()) * ψ'(In()) * L1.lagrangian * L2.lagrangian)
+        else
+            error("higher order then two not implemented")
+        end
         if simplify
-            keldysh = advanced_to_retarded(keldysh)
+            keldysh = SymbolicUtils.expand(advanced_to_retarded(keldysh))
         end
 
         self_energy = OrderedCollections.LittleDict{PropagatorType,SNuN}((
