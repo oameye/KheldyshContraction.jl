@@ -9,18 +9,20 @@ struct Edge{P2,P1}
         type = propagator_type(_out, _in)
         P2 = position(_out)
         P1 = position(_in)
-        return new{typeof(P2), typeof(P1)}(_out, _in, type)
+        return new{typeof(P2),typeof(P1)}(_out, _in, type)
     end
     Edge(out::QSym, in::QSym) = Edge((out, in))
 end
 
 struct Diagram{E}
-    contractions::SVector{E, Edge}
+    contractions::SVector{E,Edge}
     function Diagram(contractions::Vector{Contraction})
         @assert length(contractions) > 0 "Contraction vector must not be empty"
         E = length(contractions)
-        sort!(contractions, by = sort_contraction)
-        edges = StaticArrays.sacollect(SVector{length(contractions), Edge}, Edge(c) for c in contractions)
+        sort!(contractions; by=sort_contraction)
+        edges = StaticArrays.sacollect(
+            SVector{length(contractions),Edge}, Edge(c) for c in contractions
+        )
         return new{E}(edges)
     end
 end

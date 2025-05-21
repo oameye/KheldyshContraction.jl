@@ -109,7 +109,7 @@ topology3 = findall(i -> i == [3], bulk_multiplicity)
 
 foreach(terms[topology3]) do term
     ps = KC.get_propagators(term)
-    sort!(ps, by=KC.position)
+    sort!(ps; by=KC.position)
     println(ps)
 end
 

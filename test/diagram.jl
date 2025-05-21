@@ -25,7 +25,7 @@ end
 
 @testset "diagram construction" begin
     using KeldyshContraction: Diagram, Contraction
-    contractions = Contraction[(ϕᴾ, ϕᶜ'(In())), (ϕᶜ, ϕᶜ'),(ϕᶜ(Out()), ϕᴾ')]
+    contractions = Contraction[(ϕᴾ, ϕᶜ'(In())), (ϕᶜ, ϕᶜ'), (ϕᶜ(Out()), ϕᴾ')]
 
     Diagram(contractions)
 end

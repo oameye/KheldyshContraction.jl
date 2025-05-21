@@ -7,4 +7,4 @@ The Hopcroft-Ullman pairing function, which bijectively maps two positive intege
 
 See https://mathworld.wolfram.com/PairingFunction.html
 """
-@inline pairing(i::Int,j::Int)::Int = div((i+j-2)*(i+j-1),2) + i
+@inline pairing(i::Int, j::Int)::Int = div((i+j-2)*(i+j-1), 2) + i
