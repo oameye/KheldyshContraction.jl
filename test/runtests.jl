@@ -62,9 +62,9 @@ end
     include("self_energy.jl")
 end
 
-# @testset "two boson loss" begin
-#     include("two_boson_loss.jl")
-# end
+@testset "two boson loss" begin
+    include("two_boson_loss.jl")
+end
 
 # @testset "elastic two body" begin
 #     include("elastic_two_body.jl")

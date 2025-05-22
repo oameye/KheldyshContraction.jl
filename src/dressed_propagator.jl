@@ -43,3 +43,40 @@ G^A\\left(x_1, x_2\\right) & 0
 ```
 """
 matrix(G::DressedPropagator) = Diagrams[G.retarded G.keldysh; G.advanced Diagrams()]
+
+
+"""
+    wick_contraction(L::InteractionLagrangian; order=1)
+
+
+All the same coordinate advanced propagators are converted to retarded propagators.
+"""
+function DressedPropagator(L::InteractionLagrangian; order=1)
+    ϕ = L.qfield
+    ψ = L.cfield
+    if order == 1
+        keldysh = wick_contraction(ψ(Out()) * ψ'(In()) * L.lagrangian)
+        retarded = wick_contraction(ψ(Out()) * ϕ'(In()) * L.lagrangian)
+        advanced = wick_contraction(ϕ(Out()) * ψ'(In()) * L.lagrangian)
+    elseif order == 2
+        L1 = L
+        L2 = L(2)
+        prefactor = make_real(im^2) / 2
+        keldysh = multiply!(
+            wick_contraction(ψ(Out()) * ψ'(In()) * L1.lagrangian * L2.lagrangian), prefactor
+        )
+
+        retarded = multiply!(
+            wick_contraction(ψ(Out()) * ϕ'(In()) * L1.lagrangian * L2.lagrangian), prefactor
+        )
+        advanced = multiply!(
+            wick_contraction(ϕ(Out()) * ψ'(In()) * L1.lagrangian * L2.lagrangian), prefactor
+        )
+    else
+        error("higher order then two not implemented")
+    end
+    filter_nonzero!(keldysh)
+    filter_nonzero!(retarded)
+    filter_nonzero!(advanced)
+    return DressedPropagator(keldysh, retarded, advanced)
+end

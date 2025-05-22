@@ -1,4 +1,4 @@
-const Contraction = Tuple{<:Destroy,<:Create} # TODO should be Tuple{Destroy, Create}
+const Contraction = Tuple{<:Destroy,<:Create}
 
 """
     PropagatorType `Keldysh`, `Advanced`, `Retarded`

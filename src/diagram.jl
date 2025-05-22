@@ -1,6 +1,6 @@
 struct Diagram{E}
     contractions::SVector{E,Edge}
-    function Diagram(contractions::Vector{Contraction})
+    function Diagram(contractions::Vector{<:Contraction})
         @assert length(contractions) > 0 "Contraction vector must not be empty"
         E = length(contractions)
         sort!(contractions; by=sort_contraction)
@@ -32,10 +32,12 @@ function Diagrams(diagrams::Vector{<:Diagram}, prefactor::Number)
     Diagrams(dict)
 end
 function Diagrams(contractions::Vector{Vector{Contraction}}, prefactor::Number)
+    @assert length(contractions) > 0 "Contraction vector must not be empty"
     imag_factor = im^(first(length(contractions))) # Contraction becomes propagator
     dict = Dict{Diagram,Number}(Diagram(c) => imag_factor*prefactor for c in contractions)
     Diagrams(dict)
 end
+Base.isequal(d1::Diagrams, d2::Diagrams) = isequal(d1.diagrams, d2.diagrams)
 Base.iszero(d::Diagrams) = isempty(d.diagrams)
 
 # Add a single diagram, summing prefactors if it already exists
@@ -65,7 +67,7 @@ end
 function Base.collect(collection::Diagrams)
     return collect(keys(collection.diagrams))
 end
-function multuply!(collection::Diagrams, prefactor::Number)
+function multiply!(collection::Diagrams, prefactor::Number)
     foreach(collection) do (diagram, coeff)
         collection.diagrams[diagram] *= prefactor
     end

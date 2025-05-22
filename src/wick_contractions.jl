@@ -3,41 +3,6 @@
 #       Contraction
 #################################
 """
-    wick_contraction(L::InteractionLagrangian; order=1)
-
-
-All the same coordinate advanced propagators are converted to retarded propagators.
-"""
-function DressedPropagator(L::InteractionLagrangian; order=1)
-    ϕ = L.qfield
-    ψ = L.cfield
-    if order == 1
-        keldysh = wick_contraction(ψ(Out()) * ψ'(In()) * L.lagrangian)
-        retarded = wick_contraction(ψ(Out()) * ϕ'(In()) * L.lagrangian)
-        advanced = wick_contraction(ϕ(Out()) * ψ'(In()) * L.lagrangian)
-    elseif order == 2
-        L1 = L
-        L2 = L(2)
-        prefactor = make_real(im^2) / 2
-        keldysh = multuply!(
-            wick_contraction(ψ(Out()) * ψ'(In()) * L1.lagrangian * L2.lagrangian), prefactor
-        )
-
-        retarded = multuply!(
-            wick_contraction(ψ(Out()) * ϕ'(In()) * L1.lagrangian * L2.lagrangian), prefactor
-        )
-        advanced = multuply!(
-            wick_contraction(ϕ(Out()) * ψ'(In()) * L1.lagrangian * L2.lagrangian), prefactor
-        )
-    else
-        error("higher order then two not implemented")
-    end
-    filter_nonzero!(keldysh)
-    filter_nonzero!(retarded)
-    filter_nonzero!(advanced)
-    return DressedPropagator(keldysh, retarded, advanced)
-end
-"""
     wick_contraction(expr::QTerm)
 
 Compute all possible Wick contractions of quantum fields in the expression `expr`.
@@ -80,7 +45,11 @@ function wick_contraction!(diagrams::Diagrams, a::QMul; regularise=true)
     @assert is_physical(a)
 
     contractions = wick_contraction(a.args_nc; regularise)
-    imag_factor = im^(first(length(contractions))) # Contraction becomes propagator
+    if isempty(contractions)
+        return nothing
+    end
+    number_of_contractions = length(first(contractions))
+    imag_factor = im^(number_of_contractions) # Contraction becomes propagator
     foreach(contractions) do c
         c′, prefactor = advanced_to_retarded(c, a.arg_c)
         push!(diagrams, Diagram(c′), imag_factor * prefactor)
