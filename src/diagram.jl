@@ -36,6 +36,7 @@ function Diagrams(contractions::Vector{Vector{Contraction}}, prefactor::Number)
     dict = Dict{Diagram,Number}(Diagram(c) => imag_factor*prefactor for c in contractions)
     Diagrams(dict)
 end
+Base.iszero(d::Diagrams) = isempty(d.diagrams)
 
 # Add a single diagram, summing prefactors if it already exists
 function Base.push!(collection::Diagrams, diagram::Diagram, prefactor::Number)

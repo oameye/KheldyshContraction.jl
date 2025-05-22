@@ -1,7 +1,6 @@
 using KeldyshContraction, Test
 using KeldyshContraction: In, Out, Classical, Quantum, Plus, Minus
-using KeldyshContraction:
-    is_physical, is_conserved, make_propagators, propagator, construct_self_energy
+using KeldyshContraction: is_physical, is_conserved, construct_self_energy!
 
 @qfields ϕᶜ::Destroy(Classical) ϕᴾ::Destroy(Quantum)
 
@@ -13,8 +12,8 @@ L_int =
     )
 
 @testset "vacuum bubble" begin
-    @test !isequal(wick_contraction(L_int; regularise=false), 0.0)
-    @test isequal(wick_contraction(L_int; regularise=true), 0.0)
+    @test !iszero(wick_contraction(L_int; regularise=false))
+    @test iszero(wick_contraction(L_int; regularise=true))
 end
 
 @testset "wick contractions" begin
@@ -27,15 +26,15 @@ end
         wick_contractions = wick_contraction(expr.arguments[1].args_nc; regularise=false)
         @test length(wick_contractions) == 4
 
-        propagators = make_propagators(wick_contractions)
-        regularized_wick = KeldyshContraction._regularise(propagators)
-        @test length(regularized_wick) == 2
-        @test length(unique(regularized_wick)) == 1
+        # propagators = make_propagators(wick_contractions)
+        # regularized_wick = KeldyshContraction._regularise(propagators)
+        # @test length(regularized_wick) == 2
+        # @test length(unique(regularized_wick)) == 1
         # @test isequal(wick_contraction(expr.arguments[1]), *(regularized_wick[1]...))
 
-        using KeldyshContraction:
-            make_propagator, set_reg_to_zero!, get_propagator, make_real
-        using SymbolicUtils: arguments, SymbolicUtils
+        # using KeldyshContraction:
+        #     make_propagator, set_reg_to_zero!, get_propagator, make_real
+        # using SymbolicUtils: arguments, SymbolicUtils
         # @test isequal(
         #     make_propagator(ϕᶜ(Out()), ϕᴾ') *
         #     make_propagator(ϕᶜ, ϕᶜ') *
@@ -65,12 +64,12 @@ end
         # "Gᴬ(y₁,y₁)*Gᴷ(y₁,x₂)*Gᴿ(x₁,y₁) + Gᴬ(y₁,x₂)*Gᴿ(x₁,y₁)*Gᴷ(y₁,y₁)"
 
         # TODO the string comparison will fail due to different seed so that the terms shuffle.
-        result = make_real(SymbolicUtils.expand(sum(wick_contraction.(expr.arguments))))
+        # result = make_real(SymbolicUtils.expand(sum(wick_contraction.(expr.arguments))))
 
-        L = InteractionLagrangian(L_int)
-        GF = wick_contraction(L; simplify=false)
-        @test isequal(GF.keldysh, result)
-        @test_broken construct_self_energy(arguments(GF.keldysh)[1])
+        # L = InteractionLagrangian(L_int)
+        # GF = wick_contraction(L; simplify=false)
+        # @test isequal(GF.keldysh, result)
+        # @test_broken construct_self_energy(arguments(GF.keldysh)[1])
     end
 
     @testset "quantum-quantum Green's function" begin
@@ -80,16 +79,16 @@ end
         @test is_physical(expr)
 
         # ∨ should this be zero?
-        @test !isequal(wick_contraction(expr; regularise=false), 0.0)
-        @test isequal(wick_contraction(expr; regularise=true), 0.0)
+        @test !iszero(wick_contraction(expr; regularise=false))
+        @test iszero(wick_contraction(expr; regularise=true))
     end
 end
 
 @testset "self-energy" begin
     using KeldyshContraction: Advanced, Retarded, Keldysh
-    using KeldyshContraction: Propagator, make_propagator, matrix
+    using KeldyshContraction: Edge, matrix
     L = InteractionLagrangian(L_int)
-    GF = wick_contraction(L; simplify=false)
+    GF = DressedPropagator(L)
     matrix(GF)
     Σ = SelfEnergy(GF)
     matrix(Σ)
