@@ -66,14 +66,14 @@ end
     include("two_boson_loss.jl")
 end
 
-# @testset "elastic two body" begin
-#     include("elastic_two_body.jl")
-# end
+@testset "elastic two body" begin
+    include("elastic_two_body.jl")
+end
 
-# @testset "self interaction" begin
-#     include("self_interaction.jl")
-# end
+@testset "self interaction" begin
+    include("self_interaction.jl")
+end
 
-# @testset "second order" begin
-#     include("second_order.jl")
-# end
+@testset "second order" begin
+    include("second_order.jl")
+end
