@@ -38,8 +38,8 @@ include("canonicalize.jl")
 include("self_energy.jl")
 
 # show methods
-# include("show_methods/latexify_recipes.jl")
-# include("show_methods/printing.jl")
+include("show_methods/latexify_recipes.jl")
+include("show_methods/printing.jl")
 
 export @qfields,
     Destroy,

@@ -25,11 +25,11 @@ end
     return ex
 end
 
-@latexrecipe function f(op::SymbolicUtils.Symbolic{<:Propagator})
-    # Options
-    cdot --> false
-    return latexify(repr(MIME"text/plain"(), op))
-end
+# @latexrecipe function f(op::SymbolicUtils.Symbolic{<:Propagator})
+#     # Options
+#     cdot --> false
+#     return latexify(repr(MIME"text/plain"(), op))
+# end
 
 _to_expression(x::Number) = x
 function _to_expression(x::Complex) # For brackets when using latexify
@@ -74,17 +74,17 @@ function _to_expression(t::QMul)
 end
 _to_expression(t::QAdd) = :(+($(_to_expression.(arguments(t))...)))
 
-function _to_expression(s::SymbolicUtils.Symbolic)
-    if SymbolicUtils.iscall(s)
-        f = SymbolicUtils.operation(s)
-        fsym = if f === conj
-            :CONJ
-        else
-            Symbol(f)
-        end
-        args = map(_to_expression, arguments(s))
-        return :($(fsym)($(args...)))
-    else
-        return nameof(s)
-    end
-end
+# function _to_expression(s::SymbolicUtils.Symbolic)
+#     if SymbolicUtils.iscall(s)
+#         f = SymbolicUtils.operation(s)
+#         fsym = if f === conj
+#             :CONJ
+#         else
+#             Symbol(f)
+#         end
+#         args = map(_to_expression, arguments(s))
+#         return :($(fsym)($(args...)))
+#     else
+#         return nameof(s)
+#     end
+# end

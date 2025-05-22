@@ -36,9 +36,7 @@ end
 
 function Base.show(io::IO, x::QMul)
     if !SymbolicUtils._isone(x.arg_c)
-        x.arg_c isa Complex ? write(io, "(") : write(io, "")
-        show(io, x.arg_c)
-        x.arg_c isa Complex ? write(io, ")") : write(io, "")
+        print_number(io, x.arg_c)
         show(io, *)
     end
     show_brackets[] && write(io, "(")
@@ -59,7 +57,7 @@ function Base.show(io::IO, L::InteractionLagrangian)
     return show(io, L.lagrangian)
 end
 
-const T_LATEX = Union{<:QField,<:SymbolicUtils.Symbolic{<:Propagator}}
+const T_LATEX = Union{<:QField}
 Base.show(io::IO, ::MIME"text/latex", x::T_LATEX) = write(io, latexify(x))
 function Base.show(io::IO, ::MIME"text/latex", L::InteractionLagrangian)
     # write(io, "Interaction Lagrangian with fields ")
@@ -72,7 +70,7 @@ end
 # function Base.show(io::IO, ::MIME"text/latex", L::DressedPropagator)
 #     return write(io,latexify([L.retarded,L.advanced, L.keldysh]))
 # end
-function Base.show(io::IO, x::Average)
+function Base.show(io::IO, x::Edge)
     prop_type = Dict(Retarded => "ᴿ", Advanced => "ᴬ", Keldysh => "ᴷ")
 
     reg_string = Dict(Plus => "⁺", Zero => "", Minus => "⁻")
@@ -92,6 +90,44 @@ function Base.show(io::IO, x::Average)
     )
     return write(io, s)
 end
+function Base.show(io::IO, d::Diagram)
+    contractions = d.contractions
+    l = length(contractions)
+    for idx in eachindex(contractions)
+        if idx == l
+            show(io, contractions[idx])
+        else
+            show(io, contractions[idx])
+            show(io, *)
+        end
+    end
+end
+function Base.show(io::IO, ds::Diagrams)
+    diagrams = keys(ds.diagrams) |> collect
+    l = length(diagrams)
+    for idx in eachindex(diagrams)
+        if idx == l
+            prefactor = ds.diagrams[diagrams[idx]]
+            print_number(io, prefactor)
+            show(io, *)
+            show(io, diagrams[idx])
+        else
+            prefactor = ds.diagrams[diagrams[idx]]
+            print_number(io, prefactor)
+            show(io, *)
+            show(io, diagrams[idx])
+            write(io, " + ")
+        end
+    end
+end
+
+function print_number(io, x::Number)
+    x = make_real(x)
+    x isa Complex ? write(io, "(") : write(io, "")
+    show(io, x)
+    x isa Complex ? write(io, ")") : write(io, "")
+end
+
 
 const underscore_dict = Dict(
     1 => "₁", 2 => "₂", 3 => "₃", 4 => "₄", 5 => "₅", 6 => "₆", 7 => "₇", 8 => "₈", 9 => "₉"
