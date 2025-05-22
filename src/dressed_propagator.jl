@@ -27,19 +27,19 @@ struct DressedPropagator
         return new(keldysh, retarded, advanced)
     end
 end
-# """
-#     matrix(G::DressedPropagator)
+"""
+    matrix(G::DressedPropagator)
 
-# Returns the matrix representation of the dressed propagator `G`
-# in the Retarded-Advanced-Keldysh basis.
-# ```math
-# \\hat{G}\\left(x_1, x_2\\right)
-# =\\left(
-# \\begin{array}{cc}
-# G^K\\left(x_1, x_2\\right) & G^R\\left(x_1, x_2\\right) \\\\
-# G^A\\left(x_1, x_2\\right) & 0
-# \\end{array}
-# \\right)
-# ```
-# """
-# matrix(G::DressedPropagator) = SNuN[G.retarded G.keldysh; G.advanced 0]
+Returns the matrix representation of the dressed propagator `G`
+in the Retarded-Advanced-Keldysh basis.
+```math
+\\hat{G}\\left(x_1, x_2\\right)
+=\\left(
+\\begin{array}{cc}
+G^K\\left(x_1, x_2\\right) & G^R\\left(x_1, x_2\\right) \\\\
+G^A\\left(x_1, x_2\\right) & 0
+\\end{array}
+\\right)
+```
+"""
+matrix(G::DressedPropagator) = Diagrams[G.retarded G.keldysh; G.advanced Diagrams()]

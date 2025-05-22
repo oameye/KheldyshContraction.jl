@@ -107,17 +107,17 @@ struct SelfEnergy
     end
 end
 
-# """
-#     matrix(Σ::SelfEnergy)
+"""
+    matrix(Σ::SelfEnergy)
 
-# Returns the matrix representation of the self energy `Σ`
-# in the Retarded-Advanced-Keldysh basis.
-# ```math
-# \\hat{\\Sigma}\\left(y_1, y_2\\right)=
-# \\left(\\begin{array}{cc}0 & \\Sigma^A\\left(y_1, y_2\\right) \\\\
-# \\Sigma^R\\left(y_1, y_2\\right) & \\Sigma^K\\left(y_1, y_2\\right)
-# \\end{array}
-# \\right)
-# ```
-# """
-# matrix(Σ::SelfEnergy) = SNuN[0 Σ.advanced; Σ.retarded Σ.keldysh]
+Returns the matrix representation of the self energy `Σ`
+in the Retarded-Advanced-Keldysh basis.
+```math
+\\hat{\\Sigma}\\left(y_1, y_2\\right)=
+\\left(\\begin{array}{cc}0 & \\Sigma^A\\left(y_1, y_2\\right) \\\\
+\\Sigma^R\\left(y_1, y_2\\right) & \\Sigma^K\\left(y_1, y_2\\right)
+\\end{array}
+\\right)
+```
+"""
+matrix(Σ::SelfEnergy) = Diagrams[Diagrams() Σ.advanced; Σ.retarded Σ.keldysh]

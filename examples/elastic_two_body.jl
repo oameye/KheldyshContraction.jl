@@ -81,21 +81,18 @@ GF = DressedPropagator(L_int)
 # In second order, we have many additional terms for the dressed propagator.
 # These involve now 5 propagators:
 
-GF = wick_contraction(L_int; order=2)
+GF = DressedPropagator(L_int; order=2)
 
 # However, not all of them contribute to the second order self-energy. Indeed, many terms
 # (diagrams) involve only first order self-energy corrections and are thus reducible.
 # Instead, we need to separate the reducible and irreducible diagrams. We can separate them
 # by looking at the multiplicity of the edges in the diagrams.
 
-using KeldyshContraction.SymbolicUtils
 import KeldyshContraction as KC
-terms = arguments(expand(GF.keldysh))
-
-bulk_multiplicity = map(terms) do term
-    props = KC.get_propagators(term)
-    vs = map(props) do p
-        ff = KC.fields(p)
+terms = collect(keys(GF.keldysh.diagrams))
+bulk_multiplicity = map(terms) do diagram
+    vs = map(diagram.contractions) do c
+        ff = KC.fields(c)
         KC.integer_positions((ff[1], ff[2]))
     end
     KC.bulk_multiplicity(vs)
@@ -107,11 +104,7 @@ topology1 = findall(i -> i == [1], bulk_multiplicity)
 topology2 = findall(i -> i == [2], bulk_multiplicity)
 topology3 = findall(i -> i == [3], bulk_multiplicity)
 
-foreach(terms[topology3]) do term
-    ps = KC.get_propagators(term)
-    sort!(ps; by=KC.position)
-    println(ps)
-end
+terms[topology1]
 
 # The topology involving only one edge is the reducible diagram, which will not contribute to the self-energy in second order. Indeed, internally we only consider the irreducible diagrams.
 

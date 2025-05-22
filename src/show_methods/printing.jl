@@ -103,7 +103,7 @@ function Base.show(io::IO, d::Diagram)
     end
 end
 function Base.show(io::IO, ds::Diagrams)
-    diagrams = keys(ds.diagrams) |> collect
+    diagrams = collect(keys(ds.diagrams))
     l = length(diagrams)
     for idx in eachindex(diagrams)
         if idx == l
@@ -127,7 +127,6 @@ function print_number(io, x::Number)
     show(io, x)
     x isa Complex ? write(io, ")") : write(io, "")
 end
-
 
 const underscore_dict = Dict(
     1 => "₁", 2 => "₂", 3 => "₃", 4 => "₄", 5 => "₅", 6 => "₆", 7 => "₇", 8 => "₈", 9 => "₉"
