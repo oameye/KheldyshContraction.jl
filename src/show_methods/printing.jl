@@ -57,7 +57,7 @@ function Base.show(io::IO, L::InteractionLagrangian)
     return show(io, L.lagrangian)
 end
 
-const T_LATEX = Union{<:QField}
+const T_LATEX = Union{<:QField,Diagrams,Diagram,Edge}
 Base.show(io::IO, ::MIME"text/latex", x::T_LATEX) = write(io, latexify(x))
 function Base.show(io::IO, ::MIME"text/latex", L::InteractionLagrangian)
     # write(io, "Interaction Lagrangian with fields ")
@@ -109,7 +109,7 @@ function Base.show(io::IO, ds::Diagrams)
         if idx == l
             prefactor = ds.diagrams[diagrams[idx]]
             print_number(io, prefactor)
-            show(io, *)
+            !SymbolicUtils._isone(prefactor) ? show(io, *) : write(io, "")
             show(io, diagrams[idx])
         else
             prefactor = ds.diagrams[diagrams[idx]]
@@ -122,10 +122,12 @@ function Base.show(io::IO, ds::Diagrams)
 end
 
 function print_number(io, x::Number)
-    x = make_real(x)
-    x isa Complex ? write(io, "(") : write(io, "")
-    show(io, x)
-    x isa Complex ? write(io, ")") : write(io, "")
+    if !SymbolicUtils._isone(x)
+        x = make_real(x)
+        x isa Complex ? write(io, "(") : write(io, "")
+        show(io, x)
+        x isa Complex ? write(io, ")") : write(io, "")
+    end
 end
 
 const underscore_dict = Dict(
@@ -138,7 +140,7 @@ function pos_string(p)
     elseif p isa Out
         return "x₁"
     else
-        return "y"*underscore_dict[p.index]
+        return "y" * underscore_dict[p.index]
     end
 end
 

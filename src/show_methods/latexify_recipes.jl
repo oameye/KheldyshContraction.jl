@@ -36,6 +36,13 @@ function _to_expression(x::Complex) # For brackets when using latexify
         return :($(real(x)) + $(imag(x))*im)
     end
 end
+
+@latexrecipe function f(op::Union{Diagrams, Diagram,Edge})
+    # Options
+    cdot --> false
+    return latexify(repr(MIME"text/plain"(), op))
+end
+
 _to_expression(op::QSym) = name(op)
 function _to_expression(op::Create)
     reg = Int(regularisation(op))

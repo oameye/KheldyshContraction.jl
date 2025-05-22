@@ -9,7 +9,7 @@ struct Diagram{E}
         )
         return new{E}(edges)
     end
-    function Diagram(contractions::Vector{Edge})
+    function Diagram(contractions::Vector{<:Edge})
         @assert length(contractions) > 0 "Contraction vector must not be empty"
         E = length(contractions)
         # sort!(contractions; by=sort_contraction)
@@ -27,7 +27,7 @@ struct Diagrams
     diagrams::Dict{Diagram,ComplexF64} # TODO try SwissDict or RobinDict from DataStructures.jl.
 end
 Diagrams() = Diagrams(Dict{Diagram,Number}())
-function Diagrams(diagrams::Vector{Diagram}, prefactor::Number)
+function Diagrams(diagrams::Vector{<:Diagram}, prefactor::Number)
     dict = Dict{Diagram,Number}(d => prefactor for d in diagrams)
     Diagrams(dict)
 end
