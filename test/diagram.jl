@@ -3,38 +3,6 @@ using KeldyshContraction: Bulk, In, Out, Edge
 
 @qfields ϕᶜ::Destroy(Classical) ϕᴾ::Destroy(Quantum)
 
-@testset "propagator checks" begin
-    @test_throws MethodError Edge((ϕᶜ, ϕᶜ)) # annihilation creation
-    # @test_throws AssertionError Propagator(ϕᶜ, ϕᶜ') # same coordinate
-    @test_throws AssertionError Edge((ϕᶜ(In()), ϕᶜ'(Out()))) # In-Out
-    @test_throws AssertionError Edge((ϕᶜ(Out()), ϕᶜ'(In()))) # In-Out
-    @test_throws AssertionError Edge((ϕᶜ(Out()), ϕᶜ'(Out()))) # same coordinate
-    @test_throws AssertionError Edge((ϕᴾ, ϕᴾ(In())')) # quantum-quantum
-    @test_throws AssertionError Edge((ϕᶜ(In()), ϕᴾ')) # Out is In
-    @test_throws AssertionError Edge((ϕᶜ, ϕᶜ'(Out()))) # In is Out
-end
-
-@testset "properties" begin
-    p = Edge(ϕᴾ, ϕᶜ'(In()))
-    # @test KeldyshContraction.position(p) isa In
-    # @test KeldyshContraction.contours(p) == [Quantum, Classical]
-    # @test !KeldyshContraction.isbulk(p)
-    # @test KeldyshContraction.regularisations(p) == fill(KeldyshContraction.Zero, 2)
-    # @test KeldyshContraction.propagator_type(p) == KeldyshContraction.Advanced
-end
-
-@testset "diagram construction" begin
-    using KeldyshContraction: Diagram, Contraction
-    contractions = Contraction[(ϕᴾ, ϕᶜ'(In())), (ϕᶜ, ϕᶜ'), (ϕᶜ(Out()), ϕᴾ')]
-
-    Diagram(contractions)
-end
-
-@testset "sort" begin
-    p1 = (ϕᴾ, ϕᶜ'(In()))
-    p2 = (ϕᴾ, ϕᶜ')
-    @test isequal(sort!([p1, p2]; by=KeldyshContraction.sort_contraction), [p2, p1])
-end
 
 @testset "is_connected" begin
     # ps = [(3, 3), (3, 3)]

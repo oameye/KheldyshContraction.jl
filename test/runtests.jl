@@ -46,9 +46,9 @@ end
     include("QField.jl")
 end
 
-# @testset "propagator" begin
-#     include("propagator.jl")
-# end
+@testset "propagator" begin
+    include("propagator.jl")
+end
 
 @testset "tadpole reguralisation" begin
     include("reguralise.jl")
