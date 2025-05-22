@@ -22,7 +22,6 @@
 # end
 # make_real(x::Average) = x
 
-
 # Base.isreal(::SymbolicUtils.BasicSymbolic{Real}) = true
 # Base.isreal(::SymbolicUtils.BasicSymbolic{Number}) = false
 

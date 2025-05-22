@@ -1,3 +1,39 @@
+"""
+    advanced_to_retarded(x::T) where {T<:SymbolicUtils.Symbolic}
+
+Apply the transformation to change the advanced propagator to retarded:
+
+``G^A(y, y)=-G^R(y, y)``
+
+with ``y =(\\vec{y},t)``.
+Note the expression is only valid for equal space-time coordinates.
+"""
+function advanced_to_retarded(
+    x::Vector{Contraction}, prefactor::Number
+)::Tuple{Vector{Contraction},Number}
+    adv_idx = findall(x -> is_advanced(x) && same_position(x), x)
+    if isempty(adv_idx)
+        return x, prefactor
+    end
+    x′ = deepcopy(x)
+    for i in adv_idx
+        prefactor *= -1
+        x′[i] = adjoint(x[i])
+    end
+    return x′, prefactor
+end
+
+function sort_contraction(p::Contraction)::Float64
+    if is_out(p)
+        return -Inf
+    elseif is_in(p)
+        return Inf
+    else
+        i, j = integer_positions(p)
+        return float(pairing(i, j))
+    end
+end
+
 function canonicalize(vs::Vector{Contraction})
     # TODO: assumes lower then third order
     canonical = is_canonical(vs)

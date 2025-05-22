@@ -32,11 +32,11 @@ L_int = InteractionLagrangian(elasctic2boson)
 # of the two-point correlators of the linear part of the system.
 
 # In the package we can do this as follows:
-wick_contraction(elasctic2boson)
+wick_contraction(elasctic2boson) # TODO: add `canonicalize` kwarg
 
 # However, to show that these diagrams cancel out, we need to apply to condition $G^R = - G^A$.
 # Inside the package we do this by
-KeldyshContraction.advanced_to_retarded(wick_contraction(elasctic2boson))
+wick_contraction(elasctic2boson)
 
 # Similarly, we can compute the next orders.
 
@@ -54,7 +54,7 @@ KeldyshContraction.advanced_to_retarded(wick_contraction(elasctic2boson))
 # So we can compute the first order Green's function correction G_{(1)} by computing
 # the Wick contraction of the interaction Lagrangian
 
-GF = wick_contraction(L_int)
+GF = DressedPropagator(L_int)
 
 # Here, the simplification of the advanced to retarded propagator is done internally.
 

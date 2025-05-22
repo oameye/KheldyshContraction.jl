@@ -32,6 +32,9 @@ function DressedPropagator(L::InteractionLagrangian; order=1)
     else
         error("higher order then two not implemented")
     end
+    filter_nonzero!(keldysh)
+    filter_nonzero!(retarded)
+    filter_nonzero!(advanced)
     return DressedPropagator(keldysh, retarded, advanced)
 end
 """
@@ -57,7 +60,7 @@ The function returns a new expression of propagators of type `SymbolicUtils.Symb
 function wick_contraction(a::QAdd; regularise=true)
     diagrams = Diagrams()
     foreach(SymbolicUtils.arguments(a)) do arg
-        wick_contraction(diagrams, arg; regularise)
+        wick_contraction!(diagrams, arg; regularise)
     end
     return diagrams
 end
@@ -68,7 +71,7 @@ function wick_contraction(a::QMul; regularise=true)
     contractions = wick_contraction(a.args_nc; regularise)
     imag_factor = im^(first(length(contractions))) # Contraction becomes propagator
     dict = Dict{Diagram,ComplexF64}(
-        make_diagram_pair(c, a.args_c, imag_factor) for c in contractions
+        make_diagram_pair(c, a.arg_c, imag_factor) for c in contractions
     )
     return Diagrams(dict)
 end
@@ -79,13 +82,13 @@ function wick_contraction!(diagrams::Diagrams, a::QMul; regularise=true)
     contractions = wick_contraction(a.args_nc; regularise)
     imag_factor = im^(first(length(contractions))) # Contraction becomes propagator
     foreach(contractions) do c
-        c′, prefactor = advanced_to_retarded(c, a.args_c)
+        c′, prefactor = advanced_to_retarded(c, a.arg_c)
         push!(diagrams, Diagram(c′), imag_factor * prefactor)
     end
     return nothing
 end
-function make_diagram_pair(c, args_c, imag_factor)
-    c′, prefactor = advanced_to_retarded(c, a.args_c)
+function make_diagram_pair(c, arg_c, imag_factor)
+    c′, prefactor = advanced_to_retarded(c, arg_c)
     return diagram(c) => imag_factor * prefactor
 end
 

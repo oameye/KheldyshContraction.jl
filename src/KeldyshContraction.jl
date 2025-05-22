@@ -31,13 +31,11 @@ include("InteractionLagrangian.jl")
 include("propagator.jl")
 include("diagram.jl")
 include("dressed_propagator.jl")
-# include("symbolic_utils.jl")
-
 
 include("wick_contractions.jl")
 include("filters.jl")
 include("canonicalize.jl")
-# include("self_energy.jl")
+include("self_energy.jl")
 
 # show methods
 # include("show_methods/latexify_recipes.jl")
@@ -50,7 +48,7 @@ export @qfields,
     Quantum,
     Classical,
     DressedPropagator,
-    # SelfEnergy,
+    SelfEnergy,
     InteractionLagrangian,
     @syms,
     arguments

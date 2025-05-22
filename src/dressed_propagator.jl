@@ -24,9 +24,7 @@ struct DressedPropagator
     "The advanced component of the propagator"
     advanced::Diagrams
     function DressedPropagator(keldysh::Diagrams, retarded::Diagrams, advanced::Diagrams)
-        return new(
-            keldysh, retarded, advanced
-        )
+        return new(keldysh, retarded, advanced)
     end
 end
 # """

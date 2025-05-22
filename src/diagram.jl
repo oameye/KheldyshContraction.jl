@@ -9,12 +9,22 @@ struct Diagram{E}
         )
         return new{E}(edges)
     end
+    function Diagram(contractions::Vector{Edge})
+        @assert length(contractions) > 0 "Contraction vector must not be empty"
+        E = length(contractions)
+        # sort!(contractions; by=sort_contraction)
+        # TODO: sort to be sure?
+        edges = StaticArrays.sacollect(
+            SVector{length(contractions),Edge}, c for c in contractions
+        )
+        return new{E}(edges)
+    end
 end
 Base.isequal(d1::Diagram, d2::Diagram) = isequal(d1.contractions, d2.contractions)
 Base.hash(d::Diagram, h::UInt) = hash(d.contractions, h)
 
 struct Diagrams
-    diagrams::Dict{Diagram, ComplexF64} # TODO try SwissDict or RobinDict from DataStructures.jl.
+    diagrams::Dict{Diagram,ComplexF64} # TODO try SwissDict or RobinDict from DataStructures.jl.
 end
 Diagrams() = Diagrams(Dict{Diagram,Number}())
 function Diagrams(diagrams::Vector{Diagram}, prefactor::Number)
@@ -34,6 +44,11 @@ function Base.push!(collection::Diagrams, diagram::Diagram, prefactor::Number)
     else
         collection.diagrams[diagram] = prefactor
     end
+    return collection
+end
+
+function filter_nonzero!(collection::Diagrams)
+    filter!((kv) -> !iszero(kv[2]), collection.diagrams)
     return collection
 end
 
@@ -62,83 +77,9 @@ Base.iterate(collection::Diagrams, state) = iterate(collection.diagrams, state)
 Base.length(collection::Diagrams) = length(collection.diagrams)
 Base.eltype(::Type{Diagrams}) = Pair{Diagram,Number}
 
-function is_connected(vs::Vector{Contraction})
-    ps = integer_positions.(vs)
-    in_or_out = findfirst(p -> 1 ∈ p || 2 ∈ p, ps) # in case it a vacuum diagram
-    edges = isnothing(in_or_out) ? map(p -> p .- 2, ps) : ps
-    return is_connected(edges)
-end
-
-function is_connected(edges::Vector{Tuple{Int,Int}})
-    # Find all unique vertices
-    all_vertices = vertices(edges)
-    if isempty(all_vertices)
-        return true  # Empty graph is considered connected
-    end
-
-    # Find connected components using BFS
-    components = connected_components(all_vertices, edges)
-
-    is_single_component = length(components) == 1
-
-    if !is_single_component
-        @info "Contraction is not connected. Found $(length(components)) components:"
-        for (i, comp) in enumerate(components)
-            @info "Component $i: $comp"
-        end
-    end
-
-    return is_single_component
-end
-
-function vertices(ps)
-    vertices = Set{Int}()
-    for edge in ps
-        push!(vertices, edge[1])
-        push!(vertices, edge[2])
-    end
-    return vertices
-end
-
-function connected_components(vertices, edges)
-    # Find connected components using BFS
-    components = Vector{Set{Int}}()
-    remaining = Set(vertices)
-
-    while !isempty(remaining)
-        component = Set{Int}()
-        queue = [first(remaining)]
-        push!(component, first(queue))
-        delete!(remaining, first(queue))
-
-        while !isempty(queue)
-            current = popfirst!(queue)
-
-            # Find neighbors
-            for edge in edges
-                neighbor = nothing
-                if edge[1] == current
-                    neighbor = edge[2]
-                elseif edge[2] == current
-                    neighbor = edge[1]
-                end
-
-                if !isnothing(neighbor) && neighbor ∈ remaining
-                    push!(queue, neighbor)
-                    push!(component, neighbor)
-                    delete!(remaining, neighbor)
-                end
-            end
-        end
-
-        push!(components, component)
-    end
-    return components
-end
-
-function bulk_multiplicity(edges::Vector{Tuple{Int,Int}})
+function bulk_multiplicity(edges::SVector{N,Tuple{Int,Int}}) where {N}
     ff = edge -> !(1 ∈ edge) && !(2 ∈ edge) && !isequal(edge[1], edge[2])
-    filter!(ff, edges)
+    edges = filter(ff, edges)
     map!(edge -> edge .- 2, edges, edges)
 
     vert = vertices(edges)
@@ -150,8 +91,10 @@ function bulk_multiplicity(edges::Vector{Tuple{Int,Int}})
     end
     return mult
 end
-bulk_multiplicity(vs::Vector{Contraction}) = bulk_multiplicity(integer_positions.(vs))
-bulk_multiplicity(vs::Vector) = bulk_multiplicity(integer_positions(vs))
+function bulk_multiplicity(vs::SVector{N,KeldyshContraction.Edge}) where {N}
+    bulk_multiplicity(integer_positions.(vs))
+end
+# bulk_multiplicity(vs::Vector) = bulk_multiplicity(integer_positions(vs))
 
 max_edges(n::Int)::Int = n * (n - 1) ÷ 2
 

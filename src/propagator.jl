@@ -1,4 +1,4 @@
-const Contraction = Tuple{<:QSym,<:QSym} # TODO should be Tuple{Destroy, Create}
+const Contraction = Tuple{<:Destroy,<:Create} # TODO should be Tuple{Destroy, Create}
 
 """
     PropagatorType `Keldysh`, `Advanced`, `Retarded`
@@ -71,10 +71,16 @@ is_keldysh(x::PropagatorType) = Int(x) == Int(Keldysh)
 is_advanced(x::Edge) = is_advanced(propagator_type(x))
 is_retarded(x::Edge) = is_retarded(propagator_type(x))
 is_keldysh(x::Edge) = is_keldysh(propagator_type(x))
+is_advanced(x::Contraction) = is_advanced(propagator_type(x...))
+is_retarded(x::Contraction) = is_retarded(propagator_type(x...))
+is_keldysh(x::Contraction) = is_keldysh(propagator_type(x...))
 
 fields(e::Edge) = (e.out, e.in)
 function regularisations(p::Edge)
     return regularisation.(fields(p))
+end
+function regularisations(p::Contraction)
+    return regularisation.(p)
 end
 contours(p::Edge) = contour.(fields(p))
 
@@ -83,31 +89,7 @@ contours(p::Edge) = contour.(fields(p))
 #     return get_propagator_idx(args)
 # end
 
-
-"""
-    advanced_to_retarded(x::T) where {T<:SymbolicUtils.Symbolic}
-
-Apply the transformation to change the advanced propagator to retarded:
-
-``G^A(y, y)=-G^R(y, y)``
-
-with ``y =(\\vec{y},t)``.
-Note the expression is only valid for equal space-time coordinates.
-"""
-function advanced_to_retarded(x::Vector{Contraction}, prefactor)
-    adv_idx = findall(x -> is_advanced(x) && same_position(x), x)
-    if isempty(adv_idx)
-        return x
-    end
-    x′ = deepcopy(x)
-    for i in adv_idx
-        prefactor *= -1
-        x′[i] = adjoint(x[i])
-    end
-    return x′, prefactor
-end
-
-Base.adjoint(c::Contraction) = adjoint.(c[2], c[1])
+Base.adjoint(c::Contraction) = adjoint.((c[2], c[1]))
 
 #########################
 #       Position
@@ -128,40 +110,32 @@ end
 function integer_positions(p::Contraction)::NTuple{2,Int}
     return Int.(positions(p))
 end
+function integer_positions(p::Edge)::NTuple{2,Int}
+    return Int.(positions(p))
+end
 function same_position(p::Contraction)
     _positions = positions(p)
     return isequal(_positions...)
 end
 
-function sort_contraction(p::Contraction)::Float64
-    if is_out(p)
-        return -Inf
-    elseif is_in(p)
-        return Inf
+function position(p::Edge)
+    _positions = positions(p)
+    if length(findall(x -> x isa In, _positions)) == 1
+        return In()
+    elseif length(findall(x -> x isa Out, _positions)) == 1
+        return Out()
+    elseif all(isbulk, _positions)
+        idxs = getproperty.(_positions, :index)
+        if isequal(idxs...)
+            return _positions[1]
+        else
+            return minimum(_positions)
+            # ^  TODO what to do if both are bulk with different index?
+        end
     else
-        i, j = integer_positions(p)
-        return float(pairing(i, j))
+        throw(ArgumentError("Not a valid propagator."))
     end
-end
-
-# function position(p::Average)
-#     _positions = positions(p)
-#     if length(findall(x -> x isa In, _positions)) == 1
-#         return In()
-#     elseif length(findall(x -> x isa Out, _positions)) == 1
-#         return Out()
-#     elseif all(isbulk, _positions)
-#         idxs = getproperty.(_positions, :index)
-#         if isequal(idxs...)
-#             return _positions[1]
-#         else
-#             return minimum(_positions)
-#             # ^  TODO what to do if both are bulk with different index?
-#         end
-#     else
-#         throw(ArgumentError("Not a valid propagator."))
-#     end
-# end
+end # TODO move to Hopcroft-Ullman pairing
 
 # function integer_positions(props::Vector)
 #     map(props) do p
