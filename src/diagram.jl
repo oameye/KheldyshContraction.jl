@@ -36,7 +36,9 @@ end
 function Diagrams(contractions::Vector{Vector{Contraction}}, prefactor::Number)
     @assert length(contractions) > 0 "Contraction vector must not be empty"
     imag_factor = im^(first(length(contractions))) # Contraction becomes propagator
-    dict = Dict{Diagram,ComplexF64}(Diagram(c) => imag_factor*prefactor for c in contractions)
+    dict = Dict{Diagram,ComplexF64}(
+        Diagram(c) => imag_factor*prefactor for c in contractions
+    )
     Diagrams(dict)
 end
 Base.isequal(d1::Diagrams, d2::Diagrams) = isequal(d1.diagrams, d2.diagrams)
