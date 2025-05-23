@@ -4,11 +4,6 @@ using KeldyshContraction: Bulk, In, Out, Edge
 @qfields ϕᶜ::Destroy(Classical) ϕᴾ::Destroy(Quantum)
 
 @testset "is_connected" begin
-    # ps = [(3, 3), (3, 3)]
-    # g = Graphs.SimpleGraphFromIterator(Graphs.Edge.(ps))
-    # length(connected_components(g))
-    # Graphs.is_connected(g)
-
     @qfields c::Destroy(Classical) q::Destroy(Quantum)
 
     vs = KeldyshContraction.Contraction[(c(Out()), q'), (c, q'), (c, q(In())')]

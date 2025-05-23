@@ -10,3 +10,5 @@ See https://mathworld.wolfram.com/PairingFunction.html
 @inline pairing(i::Int, j::Int)::Int = div((i+j-2)*(i+j-1), 2) + i
 
 make_real(x::Number) = SymbolicUtils._isreal(x) ? real(x) : x
+
+_simplify(x::Complex) = iszero(x.im) ? complex(x.re) : x

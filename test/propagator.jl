@@ -6,7 +6,6 @@ using KeldyshContraction: Edge, position, contour
 
 @testset "propagator checks" begin
     @test_throws MethodError Edge((ϕᶜ, ϕᶜ)) # annihilation creation
-    # @test_throws AssertionError Propagator(ϕᶜ, ϕᶜ') # same coordinate
     @test_throws AssertionError Edge((ϕᶜ(In()), ϕᶜ'(Out()))) # In-Out
     @test_throws AssertionError Edge((ϕᶜ(Out()), ϕᶜ'(In()))) # In-Out
     @test_throws AssertionError Edge((ϕᶜ(Out()), ϕᶜ'(Out()))) # same coordinate
@@ -18,9 +17,9 @@ end
 @testset "properties" begin
     p = Edge(ϕᴾ, ϕᶜ'(In()))
     @test KeldyshContraction.position(p) isa In
-    @test_broken KeldyshContraction.contours(p) == [Quantum, Classical]
+    @test_broken KeldyshContraction.contours(p) == [Quantum, Classical] # not needed
     @test !KeldyshContraction.isbulk(p)
-    @test_broken KeldyshContraction.regularisations(p) == fill(KeldyshContraction.Zero, 2)
+    @test_broken KeldyshContraction.regularisations(p) == fill(KeldyshContraction.Zero, 2) # not needed
     @test KeldyshContraction.propagator_type(p) == KeldyshContraction.Advanced
 end
 
