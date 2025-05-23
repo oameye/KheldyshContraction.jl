@@ -1,15 +1,7 @@
 using KeldyshContraction, Test
-using KeldyshContraction: Bulk, In, Out
+using KeldyshContraction: Bulk, In, Out, Edge
 
-# @testset "construction" begin
-#     @qfields c::Destroy(Classical) q::Destroy(Quantum)
-
-#     vs = KeldyshContraction.Contraction[(c(Out()), q'), (c, q'), (c, q(In())')]
-
-#     g = KeldyshContraction.graph(vs)
-#     @test Graphs.nv(g) == 3
-#     @test Graphs.ne(g) == 3
-# end
+@qfields ϕᶜ::Destroy(Classical) ϕᴾ::Destroy(Quantum)
 
 @testset "is_connected" begin
     # ps = [(3, 3), (3, 3)]
@@ -31,17 +23,18 @@ end
 
 @testset "bulk multiplicity" begin
     @qfields c::Destroy(Classical) q::Destroy(Quantum)
+    using StaticArrays
 
-    vs = [(1, 3), (3, 3), (3, 2)]
+    vs = SA[(1, 3), (3, 3), (3, 2)]
     @test KeldyshContraction.bulk_multiplicity(vs) == Int[]
 
-    vs2 = [(1, 3), (3, 3), (3, 4), (4, 4), (4, 2)]
+    vs2 = SA[(1, 3), (3, 3), (3, 4), (4, 4), (4, 2)]
     @test KeldyshContraction.bulk_multiplicity(vs2) == Int[1]
 
-    vs3 = [(1, 3), (3, 4), (4, 3), (4, 4), (3, 2)]
+    vs3 = SA[(1, 3), (3, 4), (4, 3), (4, 4), (3, 2)]
     @test KeldyshContraction.bulk_multiplicity(vs3) == Int[2]
 
-    vs4 = [(1, 3), (3, 4), (4, 3), (4, 4), (3, 5), (5, 5), (5, 2)]
+    vs4 = SA[(1, 3), (3, 4), (4, 3), (4, 4), (3, 5), (5, 5), (5, 2)]
     @test KeldyshContraction.bulk_multiplicity(vs4) == Int[2, 1, 0]
 end
 
@@ -112,4 +105,38 @@ end
     @test Set([1, 2, 3]) ∈ comps6
     @test Set([4]) ∈ comps6
     @test Set([5]) ∈ comps6
+end
+
+@testset "Diagrams unique collection and prefactor sum" begin
+    using KeldyshContraction: Diagram, Diagrams, Contraction
+    # Dummy contractions (using the same for uniqueness)
+    c1 = (ϕᴾ, ϕᶜ'(In()))
+    c2 = (ϕᶜ, ϕᶜ')
+    c3 = (ϕᶜ(Out()), ϕᴾ')
+    contractions1 = Contraction[c1, c2, c3]
+    contractions2 = Contraction[c1, c2, c3] # identical to contractions1
+    contractions3 = Contraction[c2, c3, c1] # same elements, different order
+    contractions4 = Contraction[c1, c3]     # different contractions
+
+    d1 = Diagram(contractions1)
+    d2 = Diagram(contractions2) # should be considered equal to d1
+    d3 = Diagram(contractions3) # should be considered equal to d1 (after sorting)
+    d4 = Diagram(contractions4) # unique
+
+    diagrams = Diagrams()
+    push!(diagrams, d1, 1.0)
+    push!(diagrams, d2, 1.0)
+    push!(diagrams, d3, 1.0)
+    push!(diagrams, d4, 1.0)
+
+    collected = collect(diagrams)
+    @test length(collected) == 2
+    # Find the summed prefactor for the unique contraction set
+    for (d, pref) in diagrams.diagrams
+        if length(d.contractions) == 3
+            @test pref == 3.0 # 2.0 + 3.0 + 5.0
+        elseif length(d.contractions) == 2
+            @test pref == 1.0
+        end
+    end
 end

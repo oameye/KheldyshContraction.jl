@@ -43,14 +43,14 @@ of the two-point correlators of the linear part of the system.
 In the package we can do this as follows:
 
 ````@example elastic_two_body
-wick_contraction(elasctic2boson)
+wick_contraction(elasctic2boson) # TODO: add `canonicalize` kwarg
 ````
 
 However, to show that these diagrams cancel out, we need to apply to condition $G^R = - G^A$.
 Inside the package we do this by
 
 ````@example elastic_two_body
-KeldyshContraction.advanced_to_retarded(wick_contraction(elasctic2boson))
+wick_contraction(elasctic2boson)
 ````
 
 Similarly, we can compute the next orders.
@@ -70,7 +70,7 @@ So we can compute the first order Green's function correction G_{(1)} by computi
 the Wick contraction of the interaction Lagrangian
 
 ````@example elastic_two_body
-GF = wick_contraction(L_int)
+GF = DressedPropagator(L_int)
 ````
 
 Here, the simplification of the advanced to retarded propagator is done internally.
@@ -101,7 +101,7 @@ In second order, we have many additional terms for the dressed propagator.
 These involve now 5 propagators:
 
 ````@example elastic_two_body
-GF = wick_contraction(L_int; order=2)
+GF = DressedPropagator(L_int; order=2)
 ````
 
 However, not all of them contribute to the second order self-energy. Indeed, many terms
@@ -110,14 +110,11 @@ Instead, we need to separate the reducible and irreducible diagrams. We can sepa
 by looking at the multiplicity of the edges in the diagrams.
 
 ````@example elastic_two_body
-using KeldyshContraction.SymbolicUtils
 import KeldyshContraction as KC
-terms = arguments(expand(GF.keldysh))
-
-bulk_multiplicity = map(terms) do term
-    props = KC.get_propagators(term)
-    vs = map(props) do p
-        ff = KC.fields(p)
+terms = collect(keys(GF.keldysh.diagrams))
+bulk_multiplicity = map(terms) do diagram
+    vs = map(diagram.contractions) do c
+        ff = KC.fields(c)
         KC.integer_positions((ff[1], ff[2]))
     end
     KC.bulk_multiplicity(vs)
@@ -130,6 +127,8 @@ This gives us three distinct topologies, which we can identify by the multiplici
 topology1 = findall(i -> i == [1], bulk_multiplicity)
 topology2 = findall(i -> i == [2], bulk_multiplicity)
 topology3 = findall(i -> i == [3], bulk_multiplicity)
+
+terms[topology1]
 ````
 
 The topology involving only one edge is the reducible diagram, which will not contribute to the self-energy in second order. Indeed, internally we only consider the irreducible diagrams.

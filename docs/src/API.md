@@ -109,9 +109,7 @@ wick_contraction
 ### Propagator
 
 ```@docs
-KeldyshContraction.Propagator
 KeldyshContraction.PropagatorType
-KeldyshContraction.propagator
 DressedPropagator
 KeldyshContraction.matrix(::DressedPropagator)
 ```

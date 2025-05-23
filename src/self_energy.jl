@@ -21,41 +21,42 @@ function self_energy_type(dict::OrderedCollections.LittleDict)
     end
 end
 
-"Construct the self-energy from `expr`."
-function construct_self_energy(expr::SymbolicUtils.Symbolic)
-    self_energy = OrderedCollections.LittleDict{PropagatorType,SNuN}((
-        Advanced => 0, Retarded => 0, Keldysh => 0
-    ))
-    return construct_self_energy!(self_energy, expr)
-end
+# "Construct the self-energy from `expr`."
+# function construct_self_energy(expr::SymbolicUtils.Symbolic)
+#     self_energy = OrderedCollections.LittleDict{PropagatorType,SNuN}((
+#         Advanced => 0, Retarded => 0, Keldysh => 0
+#     ))
+#     return construct_self_energy!(self_energy, expr)
+# end
 
-"Construct the self-energy from `expr` and save in LittleDict `self_energy`."
+"Construct the self-energy from diagrams and save in LittleDict self_energy."
 function construct_self_energy!(
-    self_energy::OrderedCollections.LittleDict, expr::SymbolicUtils.Symbolic; order::Int=1
+    self_energy::OrderedCollections.LittleDict, diagrams::Diagrams; order::Int=1
 )
     if order > 2
-        error("Higher then second order in self-energy is not supported.")
+        error("Higher than second order in self-energy is not supported.")
     end
-    terms = SymbolicUtils.arguments(expr)
-    for term in terms
-        args = SymbolicUtils.arguments(term)
-        arg_c = get_prefactor(term)
-        args_p = get_propagators(term) # type-unstable
 
-        mult = bulk_multiplicity(args_p)
+    for (diagram, prefactor) in diagrams
+        contractions = diagram.contractions
+
+        mult = bulk_multiplicity(contractions)
         if !isempty(mult) && first(mult) < order
             continue
         end
 
-        positions = KeldyshContraction.position.(args_p)
-        types_p = propagator_type.(args_p)
+        positions = position.(contractions)
+        types_p = propagator_type.(contractions)
         dict = OrderedCollections.freeze(
             OrderedCollections.OrderedDict(zip(positions, types_p))
         )
 
-        bulk_propagator = args_p[findall(isbulk, positions)]
-        to_add = arg_c * prod(bulk_propagator)
-        self_energy[self_energy_type(dict)] += to_add
+        # Find all bulk propagators (edges where both fields are bulk)
+        bulk_idxs = findall(isbulk, contractions)
+        bulk_propagators = contractions[bulk_idxs]
+        # to_add = prefactor * prod(bulk_propagators)
+        # self_energy[self_energy_type(dict)] += to_add
+        push!(self_energy[self_energy_type(dict)], Diagram(bulk_propagators), prefactor)
     end
     return self_energy
 end
@@ -78,16 +79,16 @@ The self-energy is computed based on the Keldysh Green's function (`G.keldysh`) 
 its quantum-quantum (`qq`), classical-quantum (`cq`), and quantum-classical (`qc`) components.
 
 """
-struct SelfEnergy{Tk,Tr,Ta}
+struct SelfEnergy
     "The Keldysh component of the self-energy."
-    keldysh::Tk
+    keldysh
     " The retarded component of the self-energy."
-    retarded::Tr
+    retarded
     "The advanced component of the self-energy."
-    advanced::Ta
+    advanced
     function SelfEnergy(G::DressedPropagator; order=1)
-        self_energy = OrderedCollections.LittleDict{PropagatorType,SNuN}((
-            Advanced => 0, Retarded => 0, Keldysh => 0
+        self_energy = OrderedCollections.LittleDict{PropagatorType,Diagrams}((
+            Advanced => Diagrams(), Retarded => Diagrams(), Keldysh => Diagrams()
         ))
         construct_self_energy!(self_energy, G.keldysh; order)
         # ^ keldysh GF should contain everything
@@ -96,15 +97,13 @@ struct SelfEnergy{Tk,Tr,Ta}
 
         # quantum-quantum is the keldysh term in the self-energy
         # classical-classical is zero
-        qq, cq, qc = SymbolicUtils.expand.((
-            self_energy[Keldysh], self_energy[Retarded], self_energy[Advanced]
-        ))
+
         # G_R(1) = G₀_R Σ_R G₀_R
         # G_A(1) = G₀_A Σ_A G₀_A
         # G_K(1) = G₀_K(x1) Σ_A(y) G₀_A(x2) + G_A(x2) Σ_A(y) G_R(x1) + G_R(x1) Σ_R(y) G_K(x2)
         # G₀_K Σ_K G₀_K = 0
 
-        return new{typeof(qq),typeof(cq),typeof(qc)}(qq, cq, qc)
+        return new(self_energy[Keldysh], self_energy[Retarded], self_energy[Advanced])
     end
 end
 
@@ -121,4 +120,4 @@ in the Retarded-Advanced-Keldysh basis.
 \\right)
 ```
 """
-matrix(Σ::SelfEnergy) = SNuN[0 Σ.advanced; Σ.retarded Σ.keldysh]
+matrix(Σ::SelfEnergy) = Diagrams[Diagrams() Σ.advanced; Σ.retarded Σ.keldysh]

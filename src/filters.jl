@@ -89,20 +89,6 @@ A regular propagator is one that is:
 - or `p` is not of [`PropagatorType`](@ref) `Retarded` while also having a negative [`Regularisation`](@ref)
 - or `p` is not of [`PropagatorType`](@ref) `Advanced` while also having a positive [`Regularisation`](@ref)
 """
-function regular(p::Average)
-    _isbulk = isbulk(p)
-    _reg = regularisations(p)
-    T = propagator_type(p)
-    if !_isbulk || subtraction(_reg) == 0
-        return true
-    elseif subtraction(_reg) < 0 && T == Retarded
-        return false
-    elseif subtraction(_reg) > 0 && T == Advanced
-        return false
-    else
-        return true
-    end
-end
 function regular(qs::Contraction)
     _isbulk = isbulk(qs)
     _reg = regularisations(qs)
@@ -117,26 +103,77 @@ function regular(qs::Contraction)
         return true
     end
 end
-regular(p) = true
-regular(x::CSym) = regular(get_propagator(x))
 
-regular(v::Vector{SNuN}) = all(regular.(v))
-regular(v::Vector{Average}) = all(regular.(v))
-
-_regularise(vp::Vector{Vector{SNuN}}) = filter(regular, vp)
-
-function set_reg_to_zero!(p::Average)
-    p.arguments .= set_reg_to_zero.(arguments(p))
-    return p
+function is_connected(vs::Vector{Contraction})
+    ps = integer_positions.(vs)
+    in_or_out = findfirst(p -> 1 ∈ p || 2 ∈ p, ps) # in case it a vacuum diagram
+    edges = isnothing(in_or_out) ? map(p -> p .- 2, ps) : ps
+    return is_connected(edges)
 end
-function set_reg_to_zero!(vp::Union{Vector{SNuN},Vector{Vector{SNuN}}})
-    for p in vp
-        set_reg_to_zero!(p)
+
+function is_connected(edges::Vector{Tuple{Int,Int}})
+    # Find all unique vertices
+    all_vertices = vertices(edges)
+    if isempty(all_vertices)
+        return true  # Empty graph is considered connected
     end
-    return vp
+
+    # Find connected components using BFS
+    components = connected_components(all_vertices, edges)
+
+    is_single_component = length(components) == 1
+
+    if !is_single_component
+        @info "Contraction is not connected. Found $(length(components)) components:"
+        for (i, comp) in enumerate(components)
+            @info "Component $i: $comp"
+        end
+    end
+
+    return is_single_component
 end
-function set_reg_to_zero!(p::CSym)
-    p_idx = get_propagator_idx(p)
-    return set_reg_to_zero!(p.arguments[p_idx])
+
+function vertices(ps)
+    vertices = Set{Int}()
+    for edge in ps
+        push!(vertices, edge[1])
+        push!(vertices, edge[2])
+    end
+    return vertices
 end
-set_reg_to_zero!(p::Number) = nothing
+
+function connected_components(vertices, edges)
+    # Find connected components using BFS
+    components = Vector{Set{Int}}()
+    remaining = Set(vertices)
+
+    while !isempty(remaining)
+        component = Set{Int}()
+        queue = [first(remaining)]
+        push!(component, first(queue))
+        delete!(remaining, first(queue))
+
+        while !isempty(queue)
+            current = popfirst!(queue)
+
+            # Find neighbors
+            for edge in edges
+                neighbor = nothing
+                if edge[1] == current
+                    neighbor = edge[2]
+                elseif edge[2] == current
+                    neighbor = edge[1]
+                end
+
+                if !isnothing(neighbor) && neighbor ∈ remaining
+                    push!(queue, neighbor)
+                    push!(component, neighbor)
+                    delete!(remaining, neighbor)
+                end
+            end
+        end
+
+        push!(components, component)
+    end
+    return components
+end

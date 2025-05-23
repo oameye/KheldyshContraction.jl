@@ -7,18 +7,17 @@ function benchmark_two_body_loss!(SUITE)
         ϕ' * ψ' * (ϕ(Plus) * ψ(Plus) + ϕ(Minus) * ψ(Minus))
     L_int = InteractionLagrangian(loss2boson)
 
-    GF = wick_contraction(L_int)
+    GF = DressedPropagator(L_int)
     Σ = SelfEnergy(GF)
 
     simplify = false
-    SUITE["Two body loss"]["Green's function"] = @benchmarkable wick_contraction(
-        $L_int; simplify=($(simplify))
-    ) seconds = 10
+    SUITE["Two body loss"]["Green's function"] = @benchmarkable DressedPropagator($L_int;) seconds =
+        10
     SUITE["Two body loss"]["Self-energy"] = @benchmarkable SelfEnergy($GF) seconds = 10
 
     order = 2
-    SUITE["Two body loss"]["Green's function second order"] = @benchmarkable wick_contraction(
-        $L_int; order=($order), simplify=($(simplify))
+    SUITE["Two body loss"]["Green's function second order"] = @benchmarkable DressedPropagator(
+        $L_int; order=($order)
     ) seconds = 50
     return nothing
 end

@@ -1,5 +1,5 @@
 using KeldyshContraction, Test
-using KeldyshContraction: Classical, Quantum, Plus, Minus, In, Out, make_propagator, Bulk
+using KeldyshContraction: Classical, Quantum, Plus, Minus, In, Out, Edge, Bulk
 
 @qfields ϕ::Destroy(Classical) ψ::Destroy(Quantum)
 
@@ -11,11 +11,11 @@ using KeldyshContraction: Classical, Quantum, Plus, Minus, In, Out, make_propaga
         ϕ',
         ϕ(Plus)',
         ϕ(Minus)',
-        make_propagator(ϕ, ϕ'(In())),
-        make_propagator(ϕ(Out()), ϕ'),
-        make_propagator(ϕ(Out()), ψ'),
-        make_propagator(ψ(Out()), ϕ'),
-        make_propagator(ψ(Bulk(2)), ϕ'),
+        Edge(ϕ, ϕ'(In())),
+        Edge(ϕ(Out()), ϕ'),
+        Edge(ϕ(Out()), ψ'),
+        Edge(ψ(Out()), ϕ'),
+        Edge(ψ(Bulk(2)), ϕ'),
     ]
     output = [
         "ϕ",
@@ -60,15 +60,15 @@ end
 end
 
 @testset "Structs" begin
+    using KeldyshContraction: Diagram, Diagrams
     L = InteractionLagrangian(ϕ * ψ * ϕ' * ψ')
     @test repr(MIME"text/plain"(), L) ==
         "Interaction Lagrangian with fields ϕ and ψ:\n(ϕ*ψ*̄ψ*̄ϕ)"
 
     @test repr(MIME"text/latex"(), L) == "\$\\phi \\psi \\bar{\\psi} \\bar{\\phi}\$"
 
-    DP = DressedPropagator(
-        make_propagator(ϕ, ϕ'), make_propagator(ϕ, ϕ'), make_propagator(ϕ, ϕ')
-    )
+    ds = Diagrams([Diagram([Edge(ϕ, ϕ')])], 1.0)
+    DP = DressedPropagator(ds, ds, ds)
     @test repr(MIME"text/plain"(), DP) ==
         "Dressed Propagator:\nkeldysh:  Gᴷ(y₁,y₁)\nretarded: Gᴷ(y₁,y₁)\nadvanced: Gᴷ(y₁,y₁)"
 end

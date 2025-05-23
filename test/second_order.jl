@@ -32,37 +32,37 @@ end
     L2 = L(2)
     expr = ϕᶜ(Out()) * ϕᶜ'(In()) * L1.lagrangian * L2.lagrangian
 
-    @test wick_contraction(expr.arguments[1]) == 0.0
+    @test iszero(wick_contraction(expr.arguments[1]))
 
-    wick_contraction(L; order=2, simplify=false)
+    DressedPropagator(L; order=2)
 
-    @test_throws "not implemented" wick_contraction(L; order=3)
+    @test_throws "not implemented" DressedPropagator(L; order=3)
 end
 
 @testset "zero loop filter" begin
-    using KeldyshContraction: has_zero_loop, QSym
+    using KeldyshContraction: has_zero_loop, Contraction
     # Gᴿ(1,2) Gᴿ(2,1) = 0
-    vs = Tuple{<:QSym,<:QSym}[(ϕᶜ(Bulk(1)), ϕᴾ'(Bulk(2))), (ϕᶜ(Bulk(2)), ϕᴾ'(Bulk(1)))]
+    vs = Contraction[(ϕᶜ(Bulk(1)), ϕᴾ'(Bulk(2))), (ϕᶜ(Bulk(2)), ϕᴾ'(Bulk(1)))]
     @test has_zero_loop(vs)
 
     # Gᴬ(1,2) Gᴬ(2,1) = 0
-    vs = Tuple{<:QSym,<:QSym}[(ϕᴾ(Bulk(1)), ϕᶜ'(Bulk(2))), (ϕᴾ(Bulk(2)), ϕᶜ'(Bulk(1)))]
+    vs = Contraction[(ϕᴾ(Bulk(1)), ϕᶜ'(Bulk(2))), (ϕᴾ(Bulk(2)), ϕᶜ'(Bulk(1)))]
     @test has_zero_loop(vs)
 
     # Gᴿ(1,2) Gᴬ(1,2) = 0
-    vs = Tuple{<:QSym,<:QSym}[(ϕᶜ(Bulk(1)), ϕᴾ'(Bulk(2))), (ϕᴾ(Bulk(1)), ϕᶜ'(Bulk(2)))]
+    vs = Contraction[(ϕᶜ(Bulk(1)), ϕᴾ'(Bulk(2))), (ϕᴾ(Bulk(1)), ϕᶜ'(Bulk(2)))]
     @test has_zero_loop(vs)
 
-    vs = Tuple{<:QSym,<:QSym}[(ϕᶜ(Bulk(1)), ϕᴾ'(Bulk(2))), (ϕᶜ(Bulk(1)), ϕᴾ'(Bulk(2)))]
+    vs = Contraction[(ϕᶜ(Bulk(1)), ϕᴾ'(Bulk(2))), (ϕᶜ(Bulk(1)), ϕᴾ'(Bulk(2)))]
     @test !has_zero_loop(vs)
 end
 
 @testset "canonicalize" begin
-    using KeldyshContraction: canonicalize, QSym, is_canonical, Out, In
-    vs = Tuple{<:QSym,<:QSym}[(ϕᶜ(Out()), ϕᴾ'(Bulk(2))), (ϕᶜ(Bulk(2)), ϕᴾ'(Bulk(1)))]
+    using KeldyshContraction: canonicalize, Contraction, is_canonical, Out, In
+    vs = Contraction[(ϕᶜ(Out()), ϕᴾ'(Bulk(2))), (ϕᶜ(Bulk(2)), ϕᴾ'(Bulk(1)))]
     @test !is_canonical(vs)
 
-    vs′ = Tuple{<:QSym,<:QSym}[(ϕᶜ(Out()), ϕᴾ'(Bulk(1))), (ϕᶜ(Bulk(1)), ϕᴾ'(Bulk(2)))]
+    vs′ = Contraction[(ϕᶜ(Out()), ϕᴾ'(Bulk(1))), (ϕᶜ(Bulk(1)), ϕᴾ'(Bulk(2)))]
     @test is_canonical(vs′)
 
     @test canonicalize(vs) == vs′

@@ -73,10 +73,12 @@ end
 end
 
 @testset "normal ordering" begin
+    @qfields ϕ::Destroy(Classical) ψ::Destroy(Quantum)
     @test isequal(ϕ' * ϕ, ϕ * ϕ')
 end
 
 @testset "ones and zeros" begin
+    @qfields ϕ::Destroy(Classical) ψ::Destroy(Quantum)
     @test isone(ϕ) == false
     @test iszero(ϕ) == false
     @test one(ϕ) == 1
@@ -89,6 +91,7 @@ end
 # end
 
 @testset "isequal" begin
+    @qfields ϕ::Destroy(Classical) ψ::Destroy(Quantum)
     # Test the equality of two Keldysh fields
     @test ϕ == ϕ
     @test isequal(ϕ * ϕ, ϕ * ϕ)
@@ -104,6 +107,7 @@ end
 end
 
 @testset "simplification" begin
+    @qfields ϕ::Destroy(Classical) ψ::Destroy(Quantum)
     using SymbolicUtils
     @test isequal(ϕ + ϕ, 2 * ϕ) broken = true
     @test isequal(ϕ + ϕ + ϕ, 3 * ϕ) broken = true
@@ -138,6 +142,7 @@ end
 
 @testset "position" begin
     using KeldyshContraction: position
+    @qfields ϕ::Destroy(Classical) ψ::Destroy(Quantum)
     # Test the position function
     @test KC.position(ϕ).index == 1
     @test KC.position(ψ(In())) == In()
@@ -180,6 +185,7 @@ end
 
 @testset "quantum-classical" begin
     using KeldyshContraction: is_quantum, is_classical
+    @qfields ϕ::Destroy(Classical) ψ::Destroy(Quantum)
 
     @test is_quantum(ψ)
     @test is_classical(ϕ)
@@ -188,6 +194,7 @@ end
 end
 
 @testset "some lagrangians" begin
+    @qfields ϕ::Destroy(Classical) ψ::Destroy(Quantum)
     eleactic2boson = -0.5 * (ϕ' * ψ' * (ϕ^2 + ψ^2) + (ϕ'^2 + ψ'^2) * ϕ * ψ)
 
     loss2boson =
@@ -196,6 +203,7 @@ end
 end
 
 @testset "is_conserved" begin
+    @qfields ϕ::Destroy(Classical) ψ::Destroy(Quantum)
     using KeldyshContraction: is_conserved
 
     @test !is_conserved(KeldyshContraction.QSym[])
@@ -204,6 +212,7 @@ end
 
 @testset "QMul" begin
     using KeldyshContraction: QMul
+    @qfields ϕ::Destroy(Classical) ψ::Destroy(Quantum)
 
     @test isequal(ϕ, QMul(1, [ϕ]))
     @test isequal(QMul(1, [ϕ]), ϕ)

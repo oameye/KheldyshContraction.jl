@@ -8,7 +8,6 @@ using KeldyshContraction, Test
     all_concrete(KeldyshContraction.QAdd)
     all_concrete(KeldyshContraction.Destroy)
     all_concrete(KeldyshContraction.Create)
-    all_concrete(KeldyshContraction.Propagator)
     all_concrete(KeldyshContraction.InteractionLagrangian)
     all_concrete(KeldyshContraction.DressedPropagator)
     all_concrete(KeldyshContraction.SelfEnergy)
@@ -44,10 +43,6 @@ end
 
 @testset "QField" begin
     include("QField.jl")
-end
-
-@testset "symbolic utils" begin
-    include("symbolic_utils.jl")
 end
 
 @testset "propagator" begin

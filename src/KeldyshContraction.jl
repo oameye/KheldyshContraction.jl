@@ -10,6 +10,7 @@ using SymbolicUtils: SymbolicUtils, @syms, arguments
 using Combinatorics: Combinatorics
 using OrderedCollections: OrderedCollections
 using SmallCollections: SmallCollections
+using StaticArrays: StaticArrays, SVector
 
 using Latexify
 using MacroTools: MacroTools
@@ -28,9 +29,8 @@ include("InteractionLagrangian.jl")
 
 # Propagators
 include("propagator.jl")
-include("dressed_propagator.jl")
-include("symbolic_utils.jl")
 include("diagram.jl")
+include("dressed_propagator.jl")
 
 include("wick_contractions.jl")
 include("filters.jl")
