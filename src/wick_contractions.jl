@@ -138,7 +138,7 @@ function check_sorted(args)
     @assert isequal(args, args′′) "Arguments are not sorted"
 end
 function check_to_many_bulk(contraction, args_nc)
-    pos = map(x-> Int(position(x)), Iterators.flatten(contraction))
+    pos = map(x -> Int(position(x)), Iterators.flatten(contraction))
     for i in unique(pos)
         if count(x -> x == i, pos) > 4
             @show args_nc
