@@ -7,7 +7,6 @@ const PositionPropagatorType = OrderedCollections.LittleDict{
 
 "compute the self-energy type from positions save in `dict`."
 function self_energy_type(dict::OrderedCollections.LittleDict)
-    # TODO only correct for first order with Keldysh
     # G1K =  GA[y1,x2] GK[x1,y1] ΣA[y1,y1]+GA[y1,x2] GR[x1,y1] Σ+GK[y1,x2] GR[x1,y1]ΣR[y1,y1]
     if is_keldysh(dict[Out()]) && is_advanced(dict[In()])
         return Advanced
@@ -20,14 +19,6 @@ function self_energy_type(dict::OrderedCollections.LittleDict)
         error("Classical-Classical for self-energy should be zero.")
     end
 end
-
-# "Construct the self-energy from `expr`."
-# function construct_self_energy(expr::SymbolicUtils.Symbolic)
-#     self_energy = OrderedCollections.LittleDict{PropagatorType,SNuN}((
-#         Advanced => 0, Retarded => 0, Keldysh => 0
-#     ))
-#     return construct_self_energy!(self_energy, expr)
-# end
 
 "Construct the self-energy from diagrams and save in LittleDict self_energy."
 function construct_self_energy!(

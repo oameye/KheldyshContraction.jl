@@ -43,7 +43,7 @@ of the two-point correlators of the linear part of the system.
 In the package we can do this as follows:
 
 ````@example elastic_two_body
-wick_contraction(elasctic2boson) # TODO: add `canonicalize` kwarg
+wick_contraction(elasctic2boson, simplify=true)
 ````
 
 However, to show that these diagrams cancel out, we need to apply to condition $G^R = - G^A$.

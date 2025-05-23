@@ -19,6 +19,7 @@ end
     @test_broken iszero(_conj(GF.advanced) - GF.retarded)
     @test_broken isequal(KeldyshContraction._conj(GF.keldysh), -1 * GF.keldysh)
     # TODO this is not equal to do G^R and G^A being at different coordinates
+    # switch in and out coordinate when adjoint(::DressedPropagator)
 end
 
 @testset "self-energy" begin
@@ -27,6 +28,7 @@ end
     GF = DressedPropagator(L)
     Σ = SelfEnergy(GF)
 
-    @test_broken isequal(arguments(_conj(Σ.advanced)), arguments(_conj(Σ.retarded)))
-    @test_broken isequal(KeldyshContraction._conj(Σ.keldysh), -1 * Σ.keldysh)
+    @test_broken isequal(adjoint(Σ.advanced), Σ.retarded)
+    # TODO ^ This should be equal!
+    @test isequal(adjoint(Σ.keldysh), -1 * Σ.keldysh)
 end
