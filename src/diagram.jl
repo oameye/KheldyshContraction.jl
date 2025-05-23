@@ -1,5 +1,5 @@
-struct Diagram{E}
-    contractions::SVector{E,Edge}
+ConcreteStructs.@concrete struct Diagram
+    contractions
     function Diagram(contractions::Vector{<:Contraction})
         @assert length(contractions) > 0 "Contraction vector must not be empty"
         E = length(contractions)
@@ -7,7 +7,7 @@ struct Diagram{E}
         edges = StaticArrays.sacollect(
             SVector{length(contractions),Edge}, Edge(c) for c in contractions
         )
-        return new{E}(edges)
+        return new{typeof(edges)}(edges)
     end
     function Diagram(contractions::Vector{<:Edge})
         @assert length(contractions) > 0 "Contraction vector must not be empty"
@@ -17,24 +17,26 @@ struct Diagram{E}
         edges = StaticArrays.sacollect(
             SVector{length(contractions),Edge}, c for c in contractions
         )
-        return new{E}(edges)
+        return new{typeof(edges)}(edges)
     end
 end
+Base.length(d::Diagram) = length(d.contractions)
 Base.isequal(d1::Diagram, d2::Diagram) = isequal(d1.contractions, d2.contractions)
 Base.hash(d::Diagram, h::UInt) = hash(d.contractions, h)
 
-struct Diagrams
-    diagrams::Dict{Diagram,ComplexF64} # TODO try SwissDict or RobinDict from DataStructures.jl.
+ConcreteStructs.@concrete struct Diagrams
+    diagrams <: Dict{<:Diagram,<:Complex}
+    # TODO try SwissDict or RobinDict from DataStructures.jl.
 end
-Diagrams() = Diagrams(Dict{Diagram,Number}())
+Diagrams() = Diagrams(Dict{Diagram,ComplexF64}())
 function Diagrams(diagrams::Vector{<:Diagram}, prefactor::Number)
-    dict = Dict{Diagram,Number}(d => prefactor for d in diagrams)
+    dict = Dict{Diagram,ComplexF64}(d => prefactor for d in diagrams)
     Diagrams(dict)
 end
 function Diagrams(contractions::Vector{Vector{Contraction}}, prefactor::Number)
     @assert length(contractions) > 0 "Contraction vector must not be empty"
     imag_factor = im^(first(length(contractions))) # Contraction becomes propagator
-    dict = Dict{Diagram,Number}(Diagram(c) => imag_factor*prefactor for c in contractions)
+    dict = Dict{Diagram,ComplexF64}(Diagram(c) => imag_factor*prefactor for c in contractions)
     Diagrams(dict)
 end
 Base.isequal(d1::Diagrams, d2::Diagrams) = isequal(d1.diagrams, d2.diagrams)

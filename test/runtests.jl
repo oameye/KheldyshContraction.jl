@@ -9,6 +9,10 @@ using KeldyshContraction, Test
     all_concrete(KeldyshContraction.Destroy)
     all_concrete(KeldyshContraction.Create)
     all_concrete(KeldyshContraction.InteractionLagrangian)
+
+    all_concrete(KeldyshContraction.Edge)
+    all_concrete(KeldyshContraction.Diagram)
+    all_concrete(KeldyshContraction.Diagrams)
     all_concrete(KeldyshContraction.DressedPropagator)
     all_concrete(KeldyshContraction.SelfEnergy)
 end

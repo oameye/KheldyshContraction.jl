@@ -20,7 +20,7 @@ struct Destroy{C,P,R} <: QSym
     )
         return new{typeof(contour),typeof(pos),typeof(reg)}(name, contour, pos, reg)
     end
-end
+end # TODO: is C and R needed?
 
 """
     Create <: QSym

@@ -97,9 +97,9 @@ end
         @testset "first order" begin
             kp = Diagram([(ϕᶜ, ϕᶜ')])
             rp = Diagram([(ϕᶜ, ϕᴾ')])
-            advanced_truth = Diagrams(Dict(kp => -1.0, rp => 1.0))
-            retarded_truth = Diagrams(Dict(kp => 1.0, rp => -1.0))
-            keldysh_truth = Diagrams(Dict(kp => 2.0, rp => -2.0))
+            advanced_truth = Diagrams(Dict(kp => complex(-1.0), rp => complex(1.0)))
+            retarded_truth = Diagrams(Dict(kp => complex(1.0), rp => complex(-1.0)))
+            keldysh_truth = Diagrams(Dict(kp => complex(2.0), rp => complex(-2.0)))
 
             @test isequal(Σ.advanced, advanced_truth)
             @test isequal(Σ.retarded, retarded_truth)

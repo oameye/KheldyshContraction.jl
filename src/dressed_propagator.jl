@@ -16,16 +16,13 @@ $(TYPEDSIGNATURES)
 
 Constructs a `DressedPropagator` with the given Keldysh, retarded, and advanced components.
 """
-struct DressedPropagator
+ConcreteStructs.@concrete struct DressedPropagator
     "The Keldysh component of the propagator"
-    keldysh::Diagrams
+    keldysh <: Diagrams
     "The retarded component of the propagator"
-    retarded::Diagrams
+    retarded <: Diagrams
     "The advanced component of the propagator"
-    advanced::Diagrams
-    function DressedPropagator(keldysh::Diagrams, retarded::Diagrams, advanced::Diagrams)
-        return new(keldysh, retarded, advanced)
-    end
+    advanced <: Diagrams
 end
 """
     matrix(G::DressedPropagator)

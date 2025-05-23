@@ -11,6 +11,7 @@ using Combinatorics: Combinatorics
 using OrderedCollections: OrderedCollections
 using SmallCollections: SmallCollections
 using StaticArrays: StaticArrays, SVector
+using ConcreteStructs: ConcreteStructs
 
 using Latexify
 using MacroTools: MacroTools
