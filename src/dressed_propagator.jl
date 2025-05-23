@@ -44,7 +44,6 @@ G^A\\left(x_1, x_2\\right) & 0
 """
 matrix(G::DressedPropagator) = Diagrams[G.retarded G.keldysh; G.advanced Diagrams()]
 
-
 """
     wick_contraction(L::InteractionLagrangian; order=1)
 

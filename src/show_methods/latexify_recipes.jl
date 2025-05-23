@@ -37,7 +37,7 @@ function _to_expression(x::Complex) # For brackets when using latexify
     end
 end
 
-@latexrecipe function f(op::Union{Diagrams, Diagram,Edge})
+@latexrecipe function f(op::Union{Diagrams,Diagram,Edge})
     # Options
     cdot --> false
     return latexify(repr(MIME"text/plain"(), op))

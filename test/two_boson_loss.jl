@@ -101,9 +101,9 @@ end
             retarded_truth = Diagrams(Dict(kp => 1.0, rp => -1.0))
             keldysh_truth = Diagrams(Dict(kp => 2.0, rp => -2.0))
 
-            @test  isequal(Σ.advanced, advanced_truth)
-            @test  isequal(Σ.retarded, retarded_truth)
-            @test  isequal(Σ.keldysh, keldysh_truth) # already simplified A => R
+            @test isequal(Σ.advanced, advanced_truth)
+            @test isequal(Σ.retarded, retarded_truth)
+            @test isequal(Σ.keldysh, keldysh_truth) # already simplified A => R
             # ^ pretty sure Gerbino et al https://arxiv.org/pdf/2406.20028
             # is wrong and switshes retarded and advanced
             # and we compute the correct with a overall minus sign
@@ -115,7 +115,7 @@ end
 
     @testset "Keldysh GF is enough" begin
         using OrderedCollections
-        using KeldyshContraction: construct_self_energy!,PropagatorType, Diagrams
+        using KeldyshContraction: construct_self_energy!, PropagatorType, Diagrams
 
         expr_K = ϕᶜ(Out()) * ϕᶜ'(In()) * L_int
         G_K1 = wick_contraction(expr_K)
@@ -123,7 +123,7 @@ end
         self_energy = OrderedCollections.LittleDict{PropagatorType,Diagrams}((
             Advanced => Diagrams(), Retarded => Diagrams(), Keldysh => Diagrams()
         ))
-        construct_self_energy!(self_energy,G_K1)
+        construct_self_energy!(self_energy, G_K1)
         @test isequal(self_energy[Advanced], Σ.advanced)
         @test isequal(self_energy[Retarded], Σ.retarded)
     end

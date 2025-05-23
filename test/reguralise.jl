@@ -1,10 +1,6 @@
 using KeldyshContraction, Test
 using KeldyshContraction: In, Out, Classical, Quantum, Plus, Minus
-using KeldyshContraction:
-    isbulk,
-    regularisations,
-    propagator_type,
-    regular
+using KeldyshContraction: isbulk, regularisations, propagator_type, regular
 
 @qfields ϕᶜ::Destroy(Classical) ϕᴾ::Destroy(Quantum)
 
