@@ -1,44 +1,53 @@
-struct Diagram{E}
-    contractions::SVector{E,Edge}
-    function Diagram(contractions::Vector{<:Contraction})
-        @assert length(contractions) > 0 "Contraction vector must not be empty"
-        E = length(contractions)
-        sort!(contractions; by=sort_contraction)
-        edges = StaticArrays.sacollect(
-            SVector{length(contractions),Edge}, Edge(c) for c in contractions
-        )
-        return new{E}(edges)
-    end
-    function Diagram(contractions::Vector{<:Edge})
-        @assert length(contractions) > 0 "Contraction vector must not be empty"
-        E = length(contractions)
-        # sort!(contractions; by=sort_contraction)
-        # TODO: sort to be sure?
-        edges = StaticArrays.sacollect(
-            SVector{length(contractions),Edge}, c for c in contractions
-        )
-        return new{E}(edges)
-    end
+struct Diagram{E,T}
+    contractions::T
+end
+function Diagram(contractions::Vector{<:Contraction})
+    @assert length(contractions) > 0 "Contraction vector must not be empty"
+    E = length(contractions)
+    sort!(contractions; by=sort_contraction)
+    edges = StaticArrays.sacollect(
+        SVector{length(contractions),Edge}, Edge(c) for c in contractions
+    )
+    return Diagram{E,typeof(edges)}(edges)
+end
+function Diagram(contractions::Vector{<:Edge})
+    @assert length(contractions) > 0 "Contraction vector must not be empty"
+    E = length(contractions)
+    # sort!(contractions; by=sort_contraction)
+    # TODO: sort to be sure?
+    edges = StaticArrays.sacollect(
+        SVector{length(contractions),Edge}, c for c in contractions
+    )
+    return Diagram{E,typeof(edges)}(edges)
 end
 Base.isequal(d1::Diagram, d2::Diagram) = isequal(d1.contractions, d2.contractions)
 Base.hash(d::Diagram, h::UInt) = hash(d.contractions, h)
 
-struct Diagrams
-    diagrams::Dict{Diagram,ComplexF64} # TODO try SwissDict or RobinDict from DataStructures.jl.
+struct Diagrams{E,T}
+    diagrams::Dict{Diagram{E,T},ComplexF64} # TODO try SwissDict or RobinDict from DataStructures.jl.
 end
-Diagrams() = Diagrams(Dict{Diagram,Number}())
-function Diagrams(diagrams::Vector{<:Diagram}, prefactor::Number)
-    dict = Dict{Diagram,Number}(d => prefactor for d in diagrams)
-    Diagrams(dict)
+function Diagrams(E::Int)
+    Diagrams{E,SVector{E,Edge}}(Dict{Diagram{E,SVector{E,Edge}},ComplexF64}())
 end
-function Diagrams(contractions::Vector{Vector{Contraction}}, prefactor::Number)
+function Diagrams(diagrams::Vector{Diagram{E,T}}, prefactor::ComplexF64) where {E,T}
+    dict = Dict{Diagram{E,T},ComplexF64}(d => prefactor for d in diagrams)
+    Diagrams{E,T}(dict)
+end
+function Diagrams(contractions::Vector{Vector{Contraction}}, prefactor::ComplexF64)
     @assert length(contractions) > 0 "Contraction vector must not be empty"
-    imag_factor = im^(first(length(contractions))) # Contraction becomes propagator
-    dict = Dict{Diagram,Number}(Diagram(c) => imag_factor*prefactor for c in contractions)
-    Diagrams(dict)
+    c = first(contractions)
+    E = length(c)
+    T = SVector{E,Edge}
+    imag_factor = im^E # Contraction becomes propagator
+    dict = Dict{Diagram{E,T},ComplexF64}(
+        Diagram(c) => imag_factor*prefactor for c in contractions
+    )
+    Diagrams{E,T}(dict)
 end
 Base.isequal(d1::Diagrams, d2::Diagrams) = isequal(d1.diagrams, d2.diagrams)
 Base.iszero(d::Diagrams) = isempty(d.diagrams)
+
+number_of_propagators(a::QMul) = length(a) ÷ 2
 
 # Add a single diagram, summing prefactors if it already exists
 function Base.push!(collection::Diagrams, diagram::Diagram, prefactor::Number)
