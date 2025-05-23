@@ -21,7 +21,8 @@ struct Destroy{C,P,R} <: QSym
         return new{typeof(contour),typeof(pos),typeof(reg)}(name, contour, pos, reg)
     end
 end
-# TODO: now we can dispatch on Bulk and In as they are different structs. Instead, we want to dispatch on the position of the field.
+# TODO: now we can dispatch on Bulk and In as they are different structs.
+# Instead, we want to dispatch on the position of the field.
 # Because, otherwise later you get in problem when trying to make Diagram concrete
 
 """
