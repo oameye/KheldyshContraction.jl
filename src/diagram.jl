@@ -104,7 +104,7 @@ function bulk_multiplicity(edges::SVector{N,Tuple{Int,Int}}) where {N}
     return mult
 end
 function bulk_multiplicity(vs::SVector{N,KeldyshContraction.Edge}) where {N}
-    bulk_multiplicity(integer_positions.(vs))
+    bulk_multiplicity(map(integer_positions, vs))
 end
 # bulk_multiplicity(vs::Vector) = bulk_multiplicity(integer_positions(vs))
 

@@ -18,12 +18,13 @@ end
 
 @testset "wick contractions" begin
     @testset "classical-classical Green's function" begin
+        using KeldyshContraction: _wick_contraction
         expr = ϕᶜ(Out()) * ϕᶜ'(In()) * L_int
 
         @test is_conserved(expr)
         @test is_physical(expr)
 
-        wick_contractions = wick_contraction(expr.arguments[1].args_nc; regularise=false)
+        wick_contractions = _wick_contraction(expr.arguments[1].args_nc; regularise=false)
         @test length(wick_contractions) == 4
 
         # propagators = make_propagators(wick_contractions)

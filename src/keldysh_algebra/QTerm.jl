@@ -68,7 +68,7 @@ Base.iszero(q::QMul) = iszero(q.arg_c)
 
 Checks if a term is in the bulk. A term is bulk if it has no `In` or `Out` position fields ([`AbstractPosition`](@ref)).
 """
-isbulk(q::QMul) = all(isbulk.(q.args_nc))
+isbulk(q::QMul) = all(isbulk(f) for f in q.args_nc)
 allfields(q::QMul) = q.args_nc
 
 ########################
@@ -106,7 +106,10 @@ SymbolicUtils.maketerm(::Type{<:QAdd}, ::typeof(+), args, metadata) = QAdd(args)
 SymbolicUtils.metadata(a::QAdd) = nothing
 
 Base.adjoint(q::QAdd) = QAdd(map(adjoint, arguments(q)))
-allfields(q::QAdd) = reduce(vcat, allfields.(SymbolicUtils.arguments(q)))
+function allfields(q::QAdd)
+    vfields = map(allfields, arguments(q))
+    reduce(vcat, vfields)
+end
 
 #########################
 #       isequal
@@ -183,7 +186,7 @@ end
 #       Position
 #########################
 
-isbulk(q::QAdd) = all(isbulk.(arguments(q)))
+isbulk(q::QAdd) = all(isbulk(q) for q in arguments(q))
 
 set_position(a::QSym, p::AbstractPosition) = a(p)
 function set_position(a::QMul, p::AbstractPosition)

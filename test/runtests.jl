@@ -20,10 +20,10 @@ end
 if isempty(VERSION.prerelease)
     @testset "Code linting" begin
         using JET
-        # JET.test_package(KeldyshContraction; target_defined_modules=true)
+        JET.test_package(KeldyshContraction; target_defined_modules=true)
         rep = report_package("KeldyshContraction")
         @show rep
-        @test length(JET.get_reports(rep)) <= 62
+        @test length(JET.get_reports(rep)) <= 24
         @test_broken length(JET.get_reports(rep)) == 0
     end
 end

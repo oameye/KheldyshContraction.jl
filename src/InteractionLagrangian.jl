@@ -82,7 +82,7 @@ function is_conserved(args_nc_::Union{Tuple{<:QSym,<:QSym},Vector{QSym}})
     end
 end
 is_conserved(a::QMul) = is_conserved(a.args_nc)
-is_conserved(a::QAdd) = all(is_conserved.(arguments(a)))
+is_conserved(a::QAdd) = all(is_conserved(arg) for arg in arguments(a))
 is_conserved(a::QSym) = false
 
 """
@@ -93,7 +93,7 @@ Checks if an expression [`QTerm`])(@ref) is physical. A physical expression is o
 See also: [`is_conserved`](@ref)
 """
 function is_physical(args_nc_::Vector{<:QField})
-    positions = position.(args_nc_)
+    positions = [position(f) for f in args_nc_]
     # checks if a mul has both in-out in a lagrangian
     in_out = In() ∈ positions ? Out() ∈ positions : true
     out_in = Out() ∈ positions ? In() ∈ positions : true
@@ -101,7 +101,7 @@ function is_physical(args_nc_::Vector{<:QField})
     return physical && in_out && out_in
 end
 is_physical(a::QMul) = is_physical(a.args_nc)
-is_physical(a::QAdd) = all(is_physical.(arguments(a)))
+is_physical(a::QAdd) = all(is_physical(arg) for arg in arguments(a))
 is_physical(a::Destroy) = !isa(position(a), In)
 is_physical(a::Create) = !isa(position(a), Out)
 
