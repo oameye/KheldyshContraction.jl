@@ -11,7 +11,8 @@ Note the expression is only valid for equal space-time coordinates.
 function advanced_to_retarded(
     x::Vector{Contraction}, prefactor::Number
 )::Tuple{Vector{Contraction},Number}
-    adv_idx = findall(x -> is_advanced(x) && same_position(x), x)
+    ff(x::Contraction) = is_advanced(x) && same_position(x)
+    adv_idx = findall(ff, x)
     if isempty(adv_idx)
         return x, prefactor
     end

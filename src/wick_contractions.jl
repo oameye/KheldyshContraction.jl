@@ -76,7 +76,7 @@ fields, we have made sure that the destroy and create vectors are ordered with t
 out fields first. Computing the permutatins in lexicographic order, we can skip the first
 (n-1)! permutations.
 """
-function wick_contraction(
+function _wick_contraction(
     args_nc::Vector{<:QField}; regularise=true
 )::Vector{Vector{Contraction}}
     destroys, creates, n_destroy = prepare_args(args_nc)
@@ -141,7 +141,7 @@ function check_sorted(args)
     @assert isequal(args, args′′) "Arguments are not sorted"
 end
 function check_to_many_bulk(contraction, args_nc)
-    pos = Int.(map(position, Iterators.flatten(contraction)))
+    pos = map(x -> Int(position(x)), Iterators.flatten(contraction))
     for i in unique(pos)
         if count(x -> x == i, pos) > 4
             @show args_nc
@@ -149,15 +149,3 @@ function check_to_many_bulk(contraction, args_nc)
         end
     end
 end
-
-function make_propagators(contraction::Vector{Vector{Contraction}})::Vector{Vector{SNuN}}
-    propagators = map(contraction) do factor
-        to_prop = x -> propagator(x...)
-        _propagators = to_prop.(factor)
-        sort!(_propagators; by=position)
-    end
-    return propagators
-end # TODO: remove in future
-
-make_mul(v::Vector{SNuN}) = isempty(v) ? 0 : prod(v) # TODO: remove in future
-make_term(vp::Vector{Vector{SNuN}}) = isempty(vp) ? 0 : sum(make_mul, vp) # TODO: remove in future
