@@ -22,48 +22,51 @@ The function handles two types of inputs:
 The function returns a new expression of propagators of type `SymbolicUtils.Symbol`.
 
 """
-function wick_contraction(a::QAdd; regularise=true)
-    args=SymbolicUtils.arguments(a)
+function wick_contraction(a::QAdd; kwargs...)::Diagrams
+    args = SymbolicUtils.arguments(a)
     E = number_of_propagators(first(args))
     diagrams = Diagrams(E)
-    foreach(args) do arg
-        wick_contraction!(diagrams, arg; regularise)
+    # foreach(args) do arg
+    for arg in args
+        wick_contraction!(diagrams, arg; kwargs...)
     end
     return diagrams
 end
-function wick_contraction(a::QMul; regularise=true)
+function wick_contraction(a::QMul; regularise=true, simplify=false)::Diagrams
     @assert is_conserved(a)
     @assert is_physical(a)
 
     E = number_of_propagators(a)
-    T = SVector{E,Edge}
+    diagrams = Diagrams(E)
 
-    contractions = wick_contraction(a.args_nc; regularise)
-    imag_factor = im^(first(length(contractions))) # Contraction becomes propagator
-    dict = Dict{Diagram{E,T},ComplexF64}(
-        make_diagram_pair(c, a.arg_c, imag_factor) for c in contractions
-    )
-    return Diagrams{E,T}(dict)
+    contractions = _wick_contraction(a.args_nc; regularise)
+    make_diagram!(diagrams, contractions, a.arg_c, simplify)
+    return diagrams
 end
-function wick_contraction!(diagrams::Diagrams, a::QMul; regularise=true)
+function wick_contraction!(diagrams::Diagrams, a::QMul; regularise=true, simplify=false)
     @assert is_conserved(a)
     @assert is_physical(a)
 
-    contractions = wick_contraction(a.args_nc; regularise)
+    contractions = _wick_contraction(a.args_nc; regularise)
+    make_diagram!(diagrams, contractions, a.arg_c, simplify)
+    return nothing
+end
+function make_diagram!(diagrams::Diagrams, contractions, arg_c, simplify::Bool)
     if isempty(contractions)
         return nothing
     end
     number_of_contractions = length(first(contractions))
     imag_factor = im^(number_of_contractions) # Contraction becomes propagator
-    foreach(contractions) do c
-        c′, prefactor = advanced_to_retarded(c, a.arg_c)
-        push!(diagrams, Diagram(c′), imag_factor * prefactor)
+    # foreach(contractions) do c
+    for c in contractions
+        diagram, prefactor = make_diagram_pair(c, arg_c, imag_factor, simplify)
+        push!(diagrams, diagram, prefactor)
     end
     return nothing
 end
-function make_diagram_pair(c, arg_c, imag_factor)
-    c′, prefactor = advanced_to_retarded(c, arg_c)
-    return diagram(c) => imag_factor * prefactor
+function make_diagram_pair(c, arg_c, imag_factor, simplify::Bool)
+    c′, prefactor = simplify ? advanced_to_retarded(c, arg_c) : (c, arg_c)
+    return Diagram(c′) => imag_factor * prefactor
 end
 
 """

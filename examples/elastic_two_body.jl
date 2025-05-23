@@ -32,7 +32,7 @@ L_int = InteractionLagrangian(elasctic2boson)
 # of the two-point correlators of the linear part of the system.
 
 # In the package we can do this as follows:
-wick_contraction(elasctic2boson) # TODO: add `canonicalize` kwarg
+wick_contraction(elasctic2boson; simplify=false)
 
 # However, to show that these diagrams cancel out, we need to apply to condition $G^R = - G^A$.
 # Inside the package we do this by
@@ -104,7 +104,7 @@ topology1 = findall(i -> i == [1], bulk_multiplicity)
 topology2 = findall(i -> i == [2], bulk_multiplicity)
 topology3 = findall(i -> i == [3], bulk_multiplicity)
 
-terms[topology1]
+terms[topology3]
 
 # The topology involving only one edge is the reducible diagram, which will not contribute to the self-energy in second order. Indeed, internally we only consider the irreducible diagrams.
 

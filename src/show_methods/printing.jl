@@ -114,7 +114,7 @@ function Base.show(io::IO, ds::Diagrams)
         else
             prefactor = ds.diagrams[diagrams[idx]]
             print_number(io, prefactor)
-            show(io, *)
+            !SymbolicUtils._isone(prefactor) ? show(io, *) : write(io, "")
             show(io, diagrams[idx])
             write(io, " + ")
         end

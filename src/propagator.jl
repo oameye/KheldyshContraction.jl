@@ -84,12 +84,8 @@ function regularisations(p::Contraction)
 end
 contours(p::Edge) = contour.(fields(p))
 
-# function get_propagator_idx(x::CSym)::Int
-#     args = KeldyshContraction.arguments(x)
-#     return get_propagator_idx(args)
-# end
-
 Base.adjoint(c::Contraction) = adjoint.((c[2], c[1]))
+Base.adjoint(c::Edge) = Edge(adjoint(fields(c)))
 
 #########################
 #       Position

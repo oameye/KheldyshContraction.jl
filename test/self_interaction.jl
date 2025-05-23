@@ -6,7 +6,7 @@ eleactic2boson = 0.5 * (c^2 + q^2) * c' * q' + 0.5 * c * q * ((c')^2 + (q')^2)
 
 @testset "Bubble diagrams" begin
     using KeldyshContraction: filter_nonzero!
-    expr = wick_contraction(eleactic2boson)
+    expr = wick_contraction(eleactic2boson; simplify=true)
     filter_nonzero!(expr)
     @test iszero(expr)
 end
