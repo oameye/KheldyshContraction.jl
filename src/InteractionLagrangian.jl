@@ -73,7 +73,7 @@ Checks if an expression [`QTerm`])(@ref) is conserved. A conserved expression is
 See also: [`is_physical`](@ref)
 """
 function is_conserved(args_nc_::Union{Tuple{<:QSym,<:QSym},Vector{QSym}})
-    n_destroy = isa.(args_nc_, Destroy)
+    n_destroy = Bool[arg isa Destroy for arg in args_nc_]
     if length(args_nc_) == 0 || iszero(sum(n_destroy))
         return false
     else
