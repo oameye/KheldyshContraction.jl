@@ -23,8 +23,10 @@ The function returns a new expression of propagators of type `SymbolicUtils.Symb
 
 """
 function wick_contraction(a::QAdd; regularise=true)
-    diagrams = Diagrams()
-    foreach(SymbolicUtils.arguments(a)) do arg
+    args=SymbolicUtils.arguments(a)
+    E = number_of_propagators(first(args))
+    diagrams = Diagrams(E)
+    foreach(args) do arg
         wick_contraction!(diagrams, arg; regularise)
     end
     return diagrams
@@ -33,12 +35,15 @@ function wick_contraction(a::QMul; regularise=true)
     @assert is_conserved(a)
     @assert is_physical(a)
 
+    E = number_of_propagators(a)
+    T = SVector{E,Edge}
+
     contractions = wick_contraction(a.args_nc; regularise)
     imag_factor = im^(first(length(contractions))) # Contraction becomes propagator
-    dict = Dict{Diagram,ComplexF64}(
+    dict = Dict{Diagram{E,T},ComplexF64}(
         make_diagram_pair(c, a.arg_c, imag_factor) for c in contractions
     )
-    return Diagrams(dict)
+    return Diagrams{E,T}(dict)
 end
 function wick_contraction!(diagrams::Diagrams, a::QMul; regularise=true)
     @assert is_conserved(a)

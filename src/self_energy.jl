@@ -79,32 +79,32 @@ The self-energy is computed based on the Keldysh Green's function (`G.keldysh`) 
 its quantum-quantum (`qq`), classical-quantum (`cq`), and quantum-classical (`qc`) components.
 
 """
-struct SelfEnergy
+struct SelfEnergy{E,T}
     "The Keldysh component of the self-energy."
-    keldysh
+    keldysh::Diagrams{E,T}
     " The retarded component of the self-energy."
-    retarded
+    retarded::Diagrams{E,T}
     "The advanced component of the self-energy."
-    advanced
-    function SelfEnergy(G::DressedPropagator; order=1)
-        self_energy = OrderedCollections.LittleDict{PropagatorType,Diagrams}((
-            Advanced => Diagrams(), Retarded => Diagrams(), Keldysh => Diagrams()
-        ))
-        construct_self_energy!(self_energy, G.keldysh; order)
-        # ^ keldysh GF should contain everything
-        # construct_self_energy!(self_energy, G.advanced)
-        # construct_self_energy!(self_energy, G.retarded)
+    advanced::Diagrams{E,T}
+end
+function SelfEnergy(G::DressedPropagator{E}; order=1) where {E}
+    self_energy = OrderedCollections.LittleDict{PropagatorType,Diagrams}((
+        Advanced => Diagrams(E-2), Retarded => Diagrams(E-2), Keldysh => Diagrams(E-2)
+    ))
+    construct_self_energy!(self_energy, G.keldysh; order)
+    # ^ keldysh GF should contain everything
+    # construct_self_energy!(self_energy, G.advanced)
+    # construct_self_energy!(self_energy, G.retarded)
 
-        # quantum-quantum is the keldysh term in the self-energy
-        # classical-classical is zero
+    # quantum-quantum is the keldysh term in the self-energy
+    # classical-classical is zero
 
-        # G_R(1) = G₀_R Σ_R G₀_R
-        # G_A(1) = G₀_A Σ_A G₀_A
-        # G_K(1) = G₀_K(x1) Σ_A(y) G₀_A(x2) + G_A(x2) Σ_A(y) G_R(x1) + G_R(x1) Σ_R(y) G_K(x2)
-        # G₀_K Σ_K G₀_K = 0
+    # G_R(1) = G₀_R Σ_R G₀_R
+    # G_A(1) = G₀_A Σ_A G₀_A
+    # G_K(1) = G₀_K(x1) Σ_A(y) G₀_A(x2) + G_A(x2) Σ_A(y) G_R(x1) + G_R(x1) Σ_R(y) G_K(x2)
+    # G₀_K Σ_K G₀_K = 0
 
-        return new(self_energy[Keldysh], self_energy[Retarded], self_energy[Advanced])
-    end
+    return SelfEnergy(self_energy[Keldysh], self_energy[Retarded], self_energy[Advanced])
 end
 
 """
@@ -120,4 +120,4 @@ in the Retarded-Advanced-Keldysh basis.
 \\right)
 ```
 """
-matrix(Σ::SelfEnergy) = Diagrams[Diagrams() Σ.advanced; Σ.retarded Σ.keldysh]
+matrix(Σ::SelfEnergy{E}) where {E} = Diagrams[Diagrams(E) Σ.advanced; Σ.retarded Σ.keldysh]

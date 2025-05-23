@@ -32,6 +32,7 @@ Base.promote_rule(::Type{QMul{S}}, ::Type{QMul{T}}) where {S,T} = QMul{promote_r
 function Base.convert(::Type{QMul{T}}, x::QMul{S}) where {T<:Number,S<:Number}
     return QMul(convert(T, x.arg_c), x.args_nc)
 end
+Base.length(a::QMul) = length(a.args_nc)
 
 SymbolicUtils.operation(::QMul) = (*)
 """
@@ -93,7 +94,7 @@ struct QAdd{T<:Number} <: QTerm
     end
     QAdd{T}() where {T} = new{T}([QMul{T}()])
 end
-
+Base.length(a::QAdd) = length(a.arguments)
 SymbolicUtils.operation(::QAdd) = (+)
 """
     arguments(a::QAdd)

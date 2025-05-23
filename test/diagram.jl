@@ -123,14 +123,14 @@ end
     d3 = Diagram(contractions3) # should be considered equal to d1 (after sorting)
     d4 = Diagram(contractions4) # unique
 
-    diagrams = Diagrams()
+    diagrams = Diagrams(3)
     push!(diagrams, d1, 1.0)
     push!(diagrams, d2, 1.0)
     push!(diagrams, d3, 1.0)
-    push!(diagrams, d4, 1.0)
+    @test_throws MethodError push!(diagrams, d4, 1.0)
 
     collected = collect(diagrams)
-    @test length(collected) == 2
+    @test length(collected) == 1
     # Find the summed prefactor for the unique contraction set
     for (d, pref) in diagrams.diagrams
         if length(d.contractions) == 3
