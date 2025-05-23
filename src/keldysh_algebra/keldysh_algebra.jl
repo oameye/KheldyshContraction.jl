@@ -75,8 +75,7 @@ function set_reg_to_zero!(v::Vector{QSym})
     end
 end
 function contour_integers(v::Vector{QSym})
-    contours = Base.materialize(Base.broadcasted(contour, v))
-    Base.materialize(Base.broadcasted(Int, contours))
+    Int[Int(contour(x)) for x in v]
 end
 ladder(::Destroy) = 0
 ladder(::Create) = 1

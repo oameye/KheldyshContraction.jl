@@ -22,7 +22,7 @@ The function handles two types of inputs:
 The function returns a new expression of propagators of type `SymbolicUtils.Symbol`.
 
 """
-function wick_contraction(a::QAdd; regularise=true)
+function wick_contraction(a::QAdd; regularise=true)::Diagrams
     args=SymbolicUtils.arguments(a)
     E = number_of_propagators(first(args))
     diagrams = Diagrams(E)
@@ -31,14 +31,14 @@ function wick_contraction(a::QAdd; regularise=true)
     end
     return diagrams
 end
-function wick_contraction(a::QMul; regularise=true)
+function wick_contraction(a::QMul; regularise=true)::Diagrams
     @assert is_conserved(a)
     @assert is_physical(a)
 
     E = number_of_propagators(a)
     T = SVector{E,Edge}
 
-    contractions = wick_contraction(a.args_nc; regularise)
+    contractions = _wick_contraction(a.args_nc; regularise)
     imag_factor = im^(first(length(contractions))) # Contraction becomes propagator
     dict = Dict{Diagram{E,T},ComplexF64}(
         make_diagram_pair(c, a.arg_c, imag_factor) for c in contractions
@@ -49,7 +49,7 @@ function wick_contraction!(diagrams::Diagrams, a::QMul; regularise=true)
     @assert is_conserved(a)
     @assert is_physical(a)
 
-    contractions = wick_contraction(a.args_nc; regularise)
+    contractions = _wick_contraction(a.args_nc; regularise)
     if isempty(contractions)
         return nothing
     end
@@ -63,7 +63,7 @@ function wick_contraction!(diagrams::Diagrams, a::QMul; regularise=true)
 end
 function make_diagram_pair(c, arg_c, imag_factor)
     c′, prefactor = advanced_to_retarded(c, arg_c)
-    return diagram(c) => imag_factor * prefactor
+    return Diagram(c) => imag_factor * prefactor
 end
 
 """
@@ -73,7 +73,7 @@ fields, we have made sure that the destroy and create vectors are ordered with t
 out fields first. Computing the permutatins in lexicographic order, we can skip the first
 (n-1)! permutations.
 """
-function wick_contraction(
+function _wick_contraction(
     args_nc::Vector{<:QField}; regularise=true
 )::Vector{Vector{Contraction}}
     destroys, creates, n_destroy = prepare_args(args_nc)
@@ -138,7 +138,7 @@ function check_sorted(args)
     @assert isequal(args, args′′) "Arguments are not sorted"
 end
 function check_to_many_bulk(contraction, args_nc)
-    pos = Int.(map(position, Iterators.flatten(contraction)))
+    pos = map(x -> Int(position(x)), Iterators.flatten(contraction))
     for i in unique(pos)
         if count(x -> x == i, pos) > 4
             @show args_nc
@@ -146,15 +146,3 @@ function check_to_many_bulk(contraction, args_nc)
         end
     end
 end
-
-function make_propagators(contraction::Vector{Vector{Contraction}})::Vector{Vector{SNuN}}
-    propagators = map(contraction) do factor
-        to_prop = x -> propagator(x...)
-        _propagators = to_prop.(factor)
-        sort!(_propagators; by=position)
-    end
-    return propagators
-end # TODO: remove in future
-
-make_mul(v::Vector{SNuN}) = isempty(v) ? 0 : prod(v) # TODO: remove in future
-make_term(vp::Vector{Vector{SNuN}}) = isempty(vp) ? 0 : sum(make_mul, vp) # TODO: remove in future

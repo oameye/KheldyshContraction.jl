@@ -125,7 +125,7 @@ function position(p::Edge)
     elseif length(findall(x -> x isa Out, _positions)) == 1
         return Out()
     elseif all(isbulk, _positions)
-        idxs = getproperty.(_positions, :index)
+        idxs = map(x -> getproperty(x, :index), _positions)
         if isequal(idxs...)
             return _positions[1]
         else
