@@ -97,17 +97,26 @@ function Base.:+(b::QAdd{S}, a::QMul{T}) where {T,S}
     return QAdd(push!(args, a))
 end
 
-function Base.:+(a::QAdd, b::QSym)
-    args = vcat(arguments(a), QMul(b))
-    return QAdd(args)
+function Base.:+(a::QAdd{T}, b::QSym) where {T}
+    args = arguments(a)
+    l = length(args)
+    args′ = QMul{T}[i>l ? QMul{T}(b) : args[i] for i in 1:(l + 1)]
+    return QAdd(args′)
 end
-function Base.:+(b::QSym, a::QAdd)
-    args = vcat(arguments(a), QMul(b))
-    return QAdd(args)
+function Base.:+(b::QSym, a::QAdd{T}) where {T}
+    args = arguments(a)
+    l = length(args)
+    args′ = QMul{T}[i>l ? QMul{T}(b) : args[i] for i in 1:(l + 1)]
+    return QAdd(args′)
 end
-function Base.:+(a::QAdd, b::QAdd)
-    args = vcat(arguments(a), arguments(b))
-    return QAdd(args)
+function Base.:+(a::QAdd{T}, b::QAdd{S}) where {T,S}
+    TT = promote_type(T, S)
+    args1 = arguments(a)
+    args2 = arguments(b)
+    l1 = length(args1)
+    l2 = length(args2)
+    args′ = QMul{TT}[i>l1 ? args2[i - l1] : args1[i] for i in 1:(l1 + l2)]
+    return QAdd(args′)
 end
 
 function Base.:*(a::QAdd{T}, b::S) where {T,S<:Number}
