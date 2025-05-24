@@ -11,4 +11,11 @@ See https://mathworld.wolfram.com/PairingFunction.html
 
 make_real(x::Number) = SymbolicUtils._isreal(x) ? real(x) : x
 
-_simplify(x::Complex) = iszero(x.im) ? complex(x.re) : x
+_simplify(x::Complex) =
+    if iszero(x.im)
+        complex(x.re)
+    elseif iszero(x.re)
+        0.0+im*x.im
+    else
+        x
+    end
