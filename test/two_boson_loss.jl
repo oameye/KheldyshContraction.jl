@@ -18,7 +18,7 @@ end
 
 @testset "wick contractions first order" begin
     @testset "keldysh Green's function" begin
-        using KeldyshContraction: _wick_contraction, regular, In, Out
+        using KeldyshContraction: _wick_contraction, regular, In, Out, Diagram
         expr = ϕᶜ(Out()) * ϕᶜ'(In()) * L_int
 
         @test is_conserved(expr)
