@@ -64,4 +64,9 @@ end
 
     terms = collect(keys(GF.keldysh.diagrams))
     @test length(terms) == 20
+
+    Σ = SelfEnergy(GF; order=2)
+
+    @test_broken isequal(adjoint(Σ.advanced), Σ.retarded)
+    @test_broken isequal(adjoint(Σ.keldysh), -1 * Σ.keldysh)
 end
