@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1748085021960,
+  "lastUpdate": 1748088077704,
   "repoUrl": "https://github.com/oameye/KeldyshContraction.jl",
   "entries": {
     "Benchmark Results": [
@@ -2080,6 +2080,60 @@ window.BENCHMARK_DATA = {
           {
             "name": "Two body scattering/Green's function second order",
             "value": 96560935,
+            "unit": "ns",
+            "extra": "gctime=0\nmemory=27454880\nallocs=462653\nparams={\"gctrial\":true,\"time_tolerance\":0.05,\"evals_set\":false,\"samples\":10000,\"evals\":1,\"gcsample\":false,\"seconds\":50,\"overhead\":0,\"memory_tolerance\":0.01}"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "orjan.ameye@hotmail.com",
+            "name": "Orjan Ameye",
+            "username": "oameye"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "cbefc4a1bb4282921ddba93cacf5bc319340c07a",
+          "message": "fix: another Jet fix (#104)",
+          "timestamp": "2025-05-24T13:56:24+02:00",
+          "tree_id": "3d9b6a9041178e0eded765f7b98ed29e12377529",
+          "url": "https://github.com/oameye/KeldyshContraction.jl/commit/cbefc4a1bb4282921ddba93cacf5bc319340c07a"
+        },
+        "date": 1748088077289,
+        "tool": "julia",
+        "benches": [
+          {
+            "name": "Two body loss/Green's function",
+            "value": 576648,
+            "unit": "ns",
+            "extra": "gctime=0\nmemory=262544\nallocs=4960\nparams={\"gctrial\":true,\"time_tolerance\":0.05,\"evals_set\":false,\"samples\":10000,\"evals\":1,\"gcsample\":false,\"seconds\":10,\"overhead\":0,\"memory_tolerance\":0.01}"
+          },
+          {
+            "name": "Two body loss/Self-energy",
+            "value": 64510,
+            "unit": "ns",
+            "extra": "gctime=0\nmemory=31936\nallocs=769\nparams={\"gctrial\":true,\"time_tolerance\":0.05,\"evals_set\":false,\"samples\":10000,\"evals\":1,\"gcsample\":false,\"seconds\":10,\"overhead\":0,\"memory_tolerance\":0.01}"
+          },
+          {
+            "name": "Two body loss/Green's function second order",
+            "value": 16339430,
+            "unit": "ns",
+            "extra": "gctime=0\nmemory=14350464\nallocs=244926\nparams={\"gctrial\":true,\"time_tolerance\":0.05,\"evals_set\":false,\"samples\":10000,\"evals\":1,\"gcsample\":false,\"seconds\":50,\"overhead\":0,\"memory_tolerance\":0.01}"
+          },
+          {
+            "name": "Two body scattering/Green's function",
+            "value": 694529,
+            "unit": "ns",
+            "extra": "gctime=0\nmemory=293504\nallocs=5572\nparams={\"gctrial\":true,\"time_tolerance\":0.05,\"evals_set\":false,\"samples\":10000,\"evals\":1,\"gcsample\":false,\"seconds\":10,\"overhead\":0,\"memory_tolerance\":0.01}"
+          },
+          {
+            "name": "Two body scattering/Green's function second order",
+            "value": 93786860.5,
             "unit": "ns",
             "extra": "gctime=0\nmemory=27454880\nallocs=462653\nparams={\"gctrial\":true,\"time_tolerance\":0.05,\"evals_set\":false,\"samples\":10000,\"evals\":1,\"gcsample\":false,\"seconds\":50,\"overhead\":0,\"memory_tolerance\":0.01}"
           }
