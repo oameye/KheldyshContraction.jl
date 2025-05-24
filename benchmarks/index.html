@@ -311,18 +311,18 @@
                 },
               },
               y: {
-                // type: 'logarithmic',
+                type: 'logarithmic',
                 title: {
                   text: "Time (ms)",
                   display: true,
                 },
                 // beginAtZero: true,
-                // min: Math.pow(10, Math.floor(Math.log10(Math.min(...dataset.entries().next().value[1].map(d => d.bench.value / 1e6))))), // Dynamically set min
-                // ticks: {
-                //   callback: function(value, index, values) {
-                //     return Number(value.toString()); // Use plain numbers
-                //   }
-                // }
+                min: Math.pow(10, Math.floor(Math.log10(Math.min(...dataset.entries().next().value[1].map(d => d.bench.value / 1e6))))), // Dynamically set min
+                ticks: {
+                  callback: function(value, index, values) {
+                    return Number(value.toString()); // Use plain numbers
+                  }
+                }
               },
             },
             onClick: (_mouseEvent, activeElems) => {
