@@ -28,8 +28,8 @@ Base.hash(d::Diagram, h::UInt) = hash(d.contractions, h)
 ###############
 
 struct Diagrams{E,T}
-    diagrams::Dict{Diagram{E,T},ComplexF64} # TODO try SwissDict or RobinDict from DataStructures.jl.
-end
+    diagrams::Dict{Diagram{E,T},ComplexF64}
+end # TODO try SwissDict or RobinDict from DataStructures.jl.
 function Diagrams(E::Int)
     return Diagrams{E,SVector{E,Edge}}(Dict{Diagram{E,SVector{E,Edge}},ComplexF64}())
 end
